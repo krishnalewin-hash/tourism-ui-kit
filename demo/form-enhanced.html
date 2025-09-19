@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Transfer Quote - Form Enhanced Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-grid {
+            display: grid;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        input, select {
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .form-actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+        .debug-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .debug-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .debug-data {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🚗 Airport Transfer Quote</h1>
+        
+        <form id="transfer-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="pickup_location">Pickup Location</label>
+                    <input type="text" 
+                           id="pickup_location" 
+                           name="pickup_location" 
+                           data-q="pickup_location"
+                           placeholder="Enter pickup location"
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dropoff_location">Drop-off Location</label>
+                    <input type="text" 
+                           id="dropoff_location" 
+                           name="drop-off_location" 
+                           data-q="drop-off_location"
+                           placeholder="Enter drop-off location"
+                           required>
+                </div>
+                
+                <div class="two-col">
+                    <div class="form-group">
+                        <label for="pickup_date">Pickup Date</label>
+                        <input type="date" 
+                               id="pickup_date" 
+                               name="pickup_date" 
+                               data-q="pickup_date"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pickup_time">Pickup Time</label>
+                        <input type="time" 
+                               id="pickup_time" 
+                               name="pickup_time" 
+                               data-q="pickup_time"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="number_of_passengers">Number of Passengers</label>
+                    <select id="number_of_passengers" 
+                            name="number_of_passengers" 
+                            data-q="number_of_passengers"
+                            required>
+                        <option value="">Select passengers</option>
+                        <option value="1">1 Passenger</option>
+                        <option value="2">2 Passengers</option>
+                        <option value="3">3 Passengers</option>
+                        <option value="4">4 Passengers</option>
+                        <option value="5">5 Passengers</option>
+                        <option value="6">6 Passengers</option>
+                        <option value="7">7 Passengers</option>
+                        <option value="8">8+ Passengers</option>
+                    </select>
+                </div>
+                
+                <div class="two-col">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" 
+                               id="first_name" 
+                               name="first_name" 
+                               data-q="full_name"
+                               placeholder="Your first name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" 
+                               id="last_name" 
+                               name="last_name"
+                               placeholder="Your last name">
+                    </div>
+                </div>
+                
+                <div class="two-col">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email"
+                               placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" 
+                               id="phone" 
+                               name="phone"
+                               placeholder="Your phone number">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn">Get Quote</button>
+                <button type="button" class="btn" onclick="viewResults()" style="background: #059669;">View Results</button>
+                <button type="button" class="btn" onclick="clearData()" style="background: #dc2626;">Clear Data</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="debug-panel">
+        <div class="debug-title">💾 Saved Data (sessionStorage)</div>
+        <div class="debug-data" id="debug-output">No data saved yet</div>
+    </div>
+    
+    <!-- Form Enhancement Embed Code -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours', // 👈 Client-specific config
+            base: 'krishnalewin-hash/tourism-ui-kit@main'
+        };
+    </script>
+    <script src="../dist/form-enhancer.min.js"></script>
+    
+    <script>
+        // Update debug panel every second
+        function updateDebugPanel() {
+            const data = sessionStorage.getItem('transfer:last');
+            const output = document.getElementById('debug-output');
+            
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    output.textContent = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    output.textContent = data;
+                }
+            } else {
+                output.textContent = 'No data saved yet';
+            }
+        }
+        
+        // Update debug panel on page load and periodically
+        updateDebugPanel();
+        setInterval(updateDebugPanel, 1000);
+        
+        // Handle form submission
+        document.getElementById('transfer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Form submitted! Check the debug panel to see saved data.');
+            viewResults();
+        });
+        
+        // View results function
+        function viewResults() {
+            const data = sessionStorage.getItem('transfer:last');
+            if (data) {
+                window.open('cards.html', '_blank');
+            } else {
+                alert('No transfer data found. Please fill out the form first.');
+            }
+        }
+        
+        // Clear data function
+        function clearData() {
+            sessionStorage.removeItem('transfer:last');
+            document.getElementById('transfer-form').reset();
+            updateDebugPanel();
+            alert('Data cleared!');
+        }
+        
+        // Set default date to today
+        document.getElementById('pickup_date').valueAsDate = new Date();
+    </script>
+</body>
+</html>

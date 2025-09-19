@@ -1,5 +1,29 @@
 {
   "START_OVER_URL": "/airport-transfer-form",
+  "FORM_CONFIG": {
+    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
+    "COUNTRIES": ["jm"],
+    "CURRENCY": "USD",
+    "PLACES": {
+      "FIELDS": ["place_id", "formatted_address", "geometry", "name", "types"],
+      "TYPES": ["establishment"],
+      "PRIORITY_KEYWORDS": {
+        "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
+        "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
+      }
+    },
+    "FIELD_MAPPING": {
+      "pickup_location": ["[data-q=\"pickup_location\"]", "[name=\"pickup_location\"]"],
+      "dropoff_location": ["[data-q=\"drop-off_location\"]", "[name=\"drop-off_location\"]", "[name=\"dropoff_location\"]"],
+      "pickup_date": ["[data-q=\"pickup_date\"]", "[name=\"pickup_date\"]"],
+      "pickup_time": ["[data-q=\"pickup_time\"]", "[name=\"pickup_time\"]"],
+      "passengers": ["select[data-q=\"number_of_passengers\"]", "[name=\"number_of_passengers\"]", "[data-q=\"number_of_passengers\"]"],
+      "first_name": ["[name=\"first_name\"]", "[data-q=\"full_name\"]"],
+      "last_name": ["[name=\"last_name\"]"],
+      "email": ["[name=\"email\"]"],
+      "phone": ["[name=\"phone\"]"]
+    }
+  },
   "copy": {
     "flight": "Flight tracking",
     "wifi": "Complimentary in-vehicle Wi-Fi",
@@ -13,25 +37,25 @@
       "shuttle": {
         "name": "Shuttle Transportation: MBJ ↔ Montego Bay Area",
         "url": "/airport-transfer-sangster-to-montego-bay-shuttle",
-        "img": "https://via.placeholder.com/640x480?text=MBJ+Area",
+        "img": "/demo/images/tour-image.jpeg",
         "fromPrice": 12
       },
       "private": {
         "name": "Private Transportation: MBJ ↔ Montego Bay Area",
         "url": "/airport-transfer-sangster-to-montego-bay-private",
-        "img": "https://via.placeholder.com/640x480?text=MBJ+Private",
+        "img": "/demo/images/tour-image.jpeg",
         "fromPrice": 35
       }
     },
     "OCHO_RIOS": {
       "label": "Ocho Rios",
-      "shuttle": { "name": "Shuttle: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-shuttle", "img": "https://via.placeholder.com/640x480?text=Ocho+Rios", "fromPrice": 25 },
-      "private": { "name": "Private: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-private", "img": "https://via.placeholder.com/640x480?text=Ocho+Private", "fromPrice": 80 }
+      "shuttle": { "name": "Shuttle: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-shuttle", "img": "/demo/images/tour-image.jpeg", "fromPrice": 25 },
+      "private": { "name": "Private: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-private", "img": "/demo/images/tour-image.jpeg", "fromPrice": 80 }
     },
     "NEGRIL": {
       "label": "Negril",
-      "shuttle": { "name": "Shuttle: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-shuttle", "img": "https://via.placeholder.com/640x480?text=Negril", "fromPrice": 28 },
-      "private": { "name": "Private: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-private", "img": "https://via.placeholder.com/640x480?text=Negril+Private", "fromPrice": 95 }
+      "shuttle": { "name": "Shuttle: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-shuttle", "img": "/demo/images/tour-image.jpeg", "fromPrice": 28 },
+      "private": { "name": "Private: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-private", "img": "/demo/images/tour-image.jpeg", "fromPrice": 95 }
     }
   }
 }

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Airport Transfer Quote - Get Instant Pricing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui; padding: 24px; max-width: 600px; margin: 0 auto; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+    .btn { background: #D65130; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    .btn:hover { background: #b54224; }
+    .row { display: flex; gap: 20px; }
+    .row .form-group { flex: 1; }
+  </style>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initAutocomplete"></script>
+</head>
+<body>
+  <h1>Airport Transfer Quote</h1>
+  <p>Get instant pricing for your Jamaica airport transfer</p>
+
+  <form id="quote-form">
+    <div class="form-group">
+      <label for="pickup">Pickup Location</label>
+      <input type="text" id="pickup" name="pickup_location" placeholder="e.g. Sangster International Airport (MBJ)" required>
+    </div>
+
+    <div class="form-group">
+      <label for="dropoff">Drop-off Location</label>
+      <input type="text" id="dropoff" name="dropoff_location" placeholder="e.g. Hotel, Resort, or Address" required>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label for="date">Pickup Date</label>
+        <input type="date" id="date" name="pickup_date" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="time">Pickup Time</label>
+        <input type="time" id="time" name="pickup_time" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="passengers">Number of Passengers</label>
+      <select id="passengers" name="passengers" required>
+        <option value="">Select passengers</option>
+        <option value="1">1 Passenger</option>
+        <option value="2">2 Passengers</option>
+        <option value="3">3 Passengers</option>
+        <option value="4">4 Passengers</option>
+        <option value="5">5 Passengers</option>
+        <option value="6">6 Passengers</option>
+        <option value="7">7 Passengers</option>
+        <option value="8">8+ Passengers</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn">Get Quote</button>
+  </form>
+
+  <script>
+    let pickupAutocomplete, dropoffAutocomplete;
+
+    function initAutocomplete() {
+      // Initialize Google Places Autocomplete
+      pickupAutocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('pickup'),
+        { 
+          componentRestrictions: { country: 'jm' }, // Restrict to Jamaica
+          types: ['establishment', 'geocode']
+        }
+      );
+      
+      dropoffAutocomplete = new google.maps.places.Autocomplete(
+        document.getElementById('dropoff'),
+        { 
+          componentRestrictions: { country: 'jm' },
+          types: ['establishment', 'geocode']
+        }
+      );
+    }
+
+    // Handle form submission
+    document.getElementById('quote-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const params = new URLSearchParams();
+      
+      for (let [key, value] of formData.entries()) {
+        if (value.trim()) {
+          params.append(key, value);
+        }
+      }
+      
+      // Redirect to quote results page
+      window.location.href = `quote-results.html?${params.toString()}`;
+    });
+
+    // Set minimum date to today
+    document.getElementById('date').min = new Date().toISOString().split('T')[0];
+  </script>
+</body>
+</html>
