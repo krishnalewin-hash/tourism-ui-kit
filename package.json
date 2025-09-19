@@ -11,7 +11,8 @@
     "build:booking:css": "postcss src/booking/css/booking.css -o dist/booking.min.css",
     "build:form-enhancer:js": "esbuild src/form-enhancer/js/enhancer.js --bundle --minify --format=iife --global-name=FormEnhancer --outfile=dist/form-enhancer.min.js",
     "build:simple-enhancer:js": "esbuild src/form-enhancer/js/simple-enhancer.js --bundle --minify --format=iife --global-name=SimpleFormEnhancer --outfile=dist/simple-form-enhancer.min.js",
-    "build": "npm run build:cards:js && npm run build:cards:css && npm run build:detail:js && npm run build:detail:css && npm run build:booking:js && npm run build:booking:css && npm run build:form-enhancer:js && npm run build:simple-enhancer:js",
+    "build:client-enhancer:js": "esbuild src/form-enhancer/js/client-aware-enhancer.js --bundle --minify --format=iife --global-name=ClientFormEnhancer --outfile=dist/client-form-enhancer.min.js",
+    "build": "npm run build:cards:js && npm run build:cards:css && npm run build:detail:js && npm run build:detail:css && npm run build:booking:js && npm run build:booking:css && npm run build:form-enhancer:js && npm run build:simple-enhancer:js && npm run build:client-enhancer:js",
     "dev": "npm run build && npx serve demo -l 5173 -s"
   },
   "devDependencies": {
