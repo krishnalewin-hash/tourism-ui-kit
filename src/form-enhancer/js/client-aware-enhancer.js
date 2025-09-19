@@ -12,25 +12,46 @@
       const base = window.BASE_URL || 'krishnalewin-hash/tourism-ui-kit@main';
       
       const configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${clientId}.json`;
-      const response = await fetch(configUrl);
+      console.log(`Loading client config from: ${configUrl}`);
+      
+      const response = await fetch(configUrl, {
+        cache: 'no-cache',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
       
       if (!response.ok) {
-        throw new Error(`Failed to load client config: ${response.status}`);
+        throw new Error(`Failed to load client config: ${response.status} ${response.statusText}`);
       }
       
       clientConfig = await response.json();
+      console.log('Client config loaded:', clientConfig);
       
       // Set up window.CFG from the client config
       if (clientConfig.WINDOW_CFG) {
         window.CFG = clientConfig.WINDOW_CFG;
-        console.log(`Loaded config for client: ${clientId}`);
+        console.log(`Successfully loaded config for client: ${clientId}`, window.CFG);
         return true;
       } else {
-        console.warn(`No WINDOW_CFG found for client: ${clientId}`);
+        console.warn(`No WINDOW_CFG found for client: ${clientId}. Available keys:`, Object.keys(clientConfig));
         return false;
       }
     } catch (error) {
       console.error('Failed to load client config:', error);
+      
+      // Fallback: if client config fails, don't block the form entirely
+      if (!window.CFG) {
+        console.warn('Using fallback configuration');
+        window.CFG = {
+          GMAPS_KEY: '', // Will cause graceful degradation
+          COUNTRIES: ['jm'],
+          PLACES: {
+            FIELDS: ['place_id','formatted_address','geometry','name','types'],
+            TYPES: ['establishment']
+          }
+        };
+      }
       return false;
     }
   }
@@ -39,9 +60,16 @@
     if (window.google?.maps) return;
     
     if (!window.CFG || !window.CFG.GMAPS_KEY) {
-      console.warn('Form enhancer: No window.CFG.GMAPS_KEY found');
+      console.warn('Form enhancer: No window.CFG.GMAPS_KEY found - Google Maps features will be disabled');
       return;
     }
+    
+    if (!window.CFG.GMAPS_KEY.trim()) {
+      console.warn('Form enhancer: Empty GMAPS_KEY - Google Maps features will be disabled');
+      return;
+    }
+    
+    console.log('Loading Google Maps API with key:', window.CFG.GMAPS_KEY.substring(0, 10) + '...');
     
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${window.CFG.GMAPS_KEY}&libraries=places`;
@@ -49,8 +77,14 @@
     script.defer = true;
     
     return new Promise((resolve, reject) => {
-      script.onload = resolve;
-      script.onerror = reject;
+      script.onload = () => {
+        console.log('Google Maps API loaded successfully');
+        resolve();
+      };
+      script.onerror = (error) => {
+        console.error('Failed to load Google Maps API:', error);
+        reject(error);
+      };
       document.head.appendChild(script);
     });
   }
@@ -241,20 +275,44 @@
   // Initialize when DOM is ready
   async function initialize() {
     try {
+      console.log('Initializing client-aware form enhancer...');
+      console.log('CLIENT_ID:', window.CLIENT_ID);
+      
       // Load client configuration first
       const configLoaded = await loadClientConfig();
       if (!configLoaded) {
-        console.error('Failed to load client configuration');
-        return;
+        console.warn('Client configuration not loaded - continuing with limited functionality');
       }
       
-      // Load Google Maps
-      await loadGoogleMaps();
+      // Load Google Maps (only if we have a valid API key)
+      if (window.CFG?.GMAPS_KEY?.trim()) {
+        await loadGoogleMaps();
+      } else {
+        console.log('Skipping Google Maps - no API key available');
+      }
       
-      // Wait a bit for form to be ready, then enhance
-      setTimeout(enhanceForm, 1000);
+      // Set up data persistence regardless of Google Maps
+      setupDataPersistence();
+      
+      // Wait a bit for form to be ready, then enhance (if Google Maps is available)
+      setTimeout(() => {
+        if (window.google?.maps) {
+          enhanceForm();
+        } else {
+          console.log('Google Maps not available - form enhancement limited to data persistence');
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Failed to initialize client-aware form enhancer:', error);
+      
+      // Fallback: at least set up data persistence
+      try {
+        setupDataPersistence();
+        console.log('Fallback: data persistence enabled');
+      } catch (fallbackError) {
+        console.error('Complete initialization failure:', fallbackError);
+      }
     }
   }
 
