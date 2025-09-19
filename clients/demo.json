@@ -1,0 +1,37 @@
+{
+  "START_OVER_URL": "/airport-transfer-form",
+  "copy": {
+    "flight": "Flight tracking",
+    "wifi": "Complimentary in-vehicle Wi-Fi",
+    "water": "Complimentary bottled water",
+    "cancel": "Free cancellation up to 24 hours before pickup",
+    "inclusive": "Price includes taxes, tolls & tip — no hidden costs"
+  },
+  "TRANSFER_CATALOG": {
+    "MBJ_AREA": {
+      "label": "Montego Bay Area",
+      "shuttle": {
+        "name": "Shuttle Transportation: MBJ ↔ Montego Bay Area",
+        "url": "/airport-transfer-sangster-to-montego-bay-shuttle",
+        "img": "https://via.placeholder.com/640x480?text=MBJ+Area",
+        "fromPrice": 12
+      },
+      "private": {
+        "name": "Private Transportation: MBJ ↔ Montego Bay Area",
+        "url": "/airport-transfer-sangster-to-montego-bay-private",
+        "img": "https://via.placeholder.com/640x480?text=MBJ+Private",
+        "fromPrice": 35
+      }
+    },
+    "OCHO_RIOS": {
+      "label": "Ocho Rios",
+      "shuttle": { "name": "Shuttle: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-shuttle", "img": "https://via.placeholder.com/640x480?text=Ocho+Rios", "fromPrice": 25 },
+      "private": { "name": "Private: MBJ ↔ Ocho Rios", "url": "/airport-transfer-sangster-to-ocho-rios-private", "img": "https://via.placeholder.com/640x480?text=Ocho+Private", "fromPrice": 80 }
+    },
+    "NEGRIL": {
+      "label": "Negril",
+      "shuttle": { "name": "Shuttle: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-shuttle", "img": "https://via.placeholder.com/640x480?text=Negril", "fromPrice": 28 },
+      "private": { "name": "Private: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-private", "img": "https://via.placeholder.com/640x480?text=Negril+Private", "fromPrice": 95 }
+    }
+  }
+}

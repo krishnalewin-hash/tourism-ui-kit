@@ -1,0 +1,17 @@
+.skeleton-list{display:grid;gap:16px}
+.skeleton{
+  display:grid;grid-template-columns:320px 1fr 200px;gap:20px;background:#fff;
+  border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;
+}
+.shimmer{position:relative;background:#eef0f3;overflow:hidden;border-radius:12px}
+.shimmer::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 100%);animation:shimmer 1.4s infinite}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+.sk-img{height:100%;min-height:220px}
+.sk-line{height:14px;border-radius:8px}
+.sk-line.lg{height:20px}
+.sk-pad{padding:18px 16px;display:flex;flex-direction:column;gap:12px}
+.sk-right{padding:16px;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--card-border)}
+.sk-pill{height:36px;border-radius:5px}
+@media (max-width:1024px){.skeleton{grid-template-columns:260px 1fr 180px}}
+@media (max-width:860px){.skeleton{grid-template-columns:1fr}.sk-right{border-left:none;border-top:1px solid var(--card-border)}.sk-img{min-height:180px}}

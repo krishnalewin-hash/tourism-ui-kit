@@ -1,0 +1,22 @@
+{
+  "name": "tourism-ui-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build:cards:js": "esbuild src/cards/js/widget.js --bundle --minify --format=iife --global-name=TourCards --outfile=dist/cards.min.js",
+    "build:cards:css": "postcss src/shared/css/index-shared.css src/cards/css/index-cards.css -o dist/cards.min.css",
+    "build:detail:js": "esbuild src/tour-detail/js/detail.js --bundle --minify --format=iife --global-name=TourDetail --outfile=dist/tour-detail.min.js",
+    "build:detail:css": "postcss src/shared/css/index-shared.css src/tour-detail/css/detail.css -o dist/tour-detail.min.css",
+    "build:booking:js": "esbuild src/booking/js/booking.js --bundle --minify --format=iife --global-name=TourBooking --outfile=dist/booking.min.js",
+    "build:booking:css": "postcss src/shared/css/index-shared.css src/booking/css/booking.css -o dist/booking.min.css",
+    "build": "npm run build:cards:js && npm run build:cards:css && npm run build:detail:js && npm run build:detail:css && npm run build:booking:js && npm run build:booking:css",
+    "dev": "npm run build && npx serve demo -l 5173"
+  },
+  "devDependencies": {
+    "cssnano": "^6.0.0",
+    "esbuild": "^0.23.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^11.0.0",
+    "postcss-import": "^16.0.0"
+  }
+}
