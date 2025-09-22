@@ -1,0 +1,71 @@
+<!-- GoHighLevel Custom Block Code for Quote Calculator (Production Version) -->
+
+<!-- 1. Container for the quote calculator -->
+<div id="quote-calc"></div>
+
+<!-- 2. Load Tour Driver client configuration -->
+<script>
+// Set up window.CFG with Tour Driver configuration
+window.CFG = {
+  "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+  "COUNTRIES": ["jm"],
+  "PLACES": {
+    "FIELDS": ["place_id","formatted_address","geometry","name","types"],
+    "TYPES": ["establishment"],
+    "PRIORITY_KEYWORDS": {
+      "airport": ["airport","international airport","terminal","mbj","kin","ocj","neg","ktp"],
+      "hotel": ["hotel","resort","inn","villa","guest house","guesthouse","lodgings","spa","apartments","suite","suites","bnb"]
+    }
+  }
+};
+</script>
+
+<!-- 3. Load CSS from CDN (with commit hash for cache control) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@869f8da49b0f32684deac22beb9a77e5392c34e2/dist/quote-calc.css">
+
+<!-- 4. Load JavaScript from CDN (with commit hash for cache control) -->
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@869f8da49b0f32684deac22beb9a77e5392c34e2/dist/quote-calc-enhanced.js"></script>
+
+<!-- 5. Fallback error handling -->
+<script>
+// Check if quote calculator loaded and show helpful error if needed
+setTimeout(() => {
+  const container = document.getElementById('quote-calc');
+  if (container && container.innerHTML.trim() === '') {
+    container.innerHTML = `
+      <div style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f9f9f9; text-align: center;">
+        <h3>Quote Calculator Loading...</h3>
+        <p>If this message persists, please check that the URL contains pickup_location and dropoff_location parameters.</p>
+        <p><strong>Required format:</strong> ?pickup_location=YourPickup&dropoff_location=YourDropoff</p>
+      </div>
+    `;
+  }
+}, 3000);
+</script>
+
+<!-- 
+IMPORTANT NOTES FOR GOHIGHLEVEL INTEGRATION:
+
+1. PAGE URL REQUIREMENTS:
+   Your GoHighLevel page URL must include these parameters:
+   ?pickup_location=YourPickupLocation&dropoff_location=YourDropoffLocation
+   
+   Examples:
+   ✅ ?pickup_location=Sangster International Airport&dropoff_location=Negril Beach Resort
+   ✅ ?pickup_location=Norman Manley International Airport&dropoff_location=Ocho Rios Bay Beach
+   ❌ ?from=Airport&to=Hotel (wrong parameter names)
+   ❌ ?pickup_location=&dropoff_location=Hotel (empty pickup)
+
+2. OPTIONAL PARAMETERS:
+   - passengers (default: 1)
+   - pickup_date
+   - pickup_time
+   
+3. TESTING:
+   Test your page with: yoursite.com/quote?pickup_location=Airport&dropoff_location=Hotel
+
+4. TROUBLESHOOTING:
+   - Check browser console for errors
+   - Verify both pickup_location and dropoff_location have values
+   - Ensure Google Maps API key is working (should see map loading)
+-->

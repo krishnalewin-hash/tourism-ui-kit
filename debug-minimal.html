@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Quote Calculator Debug</title>
+    <link rel="stylesheet" href="./dist/quote-calc.css">
+</head>
+<body>
+    <h1>Quote Calculator Debug Test</h1>
+    
+    <div id="quote-calc">
+        <p>Loading quote calculator...</p>
+    </div>
+
+    <script>
+        // Add debug logging
+        console.log('Starting debug test...');
+        
+        // Set up window.CFG with API key (CRITICAL!)
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+            PLACES_API_KEY: "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI"
+        };
+        console.log('Set window.CFG:', window.CFG);
+        
+        // Test if basic DOM manipulation works
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            const container = document.getElementById('quote-calc');
+            container.innerHTML = '<p style="color: green;">DOM manipulation working!</p>';
+        });
+    </script>
+    
+    <!-- Load the quote calculator -->
+    <script src="./dist/quote-calc-enhanced.js"></script>
+    
+    <script>
+        // Test if the calculator initialized
+        setTimeout(() => {
+            console.log('Checking for calculator after 2 seconds...');
+            const container = document.getElementById('quote-calc');
+            console.log('Container content:', container.innerHTML);
+            
+            // Test direct initialization
+            const urlParams = new URLSearchParams();
+            urlParams.set('from', 'Queenstown');
+            urlParams.set('to', 'Arrowtown');
+            urlParams.set('client', 'tour-driver');
+            
+            console.log('Testing direct params:', Object.fromEntries(urlParams));
+        }, 2000);
+    </script>
+</body>
+</html>
