@@ -9,10 +9,10 @@
 .qc-detail-item:last-of-type{border-bottom:none}
 .qc-detail-label{font-weight:800;color:#374151;font-size:18px}
 .qc-detail-value{font-weight:400;color:#111827;font-size:18px}
-.qc-detail-value.highlight{font-size:18px;font-weight:700;color:#059669}
+.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}
 
 .qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
-.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:14px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}
+.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}
 .qc-btn-primary{background:#059669;color:white;border:2px solid #059669}
 .qc-btn-primary:hover{background:#047857;border-color:#047857}
 .qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}
