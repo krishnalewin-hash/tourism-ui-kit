@@ -210,6 +210,9 @@
         const map2 = new google.maps.Map(mapNode, { zoom: CONFIG.map.zoom || 9 });
         const dr2 = new google.maps.DirectionsRenderer({ map: map2 });
         dr2.setDirections(res);
+        
+        // Remove shimmer effect once map is loaded
+        mapNode.classList.remove("qc-shimmer");
       });
     });
   }
