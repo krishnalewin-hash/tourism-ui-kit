@@ -59,9 +59,9 @@ window.BookingForm.initDatePicker = function(root=document){
 
   window.__pickupDatePicker = { openFor: (input)=>openFor(input), close };
   // wire current input
-  const input = document.querySelector('input[data-q="pickup_date"]');
+  const input = root.querySelector('input[data-q="pickup_date"]');
   if (input) {
-    window.BookingForm.attachPickupDateGuard(document);
+    window.BookingForm.attachPickupDateGuard(root);
     input.readOnly = true;
     input.addEventListener('focus', ()=> openFor(input));
     input.addEventListener('click',  ()=> openFor(input));
