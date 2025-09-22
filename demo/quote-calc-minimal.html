@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Quote Calculator Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #quote-calc { border: 1px solid #ccc; min-height: 100px; padding: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Basic Quote Calculator Test</h1>
+    
+    <p>Testing with: MBJ Airport → Negril (3 passengers)</p>
+    
+    <div id="quote-calc">Loading quote calculator...</div>
+    
+    <script>
+        // Set the required configuration
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+        };
+        
+        // Set URL parameters programmatically since we can't easily pass them
+        const url = new URL(window.location);
+        url.searchParams.set('pickup_location', 'MBJ Airport');
+        url.searchParams.set('dropoff_location', 'Negril');
+        url.searchParams.set('passengers', '3');
+        
+        // Update the URL without reloading
+        if (!url.searchParams.has('pickup_location')) {
+            window.history.replaceState({}, '', url.toString());
+        }
+        
+        console.log('Configuration:', window.CFG);
+        console.log('URL params:', url.searchParams.toString());
+    </script>
+    
+    <link rel="stylesheet" href="../dist/quote-calc.css">
+    <script src="../dist/quote-calc.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Calculator Demo - Tourism UI Kit</title>
+    <link rel="stylesheet" href="../dist/quote-calc.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f9fafb;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .demo-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .demo-links a:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>Quote Calculator Demo</h1>
+        <p>Real-time distance-based pricing with interactive route map</p>
+    </div>
+
+    <!-- This is where the quote calculator will mount -->
+    <div id="quote-calc"></div>
+
+    <div class="demo-links">
+        <a href="?pickup_location=MBJ Airport&dropoff_location=Negril Beach Resort&passengers=3">MBJ → Negril (3 passengers)</a>
+        <a href="?pickup_location=Sangster International Airport&dropoff_location=Ocho Rios&passengers=2">MBJ → Ocho Rios (2 passengers)</a>
+        <a href="?pickup_location=MBJ&dropoff_location=Montego Bay Hip Strip&passengers=1">MBJ → Hip Strip (1 passenger)</a>
+        <a href="?pickup_location=Norman Manley International Airport&dropoff_location=Blue Mountain Coffee Estate&passengers=4">KIN → Blue Mountains (4 passengers)</a>
+    </div>
+
+    <script>
+        // Set up the configuration that quote-calc.js expects
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+        };
+    </script>
+    
+    <!-- Load the quote calculator -->
+    <script src="../dist/quote-calc.js"></script>
+</body>
+</html>

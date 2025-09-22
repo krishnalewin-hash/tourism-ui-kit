@@ -24,16 +24,23 @@
       "phone": ["[name=\"phone\"]"]
     }
   },
-  "WINDOW_CFG": {
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
-    "COUNTRIES": ["jm"],
-    "PLACES": {
-      "FIELDS": ["place_id","formatted_address","geometry","name","types"],
-      "TYPES": ["establishment"],
-      "PRIORITY_KEYWORDS": {
-        "airport": ["airport","international airport","terminal","mbj","kin","ocj","neg","ktp"],
-        "hotel": ["hotel","resort","inn","villa","guest house","guesthouse","lodgings","spa","apartments","suite","suites","bnb"]
-      }
+  "PRICING_RATES": {
+    "shuttle": {
+      "perMile": 1.50,
+      "perMinute": 0.50,
+      "minimum": 25,
+      "baseRate": 12
+    },
+    "private": {
+      "perMile": 2.50,
+      "perMinute": 0.75,
+      "minimum": 35,
+      "baseRate": 35
+    },
+    "zones": {
+      "MBJ_AREA": { "shuttle": { "base": 12 }, "private": { "base": 35 } },
+      "OCHO_RIOS": { "shuttle": { "base": 25 }, "private": { "base": 80 } },
+      "NEGRIL": { "shuttle": { "base": 28 }, "private": { "base": 95 } }
     }
   },
   "copy": {

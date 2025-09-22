@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Calculator Debug - Tourism UI Kit</title>
+    <link rel="stylesheet" href="../dist/quote-calc.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f9fafb;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .debug-panel {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .demo-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>Quote Calculator Debug Mode</h1>
+        <p>Check console errors and API key issues</p>
+    </div>
+
+    <!-- Debug console -->
+    <div class="debug-panel" id="debug-console">
+        <div>🔍 Debug Console - Watch for errors below:</div>
+    </div>
+
+    <!-- Quote calculator mount point -->
+    <div id="quote-calc"></div>
+
+    <div class="demo-links">
+        <a href="?pickup_location=MBJ Airport&dropoff_location=Negril Beach Resort&passengers=3">Test MBJ → Negril</a>
+        <a href="?pickup_location=Sangster International Airport&dropoff_location=Ocho Rios&passengers=2">Test MBJ → Ocho Rios</a>
+    </div>
+
+    <script>
+        // Debug logging
+        const debugConsole = document.getElementById('debug-console');
+        function debugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'warn' ? '#f59e0b' : '#10b981';
+            debugConsole.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            debugConsole.scrollTop = debugConsole.scrollHeight;
+            console[type](message);
+        }
+
+        // Capture console errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            debugLog('ERROR: ' + args.join(' '), 'error');
+            originalError.apply(console, args);
+        };
+
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+            debugLog('WARN: ' + args.join(' '), 'warn');
+            originalWarn.apply(console, args);
+        };
+
+        // Set up configuration
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+        };
+
+        debugLog('🔑 API Key configured: ' + (window.CFG.GMAPS_KEY ? 'Yes' : 'No'));
+        debugLog('📍 Pickup location: ' + (new URLSearchParams(location.search).get('pickup_location') || 'Not set'));
+        debugLog('🎯 Dropoff location: ' + (new URLSearchParams(location.search).get('dropoff_location') || 'Not set'));
+
+        // Monitor Google Maps loading
+        window.gm_authFailure = function() {
+            debugLog('❌ Google Maps Authentication Failed - Check API key and permissions', 'error');
+        };
+
+        // Check if Google Maps loads successfully
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (window.google && window.google.maps) {
+                    debugLog('✅ Google Maps API loaded successfully');
+                    if (window.google.maps.DirectionsService) {
+                        debugLog('✅ DirectionsService available');
+                    } else {
+                        debugLog('❌ DirectionsService not available - Enable Directions API', 'error');
+                    }
+                } else {
+                    debugLog('❌ Google Maps API failed to load', 'error');
+                }
+            }, 2000);
+        });
+    </script>
+    
+    <!-- Load the quote calculator -->
+    <script src="../dist/quote-calc.js"></script>
+</body>
+</html>

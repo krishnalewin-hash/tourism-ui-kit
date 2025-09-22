@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        #map { width: 100%; height: 300px; margin: 20px 0; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Google Maps API Test</h1>
+    
+    <div id="status-log"></div>
+    
+    <h3>Test Map:</h3>
+    <div id="map"></div>
+    
+    <h3>Test Route:</h3>
+    <button onclick="testRoute()">Test MBJ to Negril Route</button>
+    <div id="route-result"></div>
+
+    <script>
+        const statusLog = document.getElementById('status-log');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusLog.appendChild(div);
+            console.log(message);
+        }
+
+        // Test API key
+        const apiKey = "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA";
+        addStatus(`Testing with API key: ${apiKey.substring(0, 20)}...`);
+
+        // Load Google Maps
+        function loadGoogleMaps() {
+            addStatus('Loading Google Maps JavaScript API...');
+            
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            
+            script.onerror = function() {
+                addStatus('❌ Failed to load Google Maps script', 'error');
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        // Initialize map when Google Maps loads
+        window.initMap = function() {
+            addStatus('✅ Google Maps API loaded successfully', 'success');
+            
+            try {
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 8,
+                    center: { lat: 18.2208, lng: -77.7911 }, // Jamaica center
+                });
+                addStatus('✅ Map initialized successfully', 'success');
+                
+                // Test if DirectionsService is available
+                if (google.maps.DirectionsService) {
+                    addStatus('✅ DirectionsService is available', 'success');
+                } else {
+                    addStatus('❌ DirectionsService not available', 'error');
+                }
+                
+            } catch (error) {
+                addStatus(`❌ Map initialization failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Test route calculation
+        window.testRoute = function() {
+            if (!window.google || !google.maps.DirectionsService) {
+                addStatus('❌ Google Maps not ready for route testing', 'error');
+                return;
+            }
+            
+            addStatus('Testing route calculation...');
+            
+            const directionsService = new google.maps.DirectionsService();
+            
+            directionsService.route({
+                origin: 'MBJ Airport, Jamaica',
+                destination: 'Negril, Jamaica',
+                travelMode: google.maps.TravelMode.DRIVING
+            }, function(result, status) {
+                const resultDiv = document.getElementById('route-result');
+                
+                if (status === 'OK') {
+                    const route = result.routes[0];
+                    const leg = route.legs[0];
+                    const distance = leg.distance.text;
+                    const duration = leg.duration.text;
+                    
+                    addStatus(`✅ Route calculated: ${distance}, ${duration}`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="status success">
+                            <strong>Route Success!</strong><br>
+                            Distance: ${distance}<br>
+                            Duration: ${duration}<br>
+                            Start: ${leg.start_address}<br>
+                            End: ${leg.end_address}
+                        </div>
+                    `;
+                } else {
+                    addStatus(`❌ Route calculation failed: ${status}`, 'error');
+                    resultDiv.innerHTML = `<div class="status error">Route failed: ${status}</div>`;
+                }
+            });
+        };
+
+        // Handle authentication failures
+        window.gm_authFailure = function() {
+            addStatus('❌ Google Maps authentication failed - check API key and billing', 'error');
+        };
+
+        // Start the test
+        addStatus('Starting Google Maps API test...');
+        loadGoogleMaps();
+    </script>
+</body>
+</html>

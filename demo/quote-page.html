@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Page - Tourism Transfer Booking</title>
+    <link rel="stylesheet" href="../dist/quote-calc.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #111827;
+            font-size: 24px;
+        }
+        .main {
+            padding: 40px 0;
+        }
+        .fallback-cards {
+            margin-top: 40px;
+        }
+        .fallback-cards h2 {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Your Transfer Quote</h1>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Primary quote calculator -->
+            <div id="quote-calc"></div>
+            
+            <!-- Fallback: Show traditional cards if quote calc fails -->
+            <div class="fallback-cards" style="display: none;">
+                <h2>Available Transfer Options</h2>
+                <div class="tourkit-cards" data-client="demo" data-base="../">
+                    <div id="results-list"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Configuration for both quote calc and fallback cards
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+        };
+
+        // Show fallback cards if quote calc fails after 10 seconds
+        setTimeout(() => {
+            const quoteCalc = document.getElementById('quote-calc');
+            const fallback = document.querySelector('.fallback-cards');
+            
+            if (quoteCalc && quoteCalc.innerHTML.includes('qc-err')) {
+                fallback.style.display = 'block';
+                // Load the traditional cards widget as fallback
+                import('../dist/cards.min.js');
+            }
+        }, 10000);
+    </script>
+    
+    <!-- Load quote calculator -->
+    <script src="../dist/quote-calc.js"></script>
+    
+    <!-- Load fallback cards CSS (hidden by default) -->
+    <link rel="stylesheet" href="../dist/cards.min.css">
+</body>
+</html>

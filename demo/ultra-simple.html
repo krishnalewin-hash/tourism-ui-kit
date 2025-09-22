@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ultra-Simple Test</title>
+</head>
+<body>
+    <h1>Ultra-Simple Quote Calculator Test</h1>
+    
+    <p>This should show a quote calculator below:</p>
+    
+    <!-- Mount point -->
+    <div id="quote-calc" style="border: 2px solid red; padding: 20px; min-height: 100px;">
+        MOUNT POINT - Should be replaced by quote calculator
+    </div>
+    
+    <p>End of page</p>
+    
+    <script>
+        // Minimal configuration
+        window.CFG = { GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA" };
+        
+        // Set URL parameters in code since we can't pass them easily
+        const url = new URL(window.location);
+        url.searchParams.set('pickup_location', 'MBJ Airport');
+        url.searchParams.set('dropoff_location', 'Negril');
+        url.searchParams.set('passengers', '3');
+        window.history.replaceState({}, '', url);
+        
+        console.log('Configuration set:', window.CFG);
+        console.log('URL set to:', url.href);
+        console.log('Mount point exists:', !!document.getElementById('quote-calc'));
+    </script>
+    
+    <!-- Load files -->
+    <link rel="stylesheet" href="../dist/quote-calc.css">
+    <script src="../dist/quote-calc.js"></script>
+    
+    <script>
+        // Debug after 3 seconds
+        setTimeout(() => {
+            console.log('After 3 seconds:');
+            console.log('- window.QuoteCalc exists:', !!window.QuoteCalc);
+            console.log('- Mount point content:', document.getElementById('quote-calc').innerHTML.substring(0, 100));
+            
+            if (window.QuoteCalc) {
+                console.log('Attempting manual run...');
+                try {
+                    window.QuoteCalc.run();
+                } catch (e) {
+                    console.error('Manual run failed:', e);
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
