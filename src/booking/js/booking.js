@@ -27,7 +27,7 @@ window.BookingForm.initNow = function(root = document) {
   // Field behaviors
   window.BookingForm.attachPickupDateGuard(root);
   window.BookingForm.initDatePicker(root);
-  window.BookingForm.attachPickupTimePicker(root);
+  window.BookingForm.setupTimePicker();
   window.BookingForm.initPassengerSelect(root);
 
   // Validation (NEXT / SUBMIT)

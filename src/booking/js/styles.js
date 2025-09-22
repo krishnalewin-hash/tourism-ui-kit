@@ -18,6 +18,19 @@ window.BookingForm.injectBaselineStyles = function() {
   .icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.3rem !important}
   input[data-q], select[data-q]{display:inline-block;width:100%;min-width:200px;padding:10px 18px 10px 2.25rem;border:1px solid #ccc;background:#fff;line-height:1.4;box-sizing:border-box;min-height:40px;color:#222}
   .pac-container{font-size:16px !important}
+  
+  /* Date picker popover */
+  #pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}
+  #pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}
+  #pickup-date-popover button[data-nav]{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}
+  #pickup-date-popover button[data-nav]:hover{background:#f2f2f2;}
+  #pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  #pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}
+  #pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}
+  #pickup-date-popover .dp-day:hover{background:#eee;}
+  #pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}
+  #pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}
+  #pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}
   `);
   inject('booking-form-iconrow-styles', `
   .icon-field-wrapper .icon-input-row{position:relative}
