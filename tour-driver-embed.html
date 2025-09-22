@@ -1,0 +1,52 @@
+<!-- Tour Driver - Enhanced Quote Calculator with New Layout -->
+<div id="quote-calc"></div>
+
+<script>
+// Load Tour Driver configuration
+window.CFG = {
+  "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+  "COUNTRIES": ["jm"],
+  "PLACES": {
+    "FIELDS": ["place_id","formatted_address","geometry","name","types"],
+    "TYPES": ["establishment"],
+    "PRIORITY_KEYWORDS": {
+      "airport": ["airport","international airport","terminal","mbj","kin","ocj","neg","ktp"],
+      "hotel": ["hotel","resort","inn","villa","guest house","guesthouse","lodgings","spa","apartments","suite","suites","bnb"]
+    }
+  },
+  "PRICING_RATES": {
+    "BASE_RATES": {"SEDAN": 120, "SUV": 150, "MINIVAN": 180},
+    "DISTANCE_BANDS": [
+      {"maxKm": 15, "multiplier": 1.0},
+      {"maxKm": 30, "multiplier": 1.2},
+      {"maxKm": 50, "multiplier": 1.4},
+      {"maxKm": 100, "multiplier": 1.8},
+      {"maxKm": 999, "multiplier": 2.2}
+    ],
+    "REMOTE_AREAS": {
+      "THRESHOLD_KM": 75,
+      "SURCHARGE_USD": 25
+    }
+  }
+};
+
+// Customize contact information for Tour Driver
+window.TOUR_DRIVER_CONFIG = {
+  bookingUrl: "https://tourdriver.com/book",
+  whatsappNumber: "1876XXXXXXX", // Replace with actual WhatsApp number
+  email: "bookings@tourdriver.com",
+  phone: "+1876XXXXXXX" // Replace with actual phone number
+};
+</script>
+
+<!-- Load enhanced CSS and JS from CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.css">
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc-enhanced.js"></script>
+
+<style>
+/* Optional: Additional Tour Driver specific styling */
+.qc-btn-primary {
+  /* Customize button colors for Tour Driver brand if needed */
+  background: #059669;
+}
+</style>
