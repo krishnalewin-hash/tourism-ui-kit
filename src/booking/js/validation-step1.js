@@ -1,7 +1,10 @@
 // Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
 // Adds inline messages and fade-out animation before advancing
 
-export function installStep1Validation(){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.installStepOneNextValidation = function(){
   if (window.__stepOneNextValidation) return;
 
   const SELECTORS = [
@@ -84,4 +87,4 @@ export function installStep1Validation(){
   document.addEventListener('click', onClick, true);
   document.addEventListener('mousedown', onClick, true);
   window.__stepOneNextValidation = true;
-}
+};

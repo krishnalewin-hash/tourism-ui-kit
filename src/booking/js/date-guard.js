@@ -1,5 +1,8 @@
 // Prevent past dates + normalize display format
 
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
@@ -18,7 +21,7 @@ function parseLoose(str){
   const d = new Date(s); return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-export function attachPickupDateGuard(root=document) {
+window.BookingForm.attachPickupDateGuard = function(root=document) {
   const input = root.querySelector('input[data-q="pickup_date"]');
   if (!input || input.dataset.dateGuard === '1') return;
   input.dataset.dateGuard = '1';
@@ -39,4 +42,4 @@ export function attachPickupDateGuard(root=document) {
   input.addEventListener('blur', enforce);
   input.addEventListener('change', enforce);
   input.addEventListener('input', () => { if ((input.value||'').length >= 6) enforce(); });
-}
+};

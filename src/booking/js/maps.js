@@ -1,11 +1,27 @@
 // Load Google Maps JS + provide a bounds function from config
 
-export function loadGoogleMaps(googleApiKey, timeoutMs=10000){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.loadGoogleMaps = function(callback) {
+  const CONFIG = window.BookingForm.getConfig();
+  const googleApiKey = CONFIG.googleApiKey;
+  const timeoutMs = CONFIG.mapsLoadTimeoutMs || 10000;
+  
   return new Promise((resolve, reject)=>{
-    if (window.google?.maps?.places) return resolve();
+    if (window.google?.maps?.places) {
+      if (callback) callback();
+      return resolve();
+    }
 
     if (document.querySelector('script[data-gmaps-loader]')){
-      const t=setInterval(()=>{ if(window.google?.maps?.places){ clearInterval(t); resolve(); } },150);
+      const t=setInterval(()=>{ 
+        if(window.google?.maps?.places){ 
+          clearInterval(t); 
+          if (callback) callback();
+          resolve(); 
+        } 
+      },150);
       setTimeout(()=>{ clearInterval(t); reject(new Error('timeout')); }, timeoutMs);
       return;
     }
@@ -14,12 +30,18 @@ export function loadGoogleMaps(googleApiKey, timeoutMs=10000){
     s.async=true; s.defer=true; s.setAttribute('data-gmaps-loader','1');
     s.onerror=()=>reject(new Error('load-failed'));
     document.head.appendChild(s);
-    const t=setInterval(()=>{ if(window.google?.maps?.places){ clearInterval(t); resolve(); } },150);
+    const t=setInterval(()=>{ 
+      if(window.google?.maps?.places){ 
+        clearInterval(t); 
+        if (callback) callback();
+        resolve(); 
+      } 
+    },150);
     setTimeout(()=>{ clearInterval(t); reject(new Error('timeout')); }, timeoutMs);
   });
-}
+};
 
-export function makeBiasBoundsSupplier(CONFIG){
+window.BookingForm.makeBiasBoundsSupplier = function(CONFIG){
   const g = window.google?.maps;
   if (!g) return () => null;
 
@@ -36,4 +58,15 @@ export function makeBiasBoundsSupplier(CONFIG){
     };
   }
   return () => null;
-}
+};
+
+// Placeholder functions for missing wireAutocomplete and setupPredictionFilters
+window.BookingForm.wireAutocomplete = function(root = document) {
+  // TODO: Implement autocomplete wiring logic
+  console.log('wireAutocomplete called - needs implementation');
+};
+
+window.BookingForm.setupPredictionFilters = function() {
+  // TODO: Implement prediction filters logic
+  console.log('setupPredictionFilters called - needs implementation');
+};

@@ -1,6 +1,9 @@
 // Validates step 2 on SUBMIT (full_name, email, phone)
 
-export function installStep2Validation(){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.installStepTwoSubmitValidation = function(){
   if (window.__stepTwoSubmitValidation) return;
 
   const SELECTORS = ['input[data-q="email"]','input[data-q="phone"]','input[data-q="full_name"]'];
@@ -31,4 +34,4 @@ export function installStep2Validation(){
   document.addEventListener('click', handle, true);
   document.addEventListener('mousedown', handle, true);
   window.__stepTwoSubmitValidation = true;
-}
+};

@@ -1,5 +1,8 @@
 // Replace input[data-q="number_of_passengers"] with a styled <select>
 
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
 function matchFieldLook(select){
   const ref = document.querySelector('.icon-field-wrapper input[data-q]') || document.querySelector('input[data-q]');
   if (!ref) return;
@@ -14,7 +17,7 @@ function applyPlaceholderClass(sel){
   sel.classList.toggle('is-placeholder', !sel.value);
 }
 
-export function attachPassengerSelect(root=document){
+window.BookingForm.initPassengerSelect = function(root=document){
   if (root.querySelector('select[data-q="number_of_passengers"]')) return;
   const input = root.querySelector('input[data-q="number_of_passengers"]');
   if (!input) return;
@@ -46,4 +49,4 @@ export function attachPassengerSelect(root=document){
   });
 
   input.parentNode.replaceChild(sel, input);
-}
+};

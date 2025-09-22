@@ -1,8 +1,9 @@
 // Small popup calendar → writes formatted string, fires input/change
 
-import { attachPickupDateGuard } from './date-guard.js';
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
 
-export function attachDatePicker(root=document){
+window.BookingForm.initDatePicker = function(root=document){
   if (window.__pickupDatePicker) return;
   const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -60,9 +61,9 @@ export function attachDatePicker(root=document){
   // wire current input
   const input = document.querySelector('input[data-q="pickup_date"]');
   if (input) {
-    attachPickupDateGuard(document);
+    window.BookingForm.attachPickupDateGuard(document);
     input.readOnly = true;
     input.addEventListener('focus', ()=> openFor(input));
     input.addEventListener('click',  ()=> openFor(input));
   }
-}
+};

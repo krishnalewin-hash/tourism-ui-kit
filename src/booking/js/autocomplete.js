@@ -1,6 +1,12 @@
 // Wire Places Autocomplete + PAC filter + keyword prioritization
 
-export function wireAutocomplete(CONFIG, biasBoundsFn, root=document){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.wireAutocomplete = function(root=document){
+  const CONFIG = window.BookingForm.getConfig();
+  const biasBoundsFn = window.BookingForm.makeBiasBoundsSupplier(CONFIG);
+  
   if (!window.google?.maps?.places) return;
 
   const sels = ['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
@@ -44,10 +50,15 @@ export function wireAutocomplete(CONFIG, biasBoundsFn, root=document){
   }
 
   // PAC filter / prioritizer (optional)
-  installPacEnhancers(CONFIG);
-}
+  window.BookingForm.installPacEnhancers(CONFIG);
+};
 
-function installPacEnhancers(CONFIG){
+window.BookingForm.setupPredictionFilters = function(){
+  const CONFIG = window.BookingForm.getConfig();
+  window.BookingForm.installPacEnhancers(CONFIG);
+};
+
+window.BookingForm.installPacEnhancers = function(CONFIG){
   if (window.__pacFilterObserver) return;
 
   const F = CONFIG.places.filter || {};
@@ -91,4 +102,4 @@ function installPacEnhancers(CONFIG){
   });
 
   window.__pacFilterObserver = true;
-}
+};

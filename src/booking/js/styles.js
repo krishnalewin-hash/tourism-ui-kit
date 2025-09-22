@@ -1,12 +1,15 @@
 // All style injectors (idempotent)
 
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
 function inject(id, css) {
   if (document.getElementById(id)) return;
   const s = document.createElement('style'); s.id = id; s.textContent = css;
   document.head.appendChild(s);
 }
 
-export function injectBaselineStyles() {
+window.BookingForm.injectBaselineStyles = function() {
   inject('booking-form-minimal-styles', `
   .icon-field-wrapper{position:relative;display:block;width:100%;}
   .icon-field-wrapper .field-icon{position:absolute;left:.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;color:#777;pointer-events:none}
@@ -21,9 +24,9 @@ export function injectBaselineStyles() {
   .icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q],
   .icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q]{padding-left:2.3rem !important}
   `);
-}
+};
 
-export function injectValidationStyles() {
+window.BookingForm.injectValidationStyles = function() {
   inject('booking-form-validation-styles', `
     .input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important}
     .field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2}
@@ -36,9 +39,9 @@ export function injectValidationStyles() {
     .bf-fade-out{opacity:0 !important; transform: translateY(-4px)}
     .bf-fade-in-init{opacity:0; transform: translateY(6px)}
   `);
-}
+};
 
-export function injectCtaStyles() {
+window.BookingForm.injectCtaStyles = function() {
   inject('booking-form-next-mobile-styles', `
     .ghl-btn.ghl-footer-next.bf-next{display:inline-flex;align-items:center;gap:8px;font-size:20px}
     .ghl-btn.ghl-footer-next .bf-next-label{display:none !important;font-weight:500}
@@ -52,4 +55,9 @@ export function injectCtaStyles() {
     .ghl-btn.ghl-submit-btn.bf-cta .bf-arrow{width:18px;height:18px;transition:transform .22s ease}
     .ghl-btn.ghl-submit-btn.bf-cta:hover .bf-arrow{transform:translateX(5px)}
   `);
-}
+};
+
+// Initialize styles immediately
+window.BookingForm.injectBaselineStyles();
+window.BookingForm.injectValidationStyles();
+window.BookingForm.injectCtaStyles();

@@ -1,6 +1,8 @@
-// Reads window.CFG and produces a normalized CONFIG used across modules.
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
 
-export function getConfig() {
+// Reads window.CFG and produces a normalized CONFIG used across modules.
+window.BookingForm.getConfig = function() {
   const CFG = window.CFG || {};
 
   const countries = (() => {
@@ -32,6 +34,10 @@ export function getConfig() {
       }
     },
     mapsLoadTimeoutMs: 10000,
-    time: { start:'00:00', end:'23:59', stepMinutes:15, format12:true }
+    time: { start:'00:00', end:'23:59', stepMinutes:15, format12:true },
+    serviceTypes: [
+      { id: 'pickup', label: 'Pickup' },
+      { id: 'dropoff', label: 'Drop-off' }
+    ]
   };
-}
+};

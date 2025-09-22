@@ -1,6 +1,10 @@
 // Singleton time picker; writes value and dispatches input/change
 
-export function attachTimePicker(config, root=document){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.attachPickupTimePicker = function(root=document){
+  const CONFIG = window.BookingForm.getConfig();
   if (window.__singletonTimePicker) return;
 
   const state = { open:false, input:null, h:6, m:0 };
@@ -94,4 +98,4 @@ export function attachTimePicker(config, root=document){
   }
 
   window.__singletonTimePicker = { openFor, close };
-}
+};

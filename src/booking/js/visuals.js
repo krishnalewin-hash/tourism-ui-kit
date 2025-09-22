@@ -1,6 +1,9 @@
 // Icons + wrappers + CTA/NEXT enhancements
 
-export function enhanceVisual(root=document){
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.enhanceVisual = function(root=document){
   const ICONS={
     'pickup_location':`<svg viewBox='0 0 24 24'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
     'drop-off_location':`<svg viewBox='0 0 24 24'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
@@ -29,9 +32,9 @@ export function enhanceVisual(root=document){
     [...root.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
     [...root.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
   });
-}
+};
 
-export function enhanceNextButtonMobile(root=document){
+window.BookingForm.enhanceNextButtonMobile = function(root=document){
   const isMobile = window.matchMedia?.('(max-width:768px)').matches;
   const btns = root.querySelectorAll('.ghl-btn.ghl-footer-next');
   btns.forEach(btn=>{
@@ -44,9 +47,9 @@ export function enhanceNextButtonMobile(root=document){
       if(labelSpan) labelSpan.remove();
     }
   });
-}
+};
 
-export function enhanceSubmitButton(root=document){
+window.BookingForm.enhanceSubmitButton = function(root=document){
   const btns = root.querySelectorAll('.ghl-btn.ghl-submit-btn');
   btns.forEach(btn=>{
     if(btn.dataset.bfCtaWired === '1') return;
@@ -57,4 +60,4 @@ export function enhanceSubmitButton(root=document){
       </span>`;
     btn.dataset.bfCtaWired='1';
   });
-}
+};
