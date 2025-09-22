@@ -1,0 +1,91 @@
+<!-- OPTION A: Quote Calculator (Distance-Based Pricing with Maps) -->
+<div id="quote-calc"></div>
+
+<script>
+// Configure Google Maps API
+window.CFG = {
+    GMAPS_KEY: "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+};
+
+// Optional: Set lead data if not in URL parameters
+window.LEAD_DATA = {
+    pickup_location: "MBJ Airport",
+    dropoff_location: "Negril",
+    passengers: "3"
+};
+</script>
+
+<!-- Load Quote Calculator (replaces all the manual code below) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.css">
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.js"></script>
+
+<!-- 
+    That's it! The quote calculator will:
+    ✅ Show interactive map with real route
+    ✅ Calculate pricing based on actual distance
+    ✅ Handle MBJ→Negril, MBJ→Ocho Rios, etc.
+    ✅ Add surcharges for remote areas (Tryall, Round Hill, etc.)
+    ✅ Work with URL parameters or sessionStorage
+-->
+
+<!--
+=========================================================================
+OPTION B: Traditional Cards (if you prefer the old zone-based system)
+=========================================================================
+-->
+
+<!-- Uncomment this section if you want the traditional cards instead:
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/cards.min.css">
+
+<div class="tourkit-cards" data-client="demo" data-base="krishnalewin-hash/tourism-ui-kit@main">
+    <div id="results-list"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/cards.min.js"></script>
+
+-->
+
+<!--
+=========================================================================
+OPTION C: Hybrid Approach (Quote Calculator with Cards Fallback)
+=========================================================================
+-->
+
+<!-- Uncomment this for the best of both worlds:
+
+<div id="quote-calc"></div>
+
+<div id="cards-fallback" style="display: none;">
+    <div class="tourkit-cards" data-client="demo" data-base="krishnalewin-hash/tourism-ui-kit@main">
+        <div id="results-list"></div>
+    </div>
+</div>
+
+<script>
+window.CFG = { GMAPS_KEY: "YOUR_API_KEY_HERE" };
+
+// Show cards as fallback if quote calc fails
+setTimeout(() => {
+    const quoteCalc = document.getElementById('quote-calc');
+    const fallback = document.getElementById('cards-fallback');
+    
+    if (quoteCalc && quoteCalc.innerHTML.includes('qc-err')) {
+        fallback.style.display = 'block';
+        // Load cards widget
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/cards.min.css';
+        document.head.appendChild(link);
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/cards.min.js';
+        document.head.appendChild(script);
+    }
+}, 10000);
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.css">
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.js"></script>
+
+-->
