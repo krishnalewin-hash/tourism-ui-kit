@@ -47,6 +47,8 @@
     const v = qs.get(k);
     if (v && String(v).trim()) return v;
     try { return sessionStorage.getItem("lead:"+k) || ""; } catch { return ""; }
+    if (window.LEAD_DATA && window.LEAD_DATA[k]) return window.LEAD_DATA[k];
+    return "";
   };
   const cacheIncoming = () => {
     ALLOW.forEach(k => { if (qs.has(k)) { try { sessionStorage.setItem("lead:"+k, qs.get(k)||""); } catch {} } });

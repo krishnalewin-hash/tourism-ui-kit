@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Calculator Embed Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .embed-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quote Calculator - Embeddable Widget</h1>
+    
+    <div class="demo-section">
+        <h2>1. CDN-Hosted Version (Recommended)</h2>
+        <p>This version loads from jsDelivr CDN and bypasses domain restrictions:</p>
+        
+        <div class="embed-code">&lt;!-- Quote Calculator Widget --&gt;
+&lt;div id="quote-calc"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+// Configuration
+window.CFG = {
+    GMAPS_KEY: "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+};
+
+// Optional: Set lead data if not in URL
+window.LEAD_DATA = {
+    pickup_location: "MBJ Airport",
+    dropoff_location: "Negril Beach Resort", 
+    passengers: "3"
+};
+&lt;/script&gt;
+
+&lt;!-- Load from CDN --&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.css"&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.js"&gt;&lt;/script&gt;</div>
+    </div>
+
+    <div class="demo-section">
+        <h2>2. Live Demo</h2>
+        <p>Here's the widget running with CDN files:</p>
+        
+        <!-- Live demo of the widget -->
+        <div id="quote-calc"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>3. URL Parameter Method</h2>
+        <p>For form integration, redirect users to a page with URL parameters:</p>
+        
+        <div class="embed-code">// After form submission, redirect to:
+https://yoursite.com/quote?pickup_location=MBJ%20Airport&amp;dropoff_location=Negril&amp;passengers=3&amp;pickup_date=2024-01-15&amp;pickup_time=14:30&amp;first_name=John&amp;last_name=Smith&amp;email=john@example.com&amp;phone=+1234567890</div>
+
+        <p>Test links:</p>
+        <ul>
+            <li><a href="?pickup_location=MBJ Airport&dropoff_location=Negril&passengers=3" target="_blank">MBJ → Negril (3 passengers)</a></li>
+            <li><a href="?pickup_location=Sangster International Airport&dropoff_location=Ocho Rios&passengers=2" target="_blank">MBJ → Ocho Rios (2 passengers)</a></li>
+            <li><a href="?pickup_location=MBJ&dropoff_location=Tryall Golf Club&passengers=4" target="_blank">MBJ → Tryall (4 passengers - with surcharge)</a></li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>4. Advanced Configuration</h2>
+        <p>Customize pricing, remote areas, and styling:</p>
+        
+        <div class="embed-code">window.CFG = {
+    GMAPS_KEY: "YOUR_API_KEY",
+    
+    // Custom pricing bands (optional)
+    PRICING_BANDS: [
+        { maxMi: 10,  pricePP: 25 },  // 0-10 miles → $25 pp
+        { maxMi: 25,  pricePP: 40 },  // 10-25 miles → $40 pp  
+        { maxMi: 50,  pricePP: 60 },  // 25-50 miles → $60 pp
+        { maxMi: 999, pricePP: 80 }   // 50+ miles → $80 pp
+    ],
+    
+    // Custom remote areas (optional)  
+    REMOTE_AREAS: ["tryall", "round hill", "your custom locations"],
+    REMOTE_SURCHARGE: 10  // $10 per person surcharge
+};</div>
+    </div>
+
+    <!-- Configure and load the actual widget -->
+    <script>
+        // Configuration for the demo
+        window.CFG = {
+            GMAPS_KEY: "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+        };
+
+        // Set demo data if no URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has('pickup_location')) {
+            window.LEAD_DATA = {
+                pickup_location: "MBJ Airport",
+                dropoff_location: "Negril Beach Resort",
+                passengers: "3"
+            };
+        }
+    </script>
+
+    <!-- Load widget from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.css">
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-calc.js"></script>
+</body>
+</html>
