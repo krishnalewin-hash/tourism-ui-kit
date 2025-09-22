@@ -53,8 +53,8 @@
   };
 
   const esc = s => String(s||"").replace(/[<>&"']/g, m => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[m]);
-  const fmtMi = n => (n||0).toFixed(1) + " mi";
-  const fmtMin = secs => Math.round((secs||0)/60) + " min";
+  const fmtMi = n => (n||0).toFixed(1) + " miles";
+  const fmtMin = secs => Math.round((secs||0)/60) + " minutes";
 
   function pickBandPrice(miles){
     for (const b of CONFIG.bands) {
