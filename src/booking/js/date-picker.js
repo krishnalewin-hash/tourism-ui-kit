@@ -6,6 +6,7 @@ window.BookingForm = window.BookingForm || {};
 window.BookingForm.initDatePicker = function(root=document){
   if (window.__pickupDatePicker) return;
   const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEKDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const pop=document.createElement('div'); pop.id='pickup-date-popover';
   pop.style.cssText='position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px;display:none';
@@ -29,31 +30,66 @@ window.BookingForm.initDatePicker = function(root=document){
     for(let day=1; day<=daysInMonth; day++){
       const ts=new Date(state.year,state.month,day).setHours(0,0,0,0);
       const dis = ts < T;
-      const style = 'width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:'+(dis?'not-allowed':'pointer');
-      html+=`<div class="dp-day${dis?' dp-disabled':''}" data-day="${day}" style="${style}" aria-disabled="${dis}" tabindex="${dis?-1:0}">${day}</div>`;
+      const classes=['dp-day']; if(dis) classes.push('dp-disabled');
+      if(ts===T) classes.push('dp-today');
+      html+=`<div class="${classes.join(' ')}" data-day="${day}" style="cursor:${dis?'not-allowed':'pointer'};padding:8px;text-align:center">${day}</div>`;
     }
     html+='</div>';
     pop.innerHTML=html;
   }
-  function openFor(input){ state.input=input; const now=new Date(); state.month=now.getMonth(); state.year=now.getFullYear(); build(); const r=input.getBoundingClientRect(); pop.style.display='block'; pop.style.top=window.scrollY+r.bottom+6+'px'; pop.style.left=window.scrollX+r.left+'px'; state.open=true;
-    setTimeout(()=>{ document.addEventListener('mousedown', onDoc, true); document.addEventListener('keydown', onKey, true); },0);
-  }
-  function close(){ if(!state.open) return; state.open=false; pop.style.display='none'; document.removeEventListener('mousedown', onDoc, true); document.removeEventListener('keydown', onKey, true); }
-  function onDoc(e){ if(pop.contains(e.target) || e.target===state.input) return; close(); }
-  function onKey(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } }
 
-  pop.addEventListener('click', e=>{
-    const nav=e.target.getAttribute('data-nav');
-    if (nav){ state.month += +nav; if(state.month<0){state.month=11;state.year--;} if(state.month>11){state.month=0;state.year++;} build(); return; }
-    const day=e.target.getAttribute('data-day');
-    if(day){
-      const d = new Date(state.year,state.month,+day);
-      const val = `${WD[d.getDay()]}, ${MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}, ${d.getFullYear()}`;
-      state.input.value = val;
-      state.input.setAttribute('value', val);
-      state.input.dispatchEvent(new Event('input', { bubbles:true }));
-      state.input.dispatchEvent(new Event('change', { bubbles:true }));
-      close();
+  function openFor(input){
+    state.input=input; 
+    const now=new Date(); 
+    state.month=now.getMonth(); 
+    state.year=now.getFullYear(); 
+    build(); 
+    const r=input.getBoundingClientRect(); 
+    pop.style.display='block'; 
+    pop.style.top=window.scrollY + r.bottom + 6 + 'px'; 
+    pop.style.left=window.scrollX + r.left + 'px'; 
+    state.open=true; 
+    setTimeout(()=>{ 
+      document.addEventListener('mousedown',outside,true); 
+      document.addEventListener('keydown',keyNav,true); 
+    },0); 
+  }
+
+  function close(){ 
+    if(!state.open) return; 
+    state.open=false; 
+    pop.style.display='none'; 
+    document.removeEventListener('mousedown',outside,true); 
+    document.removeEventListener('keydown',keyNav,true); 
+  }
+
+  function outside(e){ 
+    if(pop.contains(e.target) || e.target===state.input) return; 
+    close(); 
+  }
+
+  function keyNav(e){ 
+    if(e.key==='Escape'){ close(); state.input?.focus(); } 
+  }
+
+  pop.addEventListener('click',e=>{ 
+    const nav=e.target.getAttribute('data-nav'); 
+    if(nav){ 
+      state.month+= +nav; 
+      if(state.month<0){ state.month=11; state.year--; } 
+      else if(state.month>11){ state.month=0; state.year++; } 
+      build(); return; 
+    } 
+    const day=e.target.getAttribute('data-day'); 
+    if(day){ 
+      const sel=new Date(state.year,state.month,+day); 
+      if(sel<today()) return; 
+      const formatted = `${WEEKDAYS[sel.getDay()].slice(0,3)}, ${MONTHS[sel.getMonth()].slice(0,3)} ${sel.getDate()}, ${sel.getFullYear()}`;
+      state.input.value=formatted; 
+      state.input.setAttribute('value',formatted); 
+      state.input.dispatchEvent(new Event('input',{bubbles:true})); 
+      state.input.dispatchEvent(new Event('change',{bubbles:true})); 
+      close(); 
     }
   });
 
