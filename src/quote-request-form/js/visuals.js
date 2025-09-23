@@ -154,12 +154,9 @@ function enhanceSubmitButton(rootDoc){
       `</svg>`+
       `</span>`;
     
-        // Add loading state functionality with overlay approach
+        // Add loading state functionality with fullscreen overlay approach
     btn.addEventListener('click', function(e) {
       console.log('🔘 Submit button clicked');
-      console.log('🔍 Button element:', btn);
-      console.log('🔍 Button classes:', btn.className);
-      console.log('🔍 Button parent:', btn.parentElement);
       
       // If loading overlay already exists, don't create another
       if (document.querySelector('.bf-loading-overlay')) {
@@ -167,56 +164,40 @@ function enhanceSubmitButton(rootDoc){
         return;
       }
       
-      // Create loading overlay immediately
+      // Create fullscreen loading overlay immediately
       const loadingOverlay = document.createElement('div');
       loadingOverlay.className = 'bf-loading-overlay';
       loadingOverlay.innerHTML = `
         <div class="bf-loading-content">
-          <span class="bf-loading-text">PROCESSING...</span>
-          <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
-            <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-          </svg>
+          <div class="bf-loading-spinner-container">
+            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
+              <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+            </svg>
+          </div>
+          <span class="bf-loading-text">PROCESSING YOUR REQUEST...</span>
         </div>
       `;
       
-      // Position overlay on top of button
-      const btnRect = btn.getBoundingClientRect();
-      console.log('📐 Button dimensions:', btnRect);
-      
-      const backgroundColor = window.getComputedStyle(btn).backgroundColor || '#007bff';
-      console.log('🎨 Button background color:', backgroundColor);
-      
+      // Make it fullscreen and very visible
       loadingOverlay.style.cssText = `
         position: fixed !important;
-        top: ${btnRect.top}px !important;
-        left: ${btnRect.left}px !important;
-        width: ${btnRect.width}px !important;
-        height: ${btnRect.height}px !important;
-        background: ${backgroundColor} !important;
-        border-radius: ${window.getComputedStyle(btn).borderRadius || '4px'} !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0, 123, 255, 0.95) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         z-index: 999999 !important;
-        pointer-events: none !important;
-        font-family: ${window.getComputedStyle(btn).fontFamily} !important;
-        font-size: ${window.getComputedStyle(btn).fontSize} !important;
-        font-weight: ${window.getComputedStyle(btn).fontWeight} !important;
-        color: white !important;
-        box-shadow: ${window.getComputedStyle(btn).boxShadow || 'none'} !important;
-        border: 2px solid red !important;
+        backdrop-filter: blur(5px) !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       `;
       
-      console.log('✨ Created loading overlay with styles:', loadingOverlay.style.cssText);
+      console.log('✨ Created fullscreen loading overlay');
       document.body.appendChild(loadingOverlay);
-      console.log('📍 Overlay added to body, total overlays now:', document.querySelectorAll('.bf-loading-overlay').length);
-      
-      // Make it extra visible for debugging
-      setTimeout(() => {
-        loadingOverlay.style.background = 'red !important';
-        console.log('🔴 Changed overlay to red for visibility');
-      }, 100);
+      console.log('📍 Fullscreen overlay added');
       
       // Check for validation errors after a brief delay
       setTimeout(() => {
@@ -225,16 +206,15 @@ function enhanceSubmitButton(rootDoc){
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
         console.log('📋 Validation check:', { hasErrors, isFormValid });
-        console.log('🔍 Error elements found:', rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid'));
         
         if (hasErrors || !isFormValid) {
           console.log('❌ Validation failed, removing overlay');
           loadingOverlay.remove();
         } else {
-          console.log('✅ Form is submitting, keeping overlay');
-          // Keep overlay visible during submission
+          console.log('✅ Form is submitting, keeping fullscreen overlay visible');
+          // Keep overlay visible during submission and redirect
         }
-      }, 300);
+      }, 100);
       
     });
     

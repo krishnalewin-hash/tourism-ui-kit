@@ -273,26 +273,36 @@ window.BookingForm.injectCtaStyles = function() {
       to { transform: rotate(360deg); }
     }
     
-    /* Loading overlay styles */
+    /* Fullscreen loading overlay styles */
     .bf-loading-overlay {
-      transition: opacity 0.2s ease-in-out;
+      transition: opacity 0.3s ease-in-out !important;
     }
     .bf-loading-overlay .bf-loading-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      height: 100%;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 20px !important;
+      text-align: center !important;
     }
-    .bf-loading-overlay .bf-loading-text {
-      font-weight: 600;
-      letter-spacing: 0.5px;
+    .bf-loading-overlay .bf-loading-spinner-container {
+      width: 60px !important;
+      height: 60px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
     .bf-loading-overlay .bf-spinner {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
+      width: 50px !important;
+      height: 50px !important;
+      animation: bf-spin 1s linear infinite !important;
+    }
+    .bf-loading-overlay .bf-loading-text {
+      font-size: 18px !important;
+      font-weight: 600 !important;
+      letter-spacing: 1px !important;
+      color: white !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
     }
     
     /* Survey step transitions */
