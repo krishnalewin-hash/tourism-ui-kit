@@ -251,6 +251,7 @@ window.BookingForm.injectCtaStyles = function() {
   inject('booking-form-cta-styles', `
     .ghl-btn.ghl-submit-btn.bf-cta{display:inline-flex;gap:10px;white-space:nowrap}
     .ghl-btn.ghl-submit-btn.bf-cta .bf-arrow{width:18px;height:18px;transition:transform .22s ease}
+    .ghl-btn.ghl-submit-btn.bf-cta .bf-arrow svg{stroke:white !important;fill:none !important}
     .ghl-btn.ghl-submit-btn.bf-cta:hover .bf-arrow{transform:translateX(5px)}
     .ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text{font-size:20px !important}
     
@@ -268,6 +269,19 @@ window.BookingForm.injectCtaStyles = function() {
     @keyframes bf-spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+    
+    /* Survey step transitions */
+    .ghl-survey-step, .survey-step, [data-step], .step-container, div[data-v] {
+      transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    }
+    .survey-step-fade-out {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    .survey-step-fade-in {
+      opacity: 1;
+      transform: translateX(0);
     }
   `);
   inject('booking-form-misc-styles', `

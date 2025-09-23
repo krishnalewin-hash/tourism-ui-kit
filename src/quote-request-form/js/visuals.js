@@ -134,13 +134,14 @@ function enhanceSubmitButton(rootDoc){
   btns.forEach(btn => {
     if(btn.dataset.bfCtaWired === '1') return;
     // Replace text with our CTA while preserving the button element and its listeners
-    const label = 'GET YOUR QUOTES!';
+    const label = 'GET YOUR QUOTE!';
     btn.classList.add('bf-cta');
     btn.innerHTML = `<span class="bf-cta-text">${label}</span>`+
       `<span class="bf-arrow" aria-hidden="true">`+
       `<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`+
-      `<line x1="4" y1="12" x2="18" y2="12"></line>`+
-      `<polyline points="12,6 18,12 12,18"></polyline>`+
+      `<line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
+      `<line x1="12" y1="5" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
+      `<line x1="12" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
       `</svg>`+
       `</span>`;
     
