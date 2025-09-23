@@ -175,7 +175,7 @@ function enhanceSubmitButton(rootDoc){
               <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
             </svg>
           </div>
-          <span class="bf-loading-text">PROCESSING YOUR REQUEST...</span>
+          <span class="bf-loading-text">Processing Your Request...</span>
         </div>
       `;
       
