@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHL Form Debug Test</title>
+    <style>
+        body { font-family: system-ui; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .debug { background: #fff3cd; padding: 15px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+        .form-container { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        input, select { margin: 5px 0; padding: 8px; width: 250px; display: block; }
+        .hidden { opacity: 0.3; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <h1>GoHighLevel Form Debug</h1>
+    
+    <div class="debug" id="debug-log">
+        Debug log will appear here...
+    </div>
+
+    <!-- Simulate actual GHL form structure -->
+    <div class="form-container">
+        <h3>Simulated GoHighLevel Form</h3>
+        <form id="test-form" action="javascript:simulateSubmit()">
+            
+            <!-- Standard text fields -->
+            <input type="text" name="pickup_location" data-q="pickup_location" placeholder="Pickup location">
+            <input type="text" name="dropoff_location" data-q="dropoff_location" placeholder="Dropoff location">
+            <input type="text" name="pickup_date" data-q="pickup_date" placeholder="Pickup date">
+            <input type="text" name="pickup_time" data-q="pickup_time" placeholder="Pickup time">
+            
+            <!-- This is the problematic field - starts as input, gets converted to select -->
+            <input type="text" name="number_of_passengers" data-q="number_of_passengers" placeholder="Number of passengers">
+            
+            <input type="text" name="first_name" data-q="first_name" placeholder="First name">
+            <input type="text" name="last_name" data-q="last_name" placeholder="Last name">
+            <input type="email" name="email" data-q="email" placeholder="Email">
+            <input type="tel" name="phone" data-q="phone" placeholder="Phone">
+            
+            <button type="submit" style="margin-top: 20px; padding: 10px 20px;">Submit Form</button>
+        </form>
+        
+        <div class="debug">
+            <strong>All form fields:</strong>
+            <div id="field-list"></div>
+        </div>
+    </div>
+
+    <!-- Buttons for testing -->
+    <button onclick="testPassengerLogic()">Test Passenger Logic</button>
+    <button onclick="populateTestData()">Populate Test Data</button>
+    <button onclick="showFormData()">Show Form Data</button>
+    <button onclick="simulateGHLSubmission()">Simulate GHL Submission</button>
+
+    <!-- Add URL parameters for testing -->
+    <script>
+        // Add test parameters to URL if not present
+        if (!window.location.search.includes('number_of_passengers')) {
+            const url = new URL(window.location);
+            url.searchParams.set('number_of_passengers', '4');
+            url.searchParams.set('pickup_location', 'Sangster International Airport');
+            url.searchParams.set('first_name', 'Test User');
+            window.history.replaceState({}, '', url);
+        }
+    </script>
+
+    <!-- Configuration -->
+    <script>
+        window.CFG = {
+            GMAPS_KEY: 'AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI',
+            COUNTRIES: ['jm'],
+            PLACES: {
+                FIELDS: ['place_id','formatted_address','geometry','name','types'],
+                TYPES: ['establishment'],
+                PRIORITY_KEYWORDS: {
+                    airport: ['airport','international airport','terminal','mbj','kin','ocj','neg','ktp'],
+                    hotel: ['hotel','resort','inn','villa','guest house','guesthouse','lodgings','spa','apartments','suite','suites','bnb']
+                }
+            }
+        };
+
+        function log(message) {
+            const debugDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateFieldList() {
+            const fieldList = document.getElementById('field-list');
+            const allFields = document.querySelectorAll('input, select');
+            let html = '';
+            
+            allFields.forEach((field, index) => {
+                const isHidden = field.style.display === 'none' || field.style.visibility === 'hidden';
+                const classes = isHidden ? 'hidden' : '';
+                html += `<div class="${classes}">
+                    ${index + 1}. ${field.tagName.toLowerCase()}[name="${field.name}"][data-q="${field.getAttribute('data-q')}"] 
+                    value: "${field.value}" ${isHidden ? '(HIDDEN)' : '(VISIBLE)'}
+                </div>`;
+            });
+            fieldList.innerHTML = html;
+        }
+
+        function testPassengerLogic() {
+            log('=== Testing Passenger Logic ===');
+            
+            const originalInput = document.querySelector('input[data-q="number_of_passengers"]');
+            log(`Original input found: ${!!originalInput}, value: "${originalInput?.value || 'N/A'}"`);
+            
+            // Simulate the passenger select creation
+            if (window.BookingForm && window.BookingForm.initPassengerSelect) {
+                log('Running initPassengerSelect...');
+                window.BookingForm.initPassengerSelect();
+            }
+            
+            setTimeout(() => {
+                const select = document.querySelector('select[data-q="number_of_passengers"]');
+                const hiddenInput = document.querySelector('input[data-q="number_of_passengers"]');
+                
+                log(`Select created: ${!!select}, value: "${select?.value || 'N/A'}"`);
+                log(`Hidden input: ${!!hiddenInput}, value: "${hiddenInput?.value || 'N/A'}"`);
+                log(`Hidden input display: ${hiddenInput?.style.display || 'default'}`);
+                
+                updateFieldList();
+            }, 100);
+        }
+
+        function populateTestData() {
+            log('=== Populating Test Data ===');
+            
+            // Simulate URL parameter population
+            const params = new URLSearchParams(window.location.search);
+            const passengerValue = params.get('number_of_passengers') || '3';
+            
+            log(`URL passenger parameter: "${passengerValue}"`);
+            
+            // Try to populate passenger field
+            const input = document.querySelector('input[data-q="number_of_passengers"]');
+            const select = document.querySelector('select[data-q="number_of_passengers"]');
+            
+            if (input) {
+                input.value = passengerValue;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                log(`Set input value to: "${input.value}"`);
+            }
+            
+            if (select) {
+                select.value = passengerValue;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                log(`Set select value to: "${select.value}"`);
+            }
+            
+            // Populate other fields
+            document.querySelector('[data-q="pickup_location"]').value = 'Sangster International Airport';
+            document.querySelector('[data-q="first_name"]').value = 'Test User';
+            
+            updateFieldList();
+        }
+
+        function showFormData() {
+            log('=== Current Form Data ===');
+            const form = document.getElementById('test-form');
+            const formData = new FormData(form);
+            
+            for (let [key, value] of formData.entries()) {
+                log(`${key}: "${value}"`);
+            }
+            
+            // Also check what URLSearchParams would generate
+            const params = new URLSearchParams(formData);
+            log(`Generated URL params: ${params.toString()}`);
+        }
+
+        function simulateGHLSubmission() {
+            log('=== Simulating GHL Form Submission ===');
+            
+            // This is what GHL does - collects all visible form fields
+            const form = document.getElementById('test-form');
+            const formElements = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+            
+            log(`Form elements found: ${formElements.length}`);
+            
+            const submissionData = [];
+            formElements.forEach(element => {
+                // Skip hidden or invisible elements (like GHL does)
+                if (element.style.display === 'none' || element.style.visibility === 'hidden' || element.offsetParent === null) {
+                    log(`Skipping hidden element: ${element.name} (value: "${element.value}")`);
+                    return;
+                }
+                
+                if (element.name && element.value !== '') {
+                    submissionData.push(`${element.name}=${encodeURIComponent(element.value)}`);
+                    log(`Including: ${element.name}="${element.value}"`);
+                } else if (element.name && element.value === '') {
+                    submissionData.push(`${element.name}=`);
+                    log(`Including empty: ${element.name}=""`);
+                }
+            });
+            
+            const finalURL = `https://example.com/result?${submissionData.join('&')}`;
+            log(`Final submission URL: ${finalURL}`);
+            
+            updateFieldList();
+        }
+
+        function simulateSubmit() {
+            showFormData();
+            simulateGHLSubmission();
+        }
+
+        // Monitor for changes
+        document.addEventListener('change', updateFieldList);
+        document.addEventListener('input', updateFieldList);
+        
+        // Initial setup
+        setTimeout(() => {
+            log('Page loaded, starting debug...');
+            updateFieldList();
+        }, 500);
+    </script>
+
+    <!-- Load the component -->
+    <link rel="stylesheet" href="./dist/quote-request-form.min.css">
+    <script src="./dist/quote-request-form.min.js"></script>
+
+    <script>
+        // Monitor for component initialization
+        setTimeout(() => {
+            log('Component should be loaded now...');
+            testPassengerLogic();
+            
+            // Try URL parameter population after component loads
+            setTimeout(() => {
+                log('Running URL parameter population...');
+                populateTestData();
+            }, 1000);
+        }, 1500);
+    </script>
+</body>
+</html>
