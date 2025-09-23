@@ -163,12 +163,30 @@ function enhanceSubmitButton(rootDoc){
       // Show loading state immediately on click
       console.log('⚡ Setting loading state immediately');
       btn.classList.add('bf-loading');
-      btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
-      btn.querySelector('.bf-arrow').innerHTML = `
-        <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-          <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-        </svg>`;
+      
+      // Force text change with multiple methods
+      const textElement = btn.querySelector('.bf-cta-text');
+      const arrowElement = btn.querySelector('.bf-arrow');
+      
+      if (textElement) {
+        textElement.textContent = 'PROCESSING...';
+        textElement.innerText = 'PROCESSING...';
+        textElement.innerHTML = 'PROCESSING...';
+        console.log('📝 Text changed to:', textElement.textContent);
+      }
+      
+      if (arrowElement) {
+        const spinnerHTML = `
+          <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
+            <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+          </svg>`;
+        arrowElement.innerHTML = spinnerHTML;
+        console.log('🔄 Spinner added');
+      }
+      
+      // Also try changing the entire button content as backup
+      console.log('🔧 Button content before:', btn.innerHTML);
       
       // Then check for validation errors and reset if needed
       setTimeout(() => {
@@ -182,10 +200,17 @@ function enhanceSubmitButton(rootDoc){
           console.log('❌ Resetting button due to validation errors');
           // Reset button if there are validation errors
           btn.classList.remove('bf-loading');
-          btn.querySelector('.bf-cta-text').textContent = originalText;
-          btn.querySelector('.bf-arrow').innerHTML = originalArrow;
+          if (textElement) {
+            textElement.textContent = originalText;
+            textElement.innerText = originalText;
+            textElement.innerHTML = originalText;
+          }
+          if (arrowElement) {
+            arrowElement.innerHTML = originalArrow;
+          }
         } else {
           console.log('✅ Keeping loading state - form is submitting');
+          console.log('🔧 Button content after:', btn.innerHTML);
         }
       }, 200);
     });
