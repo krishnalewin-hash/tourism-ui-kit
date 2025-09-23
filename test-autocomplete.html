@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Autocomplete</title>
+    <link rel="stylesheet" href="dist/booking.min.css">
+</head>
+<body>
+    <h1>Test Autocomplete & Popups</h1>
+    
+    <!-- Global configuration (you need to set your API key here) -->
+    <script>
+        window.CFG = {
+            GMAPS_KEY: 'YOUR_GOOGLE_MAPS_API_KEY_HERE', // Replace with your actual API key
+            PLACES: {
+                FIELDS: ['place_id', 'formatted_address', 'geometry', 'name', 'types'],
+                TYPES: ['establishment'],
+                AIRPORT_CODES: {
+                    'Los Angeles International Airport': 'LAX',
+                    'John F. Kennedy International Airport': 'JFK',
+                    'Miami International Airport': 'MIA'
+                },
+                PRIORITY_KEYWORDS: {
+                    airport: ['airport', 'international'],
+                    hotel: ['hotel', 'resort', 'inn']
+                },
+                BIAS_CENTER: {
+                    lat: 34.0522,
+                    lng: -118.2437,
+                    radiusMeters: 50000
+                }
+            },
+            COUNTRIES: ['US']
+        };
+    </script>
+    
+    <div style="max-width: 600px; margin: 50px auto; padding: 20px;">
+        <div style="margin-bottom: 20px;">
+            <label>Pickup Location:</label><br>
+            <input type="text" data-q="pickup_location" placeholder="Enter pickup location" style="width: 100%; padding: 10px; margin-top: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label>Drop-off Location:</label><br>
+            <input type="text" data-q="drop-off_location" placeholder="Enter drop-off location" style="width: 100%; padding: 10px; margin-top: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label>Pickup Date:</label><br>
+            <input type="text" data-q="pickup_date" placeholder="Select pickup date" style="width: 100%; padding: 10px; margin-top: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label>Pickup Time:</label><br>
+            <input type="text" data-q="pickup_time" placeholder="Select pickup time" style="width: 100%; padding: 10px; margin-top: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label>Passengers:</label><br>
+            <input type="text" data-q="passengers" placeholder="Number of passengers" style="width: 100%; padding: 10px; margin-top: 5px;">
+        </div>
+    </div>
+    
+    <script src="dist/booking.min.js"></script>
+    
+    <script>
+        // Debug info
+        console.log('BookingForm loaded:', !!window.BookingForm);
+        console.log('Google Maps API Key configured:', !!window.CFG?.GMAPS_KEY);
+        console.log('Config loaded:', window.BookingForm?.CONFIG);
+        
+        // Check if initialization happened
+        setTimeout(() => {
+            console.log('Google Maps loaded:', !!window.google?.maps?.places);
+            console.log('Autocomplete functions available:', {
+                wireAutocomplete: !!window.BookingForm?.wireAutocomplete,
+                setBiasBoundsFn: !!window.BookingForm?.setBiasBoundsFn,
+                initMapsAndFilters: !!window.BookingForm?.initMapsAndFilters
+            });
+        }, 2000);
+    </script>
+</body>
+</html>
