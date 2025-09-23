@@ -131,30 +131,67 @@ try {
 function initSurveyTransitions(rootDoc) {
   if(!rootDoc) rootDoc = document;
   
-  // Find all step navigation buttons
-  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
+  console.log('🔄 Initializing survey transitions...');
   
+  // Add a MutationObserver to watch for step changes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && 
+          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+        
+        const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
+        console.log('📋 Found slides:', slides.length);
+        
+        slides.forEach((slide, index) => {
+          const computedStyle = window.getComputedStyle(slide);
+          const isVisible = computedStyle.display !== 'none' && 
+                           computedStyle.visibility !== 'hidden' && 
+                           computedStyle.opacity !== '0';
+          
+          if (isVisible) {
+            console.log(`✅ Slide ${index + 1} is visible, adding fade-in`);
+            slide.classList.remove('survey-step-fade-out');
+            slide.classList.add('survey-step-fade-in');
+          } else {
+            console.log(`❌ Slide ${index + 1} is hidden, adding fade-out`);
+            slide.classList.remove('survey-step-fade-in');
+            slide.classList.add('survey-step-fade-out');
+          }
+        });
+      }
+    });
+  });
+  
+  // Start observing
+  const surveyContainer = rootDoc.querySelector('[data-v-bc9c09f7]') || rootDoc.body;
+  observer.observe(surveyContainer, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+    attributeFilter: ['style', 'class']
+  });
+  
+  // Also try the button click approach as backup
+  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
   nextButtons.forEach(btn => {
     if (btn.dataset.bfTransitionWired === '1') return;
     btn.dataset.bfTransitionWired = '1';
     
     btn.addEventListener('click', function() {
-      // Wait a bit for GoHighLevel to process the step change
+      console.log('🔘 Button clicked, checking for step changes...');
       setTimeout(() => {
         const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
-        slides.forEach(slide => {
+        slides.forEach((slide, index) => {
           const computedStyle = window.getComputedStyle(slide);
-          if (computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden') {
-            // This slide is visible, add fade-in effect
+          const isVisible = computedStyle.display !== 'none' && 
+                           computedStyle.visibility !== 'hidden';
+          
+          if (isVisible) {
             slide.classList.remove('survey-step-fade-out');
             slide.classList.add('survey-step-fade-in');
-          } else {
-            // This slide is hidden, add fade-out effect
-            slide.classList.remove('survey-step-fade-in');
-            slide.classList.add('survey-step-fade-out');
           }
         });
-      }, 50);
+      }, 100);
     });
   });
 }
@@ -179,6 +216,7 @@ function enhanceSubmitButton(rootDoc){
     
         // Add loading state functionality
     btn.addEventListener('click', function(e) {
+      console.log('🔘 Submit button clicked');
       const originalText = btn.querySelector('.bf-cta-text').textContent;
       const originalArrow = btn.querySelector('.bf-arrow').innerHTML;
       
@@ -189,7 +227,10 @@ function enhanceSubmitButton(rootDoc){
         const formElement = btn.closest('form');
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
+        console.log('📋 Validation check:', { hasErrors, isFormValid, disabled: btn.disabled, loading: btn.classList.contains('bf-loading') });
+        
         if (!hasErrors && isFormValid && !btn.disabled && !btn.classList.contains('bf-loading')) {
+          console.log('✅ Showing loading state');
           btn.classList.add('bf-loading');
           btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
           btn.querySelector('.bf-arrow').innerHTML = `
@@ -198,6 +239,7 @@ function enhanceSubmitButton(rootDoc){
               <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
             </svg>`;
         } else if (hasErrors || !isFormValid) {
+          console.log('❌ Resetting button due to validation errors');
           // Reset button if there are validation errors
           btn.classList.remove('bf-loading');
           btn.querySelector('.bf-cta-text').textContent = originalText;
