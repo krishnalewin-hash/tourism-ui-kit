@@ -273,6 +273,28 @@ window.BookingForm.injectCtaStyles = function() {
       to { transform: rotate(360deg); }
     }
     
+    /* Loading overlay styles */
+    .bf-loading-overlay {
+      transition: opacity 0.2s ease-in-out;
+    }
+    .bf-loading-overlay .bf-loading-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 100%;
+    }
+    .bf-loading-overlay .bf-loading-text {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .bf-loading-overlay .bf-spinner {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
     /* Survey step transitions */
     .slide-no-1, .slide-no-2, [class*="slide-no-"] {
       transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;

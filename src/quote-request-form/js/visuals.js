@@ -154,65 +154,71 @@ function enhanceSubmitButton(rootDoc){
       `</svg>`+
       `</span>`;
     
-        // Add loading state functionality
+        // Add loading state functionality with overlay approach
     btn.addEventListener('click', function(e) {
       console.log('🔘 Submit button clicked');
-      const originalText = btn.querySelector('.bf-cta-text').textContent;
-      const originalArrow = btn.querySelector('.bf-arrow').innerHTML;
       
-      // Show loading state immediately on click
-      console.log('⚡ Setting loading state immediately');
-      btn.classList.add('bf-loading');
-      
-      // Force text change with multiple methods
-      const textElement = btn.querySelector('.bf-cta-text');
-      const arrowElement = btn.querySelector('.bf-arrow');
-      
-      if (textElement) {
-        textElement.textContent = 'PROCESSING...';
-        textElement.innerText = 'PROCESSING...';
-        textElement.innerHTML = 'PROCESSING...';
-        console.log('📝 Text changed to:', textElement.textContent);
+      // If loading overlay already exists, don't create another
+      if (btn.parentElement.querySelector('.bf-loading-overlay')) {
+        console.log('🚫 Loading overlay already exists');
+        return;
       }
       
-      if (arrowElement) {
-        const spinnerHTML = `
+      // Create loading overlay immediately
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.className = 'bf-loading-overlay';
+      loadingOverlay.innerHTML = `
+        <div class="bf-loading-content">
+          <span class="bf-loading-text">PROCESSING...</span>
           <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
             <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
             <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-          </svg>`;
-        arrowElement.innerHTML = spinnerHTML;
-        console.log('🔄 Spinner added');
-      }
+          </svg>
+        </div>
+      `;
       
-      // Also try changing the entire button content as backup
-      console.log('🔧 Button content before:', btn.innerHTML);
+      // Position overlay on top of button
+      const btnRect = btn.getBoundingClientRect();
+      loadingOverlay.style.cssText = `
+        position: fixed;
+        top: ${btnRect.top}px;
+        left: ${btnRect.left}px;
+        width: ${btnRect.width}px;
+        height: ${btnRect.height}px;
+        background: ${window.getComputedStyle(btn).backgroundColor || '#007bff'};
+        border-radius: ${window.getComputedStyle(btn).borderRadius || '4px'};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        pointer-events: none;
+        font-family: ${window.getComputedStyle(btn).fontFamily};
+        font-size: ${window.getComputedStyle(btn).fontSize};
+        font-weight: ${window.getComputedStyle(btn).fontWeight};
+        color: white;
+        box-shadow: ${window.getComputedStyle(btn).boxShadow || 'none'};
+      `;
       
-      // Then check for validation errors and reset if needed
+      console.log('✨ Created loading overlay');
+      document.body.appendChild(loadingOverlay);
+      
+      // Check for validation errors after a brief delay
       setTimeout(() => {
         const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid').length > 0;
         const formElement = btn.closest('form');
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
-        console.log('📋 Validation check:', { hasErrors, isFormValid, disabled: btn.disabled, loading: btn.classList.contains('bf-loading') });
+        console.log('📋 Validation check:', { hasErrors, isFormValid });
         
         if (hasErrors || !isFormValid) {
-          console.log('❌ Resetting button due to validation errors');
-          // Reset button if there are validation errors
-          btn.classList.remove('bf-loading');
-          if (textElement) {
-            textElement.textContent = originalText;
-            textElement.innerText = originalText;
-            textElement.innerHTML = originalText;
-          }
-          if (arrowElement) {
-            arrowElement.innerHTML = originalArrow;
-          }
+          console.log('❌ Validation failed, removing overlay');
+          loadingOverlay.remove();
         } else {
-          console.log('✅ Keeping loading state - form is submitting');
-          console.log('🔧 Button content after:', btn.innerHTML);
+          console.log('✅ Form is submitting, keeping overlay');
+          // Keep overlay visible during submission
         }
-      }, 200);
+      }, 300);
+      
     });
     
     btn.dataset.bfCtaWired = '1';
