@@ -96,26 +96,46 @@ window.BookingForm.initNow = function(root = document) {
             const input = document.querySelector(`input[data-q="${paramName}"], input[name="${paramName}"]`);
             const select = document.querySelector(`select[data-q="${paramName}"], select[name="${paramName}"]`);
             
+            console.log(`GHL Survey: Processing ${paramName}="${paramValue}"`);
+            console.log(`Found elements - input: ${!!input}, select: ${!!select}`);
+            
             if (input && select) {
-              // Populate both the hidden input and the visible select
+              // Populate both the hidden input and the visible select for GHL survey
               input.value = paramValue;
               select.value = paramValue;
               select.setAttribute('value', paramValue);
+              
+              // Mark as survey field for GHL
+              input.setAttribute('data-ghl-survey-field', 'true');
+              input.setAttribute('data-survey-populated', 'true');
               
               // Apply placeholder styling
               if (window.BookingForm.applyPlaceholderClass) {
                 window.BookingForm.applyPlaceholderClass(select);
               }
               
-              // Trigger events on both
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-              select.dispatchEvent(new Event('change', { bubbles: true }));
-              select.dispatchEvent(new Event('input', { bubbles: true }));
+              // Trigger comprehensive events for GHL survey
+              const events = ['change', 'input', 'blur'];
+              events.forEach(eventType => {
+                input.dispatchEvent(new Event(eventType, { bubbles: true }));
+                select.dispatchEvent(new Event(eventType, { bubbles: true }));
+              });
               
-              console.log(`Populated ${paramName}: input="${input.value}", select="${select.value}"`);
+              // Custom GHL survey event
+              try {
+                input.dispatchEvent(new CustomEvent('ghl-survey-field-populated', { 
+                  detail: { field: paramName, value: paramValue, step: 'step1' },
+                  bubbles: true 
+                }));
+              } catch(e) {
+                console.warn('GHL survey custom event failed:', e);
+              }
+              
+              console.log(`GHL Survey: Populated ${paramName} - input="${input.value}", select="${select.value}"`);
             } else if (input) {
               input.value = paramValue;
+              input.setAttribute('data-ghl-survey-field', 'true');
+              input.setAttribute('data-survey-populated', 'true');
               
               // If there's a synced select, update it too
               if (input._syncedSelect) {
@@ -124,12 +144,15 @@ window.BookingForm.initNow = function(root = document) {
                 if (window.BookingForm.applyPlaceholderClass) {
                   window.BookingForm.applyPlaceholderClass(input._syncedSelect);
                 }
-                console.log(`Synced to related select: "${paramValue}"`);
+                console.log(`GHL Survey: Synced to related select: "${paramValue}"`);
               }
               
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-              console.log(`Populated ${paramName}: input="${input.value}"`);
+              const events = ['change', 'input', 'blur'];
+              events.forEach(eventType => {
+                input.dispatchEvent(new Event(eventType, { bubbles: true }));
+              });
+              
+              console.log(`GHL Survey: Populated ${paramName} - input="${input.value}"`);
             } else if (select) {
               // If only select exists, populate it and sync to hidden input if present
               select.value = paramValue;
@@ -141,13 +164,22 @@ window.BookingForm.initNow = function(root = document) {
               
               if (select._syncedInput) {
                 select._syncedInput.value = paramValue;
-                select._syncedInput.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log(`Synced to related input: "${paramValue}"`);
+                select._syncedInput.setAttribute('data-ghl-survey-field', 'true');
+                select._syncedInput.setAttribute('data-survey-populated', 'true');
+                
+                const events = ['change', 'input', 'blur'];
+                events.forEach(eventType => {
+                  select._syncedInput.dispatchEvent(new Event(eventType, { bubbles: true }));
+                });
+                
+                console.log(`GHL Survey: Synced to related input: "${paramValue}"`);
               }
               
               select.dispatchEvent(new Event('change', { bubbles: true }));
               select.dispatchEvent(new Event('input', { bubbles: true }));
-              console.log(`Populated ${paramName}: select="${select.value}"`);
+              console.log(`GHL Survey: Populated ${paramName} - select="${select.value}"`);
+            } else {
+              console.warn(`GHL Survey: No passenger field found for ${paramName}`);
             }
           } else if (field) {
             field.value = paramValue;

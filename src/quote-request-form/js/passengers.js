@@ -92,23 +92,42 @@ window.BookingForm = window.BookingForm || {};
     // Build the select element
     const selectEl = buildSelectFromInput(input);
     
-    // Hide the original input but keep it for GoHighLevel form submission
+    // Hide the original input but keep it for GoHighLevel survey submission
     input.style.display = 'none';
     input.style.visibility = 'hidden';
     input.style.position = 'absolute';
     input.style.left = '-9999px';
     
+    // Ensure the input is marked as important for GHL survey
+    input.setAttribute('data-ghl-survey-field', 'true');
+    input.setAttribute('data-step-field', 'step1');
+    
     // Insert select after the hidden input (don't replace it)
     input.parentNode.insertBefore(selectEl, input.nextSibling);
     
-    // Sync select changes back to the hidden input for GHL form submission
+    // Sync select changes back to the hidden input for GHL survey submission
     selectEl.addEventListener('change', () => {
       input.value = selectEl.value;
       selectEl.setAttribute('value', selectEl.value);
       window.BookingForm.applyPlaceholderClass(selectEl);
-      // Trigger change event on hidden input for GHL
+      
+      // Trigger change event on hidden input for GHL survey
       input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      // Additional GHL survey events that might be needed
+      try {
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+        input.dispatchEvent(new CustomEvent('ghl-field-update', { 
+          detail: { field: 'number_of_passengers', value: selectEl.value },
+          bubbles: true 
+        }));
+      } catch(e) {
+        console.warn('GHL survey event dispatch failed:', e);
+      }
+      
       selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+      console.log(`GHL Survey: Synced passenger count "${selectEl.value}" to hidden input`);
     });
     
     // Sync input changes back to the select (for URL parameter population)
@@ -127,11 +146,82 @@ window.BookingForm = window.BookingForm || {};
       window.BookingForm.applyPlaceholderClass(selectEl);
     }
     
-    // Store references for external access
+    // Store references for external access and survey step transitions
     input._syncedSelect = selectEl;
     selectEl._syncedInput = input;
     
     selectEl.dataset.paxSelectWired = '1';
+    input.dataset.paxSelectWired = '1';
+
+    // Monitor for GHL survey step transitions
+    const monitorSurveySteps = () => {
+      // Watch for survey navigation buttons
+      const nextButtons = document.querySelectorAll('[data-action="next"], .survey-next, .btn-next, button[type="submit"]');
+      const prevButtons = document.querySelectorAll('[data-action="prev"], .survey-prev, .btn-prev');
+      
+      [...nextButtons, ...prevButtons].forEach(btn => {
+        if (!btn.dataset.passengerMonitor) {
+          btn.addEventListener('click', () => {
+            // Ensure passenger field is synced before step transition
+            if (selectEl.value && input.value !== selectEl.value) {
+              input.value = selectEl.value;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              console.log(`Survey transition: Ensured passenger sync "${selectEl.value}"`);
+            }
+          });
+          btn.dataset.passengerMonitor = 'true';
+        }
+      });
+      
+      // Watch for survey form submissions
+      const forms = document.querySelectorAll('form, .survey-form, .ghl-form');
+      forms.forEach(form => {
+        if (!form.dataset.passengerMonitor) {
+          form.addEventListener('submit', (e) => {
+            // Final sync before submission
+            if (selectEl.value && input.value !== selectEl.value) {
+              input.value = selectEl.value;
+              console.log(`Survey submission: Final passenger sync "${selectEl.value}"`);
+            }
+          });
+          form.dataset.passengerMonitor = 'true';
+        }
+      });
+    };
+    
+    // Run monitoring immediately and after DOM changes
+    monitorSurveySteps();
+    setTimeout(monitorSurveySteps, 1000); // Delay for dynamic button creation
+    
+    // Use MutationObserver to catch dynamically added survey elements
+    if (window.MutationObserver) {
+      const observer = new MutationObserver((mutations) => {
+        let shouldMonitor = false;
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1 && (
+              node.matches && (
+                node.matches('button, .btn, .survey-next, .survey-prev') ||
+                node.querySelector && node.querySelector('button, .btn, .survey-next, .survey-prev')
+              )
+            )) {
+              shouldMonitor = true;
+            }
+          });
+        });
+        if (shouldMonitor) {
+          setTimeout(monitorSurveySteps, 100);
+        }
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // Store observer for cleanup
+      selectEl._surveyObserver = observer;
+    }
 
     // Re-run icon wrapper just in case
     try { window.BookingForm.enhanceVisual(document); } catch(_) {}
