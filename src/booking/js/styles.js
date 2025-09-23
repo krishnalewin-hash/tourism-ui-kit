@@ -35,11 +35,54 @@ input[data-q], select[data-q]{
 /* Unified text color across all data-q inputs/selects */
 input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}
 
-/* Larger Google Places Autocomplete dropdown (matching temp.js) */
-.pac-container{font-size:16px !important; line-height:1.35 !important;}
-.pac-item{padding:10px 14px !important; font-size:15px !important;}
+/* Google Places Autocomplete (PAC) enhanced sizing & appearance (matches temp.js) */
+.pac-container{
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem !important; 
+  line-height: 1.35 !important;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
+  overflow: hidden;
+  z-index: 4000;
+}
+.pac-container:empty { display: none; }
+.pac-item{
+  padding: 10px 14px !important; 
+  font-size: 0.92rem !important;
+  line-height: 1.25;
+  cursor: pointer;
+  border-top: 1px solid #efefef;
+  background: #fff;
+  color: #222;
+}
+.pac-item:first-child { border-top: none; }
+/* Primary (top) line - this is the larger text you're looking for */
+.pac-item .pac-item-query {
+  display: block;
+  font-size: 1.18rem !important;
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0 0 2px 0;
+  color: #222;
+}
+/* Secondary address fragments */
+.pac-item .pac-item-query ~ span {
+  display: inline;
+  font-size: 0.85rem !important;
+  font-weight: 400;
+  color: #555;
+}
 .pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}
 .pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}
+.pac-item:hover .pac-item-query ~ span, .pac-item.pac-item-selected .pac-item-query ~ span{color:#fff !important;}
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .pac-container { font-size: 1.12rem !important; }
+  .pac-item { padding: 12px 16px !important; }
+  .pac-item .pac-item-query { font-size: 1.2rem !important; }
+  .pac-item .pac-item-query ~ span { font-size: 0.88rem !important; }
+}
 
 /* Date picker popover */
 #pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}
@@ -122,6 +165,11 @@ input[data-q='pickup_date'].input-error,
 input[data-q='pickup_time'].input-error,
 input[data-q='number_of_passengers'].input-error {
   border-radius: 4px !important;
+}
+
+/* Number of passengers placeholder color (matches temp.js) */
+select[data-q='number_of_passengers'].is-placeholder {
+  color: #8C8C8C !important;
 }
   `);
   inject('booking-form-fade-styles', `
