@@ -111,11 +111,25 @@ window.BookingForm = window.BookingForm || {};
       selectEl.dispatchEvent(new Event('input', { bubbles: true }));
     });
     
+    // Sync input changes back to the select (for URL parameter population)
+    input.addEventListener('change', () => {
+      if (input.value && input.value !== selectEl.value) {
+        selectEl.value = input.value;
+        selectEl.setAttribute('value', selectEl.value);
+        window.BookingForm.applyPlaceholderClass(selectEl);
+        console.log(`Synced input value "${input.value}" to select`);
+      }
+    });
+    
     // Also sync any initial value from input to select
     if (input.value) {
       selectEl.value = input.value;
       window.BookingForm.applyPlaceholderClass(selectEl);
     }
+    
+    // Store references for external access
+    input._syncedSelect = selectEl;
+    selectEl._syncedInput = input;
     
     selectEl.dataset.paxSelectWired = '1';
 

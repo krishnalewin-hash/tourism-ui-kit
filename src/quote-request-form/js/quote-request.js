@@ -100,6 +100,12 @@ window.BookingForm.initNow = function(root = document) {
               // Populate both the hidden input and the visible select
               input.value = paramValue;
               select.value = paramValue;
+              select.setAttribute('value', paramValue);
+              
+              // Apply placeholder styling
+              if (window.BookingForm.applyPlaceholderClass) {
+                window.BookingForm.applyPlaceholderClass(select);
+              }
               
               // Trigger events on both
               input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -110,9 +116,38 @@ window.BookingForm.initNow = function(root = document) {
               console.log(`Populated ${paramName}: input="${input.value}", select="${select.value}"`);
             } else if (input) {
               input.value = paramValue;
+              
+              // If there's a synced select, update it too
+              if (input._syncedSelect) {
+                input._syncedSelect.value = paramValue;
+                input._syncedSelect.setAttribute('value', paramValue);
+                if (window.BookingForm.applyPlaceholderClass) {
+                  window.BookingForm.applyPlaceholderClass(input._syncedSelect);
+                }
+                console.log(`Synced to related select: "${paramValue}"`);
+              }
+              
               input.dispatchEvent(new Event('change', { bubbles: true }));
               input.dispatchEvent(new Event('input', { bubbles: true }));
               console.log(`Populated ${paramName}: input="${input.value}"`);
+            } else if (select) {
+              // If only select exists, populate it and sync to hidden input if present
+              select.value = paramValue;
+              select.setAttribute('value', paramValue);
+              
+              if (window.BookingForm.applyPlaceholderClass) {
+                window.BookingForm.applyPlaceholderClass(select);
+              }
+              
+              if (select._syncedInput) {
+                select._syncedInput.value = paramValue;
+                select._syncedInput.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log(`Synced to related input: "${paramValue}"`);
+              }
+              
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              select.dispatchEvent(new Event('input', { bubbles: true }));
+              console.log(`Populated ${paramName}: select="${select.value}"`);
             }
           } else if (field) {
             field.value = paramValue;
