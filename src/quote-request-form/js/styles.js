@@ -259,12 +259,14 @@ window.BookingForm.injectCtaStyles = function() {
     .ghl-btn.ghl-submit-btn.bf-cta.bf-loading {
       opacity: 0.8;
       cursor: not-allowed;
+      pointer-events: none;
     }
     .ghl-btn.ghl-submit-btn.bf-cta.bf-loading:hover .bf-arrow {
       transform: none;
     }
     .bf-spinner {
-      animation: bf-spin 1s linear infinite;
+      animation: bf-spin 1s linear infinite !important;
+      color: white !important;
     }
     @keyframes bf-spin {
       from { transform: rotate(0deg); }

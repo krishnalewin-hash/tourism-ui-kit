@@ -160,32 +160,34 @@ function enhanceSubmitButton(rootDoc){
       const originalText = btn.querySelector('.bf-cta-text').textContent;
       const originalArrow = btn.querySelector('.bf-arrow').innerHTML;
       
-      // Wait for form validation to complete
+      // Show loading state immediately on click
+      console.log('⚡ Setting loading state immediately');
+      btn.classList.add('bf-loading');
+      btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
+      btn.querySelector('.bf-arrow').innerHTML = `
+        <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
+          <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+        </svg>`;
+      
+      // Then check for validation errors and reset if needed
       setTimeout(() => {
-        // Check if form is actually submitting (no validation errors)
-        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"]').length > 0;
+        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid').length > 0;
         const formElement = btn.closest('form');
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
         console.log('📋 Validation check:', { hasErrors, isFormValid, disabled: btn.disabled, loading: btn.classList.contains('bf-loading') });
         
-        if (!hasErrors && isFormValid && !btn.disabled && !btn.classList.contains('bf-loading')) {
-          console.log('✅ Showing loading state');
-          btn.classList.add('bf-loading');
-          btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
-          btn.querySelector('.bf-arrow').innerHTML = `
-            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-              <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-            </svg>`;
-        } else if (hasErrors || !isFormValid) {
+        if (hasErrors || !isFormValid) {
           console.log('❌ Resetting button due to validation errors');
           // Reset button if there are validation errors
           btn.classList.remove('bf-loading');
           btn.querySelector('.bf-cta-text').textContent = originalText;
           btn.querySelector('.bf-arrow').innerHTML = originalArrow;
+        } else {
+          console.log('✅ Keeping loading state - form is submitting');
         }
-      }, 100);
+      }, 200);
     });
     
     btn.dataset.bfCtaWired = '1';
