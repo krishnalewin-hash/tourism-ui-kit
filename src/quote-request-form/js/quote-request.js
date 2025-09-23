@@ -51,6 +51,29 @@ window.BookingForm.matchFieldLook = matchFieldLook;
 window.BookingForm.applyPlaceholderClass = applyPlaceholderClass;
 
 window.BookingForm.initNow = function(root = document) {
+  // Section 0: Populate URL parameters into form fields
+  try {
+    const qs = new URLSearchParams(location.search);
+    window.BookingForm.cacheIncomingParams(qs);
+    
+    // Populate form fields from URL parameters
+    window.BookingForm.PARAM_ALLOWLIST.forEach(paramName => {
+      const paramValue = window.BookingForm.getParam(qs, paramName);
+      if (paramValue) {
+        // Find the form field and populate it
+        const field = document.querySelector(`[data-q="${paramName}"], [name="${paramName}"]`);
+        if (field) {
+          field.value = paramValue;
+          // Trigger change event to update any UI dependencies
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    });
+  } catch (e) {
+    console.warn('URL parameter population failed:', e);
+  }
+
   // Section 1 & 2: Inject essential styles first
   window.BookingForm.injectBaselineStyles();
   window.BookingForm.injectValidationStyles();
