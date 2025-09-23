@@ -65,6 +65,10 @@ window.BookingForm.initNow = function(root = document) {
   window.BookingForm.enhanceNextButtonMobile(document);
   window.BookingForm.enhanceSubmitButton(document);
   window.BookingForm.initSurveyTransitions(document);
+  
+  // Install validation for both steps
+  window.BookingForm.installStepOneNextValidation();
+  window.BookingForm.installStepTwoSubmitValidation();
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
   // Secondary run to catch late-rendered inputs
