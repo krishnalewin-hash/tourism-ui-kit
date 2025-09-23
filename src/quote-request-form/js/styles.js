@@ -298,11 +298,18 @@ window.BookingForm.injectCtaStyles = function() {
       animation: bf-spin 1s linear infinite !important;
     }
     .bf-loading-overlay .bf-loading-text {
-      font-size: 18px !important;
+      font-family: "Poppins", sans-serif !important;
+      font-size: 53px !important;
       font-weight: 600 !important;
       letter-spacing: 1px !important;
       color: white !important;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    }
+    
+    @media (max-width: 768px) {
+      .bf-loading-overlay .bf-loading-text {
+        font-size: 34px !important;
+      }
     }
     
     /* Survey step transitions */
