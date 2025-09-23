@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build:quote-request:js": "esbuild src/quote-request-form/js/quote-request.js --bundle --minify --format=iife --global-name=QuoteRequest --outfile=dist/quote-request-form.min.js",
+    "build:quote-request:js": "esbuild src/quote-request-form/js/quote-request.js --bundle --minify --format=iife --global-name=TourBooking --outfile=dist/quote-request-form.min.js",
     "build:quote-request:css": "postcss src/quote-request-form/css/quote-request.css -o dist/quote-request-form.min.css",
     "build:quote-results:js": "esbuild src/quote-results-page/js/quote-results.js --bundle --minify --format=iife --global-name=QuoteResults --outfile=dist/quote-results-page.min.js",
     "build:quote-results-enhanced:js": "esbuild src/quote-results-page/js/quote-results-enhanced.js --bundle --minify --format=iife --global-name=QuoteResultsEnhanced --outfile=dist/quote-results-page-enhanced.min.js",
