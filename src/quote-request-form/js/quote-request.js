@@ -14,6 +14,7 @@ import './validation-step2.js';
 import './maps.js';
 import './autocomplete.js';
 import './observer.js';
+import './survey-enhancements.js';
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -76,6 +77,9 @@ window.BookingForm.initNow = function(root = document) {
 
   // Watch for late-rendered/replaced fields (GHL)
   window.BookingForm.observeLateFields();
+
+  // Initialize survey enhancements (fade transitions, button styling, loading states)
+  window.BookingForm.initSurveyEnhancements();
 
   // Section 11: Populate URL parameters after components are initialized
   setTimeout(() => {
