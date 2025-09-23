@@ -11,6 +11,15 @@ function inject(id, css) {
 
 window.BookingForm.injectBaselineStyles = function() {
   inject('booking-form-minimal-styles', `
+/* Page-level safety styling */
+html, body { max-width: 100%; overflow-x: hidden; }
+* { box-sizing: border-box; }
+
+/* Font family override for all form elements */
+body, input, button, select, textarea {
+    font-family: 'Poppins', sans-serif !important;
+}
+
 /* Core icon wrapper + input padding */
 .icon-field-wrapper{position:relative;display:block;width:100%;}
 .icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}
@@ -82,6 +91,35 @@ input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper se
   .pac-item { padding: 12px 16px !important; }
   .pac-item .pac-item-query { font-size: 1.2rem !important; }
   .pac-item .pac-item-query ~ span { font-size: 0.88rem !important; }
+  
+  form#_builder-form {
+    padding: 0px 10px !important;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+  }
+}
+
+/* Form wrapper margin */
+#lc-form-mount .ghl-form-wrap {
+  margin-bottom: 0 !important;
+}
+
+/* PAC Hide Class for temporarily hiding autocomplete */
+.pac-hide .pac-container { display: none !important; }
+
+/* PAC icon and branding styling */
+.pac-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+}
+.pac-container .pac-logo:after {
+  display: none;
+}
+
+/* Gradient background utility */
+.gradientbg {
+    background: linear-gradient(to bottom, #ffffff 0%, #F6F5F8 100%);
 }
 
 /* Date picker popover */
@@ -214,6 +252,18 @@ window.BookingForm.injectCtaStyles = function() {
     .ghl-btn.ghl-submit-btn.bf-cta{display:inline-flex;gap:10px;white-space:nowrap}
     .ghl-btn.ghl-submit-btn.bf-cta .bf-arrow{width:18px;height:18px;transition:transform .22s ease}
     .ghl-btn.ghl-submit-btn.bf-cta:hover .bf-arrow{transform:translateX(5px)}
+    .ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text{font-size:20px !important}
+  `);
+  inject('booking-form-misc-styles', `
+    /* Thank you message padding */
+    #_builder-form .thank-you-message > div {
+      padding: 40px 0px !important;
+    }
+    
+    /* Social icon padding (if present) */
+    .social-icon {
+      padding: 0.3rem !important;
+    }
   `);
 };
 
