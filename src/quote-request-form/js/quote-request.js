@@ -51,29 +51,6 @@ window.BookingForm.matchFieldLook = matchFieldLook;
 window.BookingForm.applyPlaceholderClass = applyPlaceholderClass;
 
 window.BookingForm.initNow = function(root = document) {
-  // Section 0: Populate URL parameters into form fields
-  try {
-    const qs = new URLSearchParams(location.search);
-    window.BookingForm.cacheIncomingParams(qs);
-    
-    // Populate form fields from URL parameters
-    window.BookingForm.PARAM_ALLOWLIST.forEach(paramName => {
-      const paramValue = window.BookingForm.getParam(qs, paramName);
-      if (paramValue) {
-        // Find the form field and populate it
-        const field = document.querySelector(`[data-q="${paramName}"], [name="${paramName}"]`);
-        if (field) {
-          field.value = paramValue;
-          // Trigger change event to update any UI dependencies
-          field.dispatchEvent(new Event('change', { bubbles: true }));
-          field.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      }
-    });
-  } catch (e) {
-    console.warn('URL parameter population failed:', e);
-  }
-
   // Section 1 & 2: Inject essential styles first
   window.BookingForm.injectBaselineStyles();
   window.BookingForm.injectValidationStyles();
@@ -99,6 +76,58 @@ window.BookingForm.initNow = function(root = document) {
 
   // Watch for late-rendered/replaced fields (GHL)
   window.BookingForm.observeLateFields();
+
+  // Section 11: Populate URL parameters after components are initialized
+  setTimeout(() => {
+    try {
+      const qs = new URLSearchParams(location.search);
+      window.BookingForm.cacheIncomingParams(qs);
+      
+      // Populate form fields from URL parameters with better field selection
+      window.BookingForm.PARAM_ALLOWLIST.forEach(paramName => {
+        const paramValue = window.BookingForm.getParam(qs, paramName);
+        if (paramValue) {
+          // Try multiple selectors to find the field
+          let field = document.querySelector(`[data-q="${paramName}"]`) || 
+                     document.querySelector(`[name="${paramName}"]`);
+          
+          // For number_of_passengers, prefer the original input over the select
+          if (paramName === 'number_of_passengers') {
+            const input = document.querySelector(`input[data-q="${paramName}"], input[name="${paramName}"]`);
+            const select = document.querySelector(`select[data-q="${paramName}"], select[name="${paramName}"]`);
+            
+            if (input && select) {
+              // Populate both the hidden input and the visible select
+              input.value = paramValue;
+              select.value = paramValue;
+              
+              // Trigger events on both
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              select.dispatchEvent(new Event('input', { bubbles: true }));
+              
+              console.log(`Populated ${paramName}: input="${input.value}", select="${select.value}"`);
+            } else if (input) {
+              input.value = paramValue;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              console.log(`Populated ${paramName}: input="${input.value}"`);
+            }
+          } else if (field) {
+            field.value = paramValue;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            console.log(`Populated ${paramName}: "${paramValue}"`);
+          } else {
+            console.warn(`Field not found for parameter: ${paramName}`);
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('URL parameter population failed:', e);
+    }
+  }, 800); // Longer delay to ensure passenger select is created
 };
 
 if (document.readyState === 'loading') {
