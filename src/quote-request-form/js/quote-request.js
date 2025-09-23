@@ -64,6 +64,7 @@ window.BookingForm.initNow = function(root = document) {
   window.BookingForm.enhanceVisual(document);
   window.BookingForm.enhanceNextButtonMobile(document);
   window.BookingForm.enhanceSubmitButton(document);
+  window.BookingForm.initSurveyTransitions(document);
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
   // Secondary run to catch late-rendered inputs

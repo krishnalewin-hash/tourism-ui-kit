@@ -127,6 +127,38 @@ try {
   window.addEventListener('resize', reapply, { passive: true });
 } catch(_) {}
 
+// Initialize survey step transitions
+function initSurveyTransitions(rootDoc) {
+  if(!rootDoc) rootDoc = document;
+  
+  // Find all step navigation buttons
+  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
+  
+  nextButtons.forEach(btn => {
+    if (btn.dataset.bfTransitionWired === '1') return;
+    btn.dataset.bfTransitionWired = '1';
+    
+    btn.addEventListener('click', function() {
+      // Wait a bit for GoHighLevel to process the step change
+      setTimeout(() => {
+        const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
+        slides.forEach(slide => {
+          const computedStyle = window.getComputedStyle(slide);
+          if (computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden') {
+            // This slide is visible, add fade-in effect
+            slide.classList.remove('survey-step-fade-out');
+            slide.classList.add('survey-step-fade-in');
+          } else {
+            // This slide is hidden, add fade-out effect
+            slide.classList.remove('survey-step-fade-in');
+            slide.classList.add('survey-step-fade-out');
+          }
+        });
+      }, 50);
+    });
+  });
+}
+
 // Enhance the Step 2 submit button with CTA text + white arrow + loading state
 function enhanceSubmitButton(rootDoc){
   if(!rootDoc) rootDoc = document;
@@ -145,11 +177,19 @@ function enhanceSubmitButton(rootDoc){
       `</svg>`+
       `</span>`;
     
-    // Add loading state functionality
-    btn.addEventListener('click', function() {
-      // Only add loading state if validation passes
+        // Add loading state functionality
+    btn.addEventListener('click', function(e) {
+      const originalText = btn.querySelector('.bf-cta-text').textContent;
+      const originalArrow = btn.querySelector('.bf-arrow').innerHTML;
+      
+      // Wait for form validation to complete
       setTimeout(() => {
-        if (!btn.disabled && !btn.classList.contains('bf-loading')) {
+        // Check if form is actually submitting (no validation errors)
+        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"]').length > 0;
+        const formElement = btn.closest('form');
+        const isFormValid = formElement ? formElement.checkValidity() : true;
+        
+        if (!hasErrors && isFormValid && !btn.disabled && !btn.classList.contains('bf-loading')) {
           btn.classList.add('bf-loading');
           btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
           btn.querySelector('.bf-arrow').innerHTML = `
@@ -157,8 +197,13 @@ function enhanceSubmitButton(rootDoc){
               <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
               <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
             </svg>`;
+        } else if (hasErrors || !isFormValid) {
+          // Reset button if there are validation errors
+          btn.classList.remove('bf-loading');
+          btn.querySelector('.bf-cta-text').textContent = originalText;
+          btn.querySelector('.bf-arrow').innerHTML = originalArrow;
         }
-      }, 100); // Small delay to let validation run first
+      }, 100);
     });
     
     btn.dataset.bfCtaWired = '1';
@@ -170,3 +215,4 @@ window.BookingForm.enhanceVisual = enhanceVisual;
 window.BookingForm.enhanceDateTimeLayout = enhanceDateTimeLayout;
 window.BookingForm.enhanceNextButtonMobile = enhanceNextButtonMobile;
 window.BookingForm.enhanceSubmitButton = enhanceSubmitButton;
+window.BookingForm.initSurveyTransitions = initSurveyTransitions;

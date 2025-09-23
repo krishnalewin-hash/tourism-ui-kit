@@ -272,7 +272,7 @@ window.BookingForm.injectCtaStyles = function() {
     }
     
     /* Survey step transitions */
-    .ghl-survey-step, .survey-step, [data-step], .step-container, div[data-v] {
+    .slide-no-1, .slide-no-2, [class*="slide-no-"] {
       transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
     }
     .survey-step-fade-out {
