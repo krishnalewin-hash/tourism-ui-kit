@@ -33,7 +33,8 @@ input[data-q], select[data-q]{
   width:100% !important;
   min-width:200px !important;
   padding:10px 18px 10px 2.25rem !important; /* leaves room for the icon */
-  border:1px solid #ccc !important;
+  border:2px solid #DDDDDDFF !important;
+  box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
   background:#fff !important;
   line-height:1.4 !important;
   box-sizing:border-box !important;
@@ -215,20 +216,37 @@ select[data-q='number_of_passengers'].is-placeholder {
   padding: 10px 20px !important;
 }
 
-/* Number of passengers background: keep white in all states (matches temp.js) */
+/* Number of passengers styling: consistent with other fields */
 .icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'],
+select[data-q='number_of_passengers'] {
+  background: #fff !important;
+  border: 2px solid #DDDDDDFF !important;
+  box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
+  outline: none !important;
+}
+
+/* Number of passengers hover/focus states */
 .icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:hover,
 .icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:focus,
 .icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:focus-visible,
 .icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:active,
-select[data-q='number_of_passengers'],
 select[data-q='number_of_passengers']:hover,
 select[data-q='number_of_passengers']:focus,
-select[data-q='number_of_passengers']:active,
+select[data-q='number_of_passengers']:active {
+  background: #fff !important;
+  border: 2px solid #DDDDDDFF !important;
+  box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
+  outline: none !important;
+}
+
+/* Number of passengers error states */
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'][aria-invalid='true'],
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'].input-error,
 select[data-q='number_of_passengers'][aria-invalid='true'],
 select[data-q='number_of_passengers'].input-error {
   background: #fff !important;
-  border-color: #ccc !important;
+  border-color: #e53935 !important;
+  box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
   outline: none !important;
 }
   `);
