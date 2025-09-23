@@ -157,9 +157,12 @@ function enhanceSubmitButton(rootDoc){
         // Add loading state functionality with overlay approach
     btn.addEventListener('click', function(e) {
       console.log('🔘 Submit button clicked');
+      console.log('🔍 Button element:', btn);
+      console.log('🔍 Button classes:', btn.className);
+      console.log('🔍 Button parent:', btn.parentElement);
       
       // If loading overlay already exists, don't create another
-      if (btn.parentElement.querySelector('.bf-loading-overlay')) {
+      if (document.querySelector('.bf-loading-overlay')) {
         console.log('🚫 Loading overlay already exists');
         return;
       }
@@ -179,28 +182,41 @@ function enhanceSubmitButton(rootDoc){
       
       // Position overlay on top of button
       const btnRect = btn.getBoundingClientRect();
+      console.log('📐 Button dimensions:', btnRect);
+      
+      const backgroundColor = window.getComputedStyle(btn).backgroundColor || '#007bff';
+      console.log('🎨 Button background color:', backgroundColor);
+      
       loadingOverlay.style.cssText = `
-        position: fixed;
-        top: ${btnRect.top}px;
-        left: ${btnRect.left}px;
-        width: ${btnRect.width}px;
-        height: ${btnRect.height}px;
-        background: ${window.getComputedStyle(btn).backgroundColor || '#007bff'};
-        border-radius: ${window.getComputedStyle(btn).borderRadius || '4px'};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        pointer-events: none;
-        font-family: ${window.getComputedStyle(btn).fontFamily};
-        font-size: ${window.getComputedStyle(btn).fontSize};
-        font-weight: ${window.getComputedStyle(btn).fontWeight};
-        color: white;
-        box-shadow: ${window.getComputedStyle(btn).boxShadow || 'none'};
+        position: fixed !important;
+        top: ${btnRect.top}px !important;
+        left: ${btnRect.left}px !important;
+        width: ${btnRect.width}px !important;
+        height: ${btnRect.height}px !important;
+        background: ${backgroundColor} !important;
+        border-radius: ${window.getComputedStyle(btn).borderRadius || '4px'} !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 999999 !important;
+        pointer-events: none !important;
+        font-family: ${window.getComputedStyle(btn).fontFamily} !important;
+        font-size: ${window.getComputedStyle(btn).fontSize} !important;
+        font-weight: ${window.getComputedStyle(btn).fontWeight} !important;
+        color: white !important;
+        box-shadow: ${window.getComputedStyle(btn).boxShadow || 'none'} !important;
+        border: 2px solid red !important;
       `;
       
-      console.log('✨ Created loading overlay');
+      console.log('✨ Created loading overlay with styles:', loadingOverlay.style.cssText);
       document.body.appendChild(loadingOverlay);
+      console.log('📍 Overlay added to body, total overlays now:', document.querySelectorAll('.bf-loading-overlay').length);
+      
+      // Make it extra visible for debugging
+      setTimeout(() => {
+        loadingOverlay.style.background = 'red !important';
+        console.log('🔴 Changed overlay to red for visibility');
+      }, 100);
       
       // Check for validation errors after a brief delay
       setTimeout(() => {
@@ -209,6 +225,7 @@ function enhanceSubmitButton(rootDoc){
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
         console.log('📋 Validation check:', { hasErrors, isFormValid });
+        console.log('🔍 Error elements found:', rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid'));
         
         if (hasErrors || !isFormValid) {
           console.log('❌ Validation failed, removing overlay');
