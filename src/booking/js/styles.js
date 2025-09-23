@@ -171,6 +171,28 @@ input[data-q='number_of_passengers'].input-error {
 select[data-q='number_of_passengers'].is-placeholder {
   color: #8C8C8C !important;
 }
+
+/* Form control padding override (matches temp.js) */
+.hl-app .form-control {
+  padding: 10px 20px !important;
+}
+
+/* Number of passengers background: keep white in all states (matches temp.js) */
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'],
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:hover,
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:focus,
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:focus-visible,
+.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers']:active,
+select[data-q='number_of_passengers'],
+select[data-q='number_of_passengers']:hover,
+select[data-q='number_of_passengers']:focus,
+select[data-q='number_of_passengers']:active,
+select[data-q='number_of_passengers'][aria-invalid='true'],
+select[data-q='number_of_passengers'].input-error {
+  background: #fff !important;
+  border-color: #ccc !important;
+  outline: none !important;
+}
   `);
   inject('booking-form-fade-styles', `
     .bf-fade-anim{transition:opacity 220ms ease, transform 220ms ease; will-change: opacity, transform;}
