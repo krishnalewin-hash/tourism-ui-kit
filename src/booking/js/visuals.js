@@ -3,6 +3,37 @@
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
 
+// Enhanced layout for date and time fields on desktop (custom from your temp.js)
+function enhanceDateTimeLayout(rootDoc) {
+  if (!rootDoc) return;
+  
+  // Find date and time input wrappers
+  const dateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_date"])') ||
+                     rootDoc.querySelector('input[data-q="pickup_date"]')?.closest('.icon-field-wrapper');
+  const timeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_time"])') ||
+                     rootDoc.querySelector('input[data-q="pickup_time"]')?.closest('.icon-field-wrapper');
+  
+  if (!dateWrapper || !timeWrapper) return;
+  
+  // Check if they're siblings and not already in a flex container
+  if (dateWrapper.nextElementSibling === timeWrapper && !dateWrapper.parentElement.classList.contains('bf-datetime-container')) {
+    // Create flex container
+    const container = document.createElement('div');
+    container.className = 'bf-datetime-container';
+    container.style.cssText = 'display: flex; gap: 12px; align-items: flex-start;';
+    
+    // Insert container before date wrapper
+    dateWrapper.parentElement.insertBefore(container, dateWrapper);
+    
+    // Move both wrappers into container and set flex properties
+    dateWrapper.style.cssText = 'flex: 2; min-width: 0;'; // Date gets more space
+    timeWrapper.style.cssText = 'flex: 1; min-width: 0;'; // Time gets less space
+    
+    container.appendChild(dateWrapper);
+    container.appendChild(timeWrapper);
+  }
+}
+
 // Section 7 implementation from temp.js
 function enhanceVisual(rootDoc){
   if(!rootDoc) return;
@@ -118,5 +149,6 @@ function enhanceSubmitButton(rootDoc){
 
 // Expose functions on global namespace
 window.BookingForm.enhanceVisual = enhanceVisual;
+window.BookingForm.enhanceDateTimeLayout = enhanceDateTimeLayout;
 window.BookingForm.enhanceNextButtonMobile = enhanceNextButtonMobile;
 window.BookingForm.enhanceSubmitButton = enhanceSubmitButton;

@@ -62,12 +62,16 @@ window.BookingForm.initNow = function(root = document) {
   window.BookingForm.attachPickupDateGuard(document);
   window.BookingForm.attachPickupTimePicker(document);
   window.BookingForm.enhanceVisual(document);
+  window.BookingForm.enhanceDateTimeLayout(document);
   window.BookingForm.enhanceNextButtonMobile(document);
   window.BookingForm.enhanceSubmitButton(document);
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
   // Secondary run to catch late-rendered inputs
-  setTimeout(()=>window.BookingForm.enhanceVisual(document),400);
+  setTimeout(()=>{
+    window.BookingForm.enhanceVisual(document);
+    window.BookingForm.enhanceDateTimeLayout(document);
+  },400);
 
   // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
   window.BookingForm.initMapsAndFilters();

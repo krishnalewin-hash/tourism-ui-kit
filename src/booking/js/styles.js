@@ -35,9 +35,9 @@ input[data-q], select[data-q]{
 /* Unified text color across all data-q inputs/selects */
 input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}
 
-/* Larger Google Places Autocomplete dropdown */
-.pac-container{font-size:18px !important; line-height:1.35 !important;}
-.pac-item{padding:12px 16px !important; font-size:16px !important;}
+/* Larger Google Places Autocomplete dropdown (matching temp.js) */
+.pac-container{font-size:16px !important; line-height:1.35 !important;}
+.pac-item{padding:10px 14px !important; font-size:15px !important;}
 .pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}
 .pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}
 
