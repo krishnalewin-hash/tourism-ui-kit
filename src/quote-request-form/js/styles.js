@@ -300,7 +300,7 @@ window.BookingForm.injectCtaStyles = function() {
     .bf-loading-overlay .bf-loading-text {
       font-family: "Poppins", sans-serif !important;
       font-size: 53px !important;
-      font-weight: 600 !important;
+      font-weight: 700 !important;
       letter-spacing: -1px !important;
       color: white !important;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
