@@ -133,20 +133,23 @@ function initSurveyTransitions(rootDoc) {
   
   console.log('🔄 Initializing survey transitions...');
   
-  // Add a MutationObserver to watch for step changes
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && 
-          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-        
+  // Find all step navigation buttons
+  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
+  
+  nextButtons.forEach(btn => {
+    if (btn.dataset.bfTransitionWired === '1') return;
+    btn.dataset.bfTransitionWired = '1';
+    
+    btn.addEventListener('click', function() {
+      console.log('🔘 Button clicked, checking for step changes...');
+      // Wait a bit for GoHighLevel to process the step change
+      setTimeout(() => {
         const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
         console.log('📋 Found slides:', slides.length);
-        
         slides.forEach((slide, index) => {
           const computedStyle = window.getComputedStyle(slide);
           const isVisible = computedStyle.display !== 'none' && 
-                           computedStyle.visibility !== 'hidden' && 
-                           computedStyle.opacity !== '0';
+                           computedStyle.visibility !== 'hidden';
           
           if (isVisible) {
             console.log(`✅ Slide ${index + 1} is visible, adding fade-in`);
@@ -156,39 +159,6 @@ function initSurveyTransitions(rootDoc) {
             console.log(`❌ Slide ${index + 1} is hidden, adding fade-out`);
             slide.classList.remove('survey-step-fade-in');
             slide.classList.add('survey-step-fade-out');
-          }
-        });
-      }
-    });
-  });
-  
-  // Start observing
-  const surveyContainer = rootDoc.querySelector('[data-v-bc9c09f7]') || rootDoc.body;
-  observer.observe(surveyContainer, {
-    attributes: true,
-    childList: true,
-    subtree: true,
-    attributeFilter: ['style', 'class']
-  });
-  
-  // Also try the button click approach as backup
-  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
-  nextButtons.forEach(btn => {
-    if (btn.dataset.bfTransitionWired === '1') return;
-    btn.dataset.bfTransitionWired = '1';
-    
-    btn.addEventListener('click', function() {
-      console.log('🔘 Button clicked, checking for step changes...');
-      setTimeout(() => {
-        const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
-        slides.forEach((slide, index) => {
-          const computedStyle = window.getComputedStyle(slide);
-          const isVisible = computedStyle.display !== 'none' && 
-                           computedStyle.visibility !== 'hidden';
-          
-          if (isVisible) {
-            slide.classList.remove('survey-step-fade-out');
-            slide.classList.add('survey-step-fade-in');
           }
         });
       }, 100);
