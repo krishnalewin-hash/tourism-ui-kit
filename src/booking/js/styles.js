@@ -253,6 +253,22 @@ window.BookingForm.injectCtaStyles = function() {
     .ghl-btn.ghl-submit-btn.bf-cta .bf-arrow{width:18px;height:18px;transition:transform .22s ease}
     .ghl-btn.ghl-submit-btn.bf-cta:hover .bf-arrow{transform:translateX(5px)}
     .ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text{font-size:20px !important}
+    
+    /* Loading state styling */
+    .ghl-btn.ghl-submit-btn.bf-cta.bf-loading {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+    .ghl-btn.ghl-submit-btn.bf-cta.bf-loading:hover .bf-arrow {
+      transform: none;
+    }
+    .bf-spinner {
+      animation: bf-spin 1s linear infinite;
+    }
+    @keyframes bf-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   `);
   inject('booking-form-misc-styles', `
     /* Thank you message padding */

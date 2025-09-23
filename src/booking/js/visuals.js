@@ -127,7 +127,7 @@ try {
   window.addEventListener('resize', reapply, { passive: true });
 } catch(_) {}
 
-// Enhance the Step 2 submit button with CTA text + white arrow
+// Enhance the Step 2 submit button with CTA text + white arrow + loading state
 function enhanceSubmitButton(rootDoc){
   if(!rootDoc) rootDoc = document;
   const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-submit-btn');
@@ -143,6 +143,23 @@ function enhanceSubmitButton(rootDoc){
       `<polyline points="12,6 18,12 12,18"></polyline>`+
       `</svg>`+
       `</span>`;
+    
+    // Add loading state functionality
+    btn.addEventListener('click', function() {
+      // Only add loading state if validation passes
+      setTimeout(() => {
+        if (!btn.disabled && !btn.classList.contains('bf-loading')) {
+          btn.classList.add('bf-loading');
+          btn.querySelector('.bf-cta-text').textContent = 'PROCESSING...';
+          btn.querySelector('.bf-arrow').innerHTML = `
+            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
+              <path fill="currentColor" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+            </svg>`;
+        }
+      }, 100); // Small delay to let validation run first
+    });
+    
     btn.dataset.bfCtaWired = '1';
   });
 }

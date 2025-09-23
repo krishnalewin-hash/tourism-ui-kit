@@ -89,9 +89,34 @@ window.BookingForm = window.BookingForm || {};
     if (!input || selAlready) return;
     if (input.dataset.paxSelectWired === '1') return;
 
-    // Replace the input with a select (keep the icon wrapper intact)
+    // Build the select element
     const selectEl = buildSelectFromInput(input);
-    input.parentNode.replaceChild(selectEl, input);
+    
+    // Hide the original input but keep it for GoHighLevel form submission
+    input.style.display = 'none';
+    input.style.visibility = 'hidden';
+    input.style.position = 'absolute';
+    input.style.left = '-9999px';
+    
+    // Insert select after the hidden input (don't replace it)
+    input.parentNode.insertBefore(selectEl, input.nextSibling);
+    
+    // Sync select changes back to the hidden input for GHL form submission
+    selectEl.addEventListener('change', () => {
+      input.value = selectEl.value;
+      selectEl.setAttribute('value', selectEl.value);
+      window.BookingForm.applyPlaceholderClass(selectEl);
+      // Trigger change event on hidden input for GHL
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    
+    // Also sync any initial value from input to select
+    if (input.value) {
+      selectEl.value = input.value;
+      window.BookingForm.applyPlaceholderClass(selectEl);
+    }
+    
     selectEl.dataset.paxSelectWired = '1';
 
     // Re-run icon wrapper just in case
