@@ -106,7 +106,11 @@ window.BookingForm = window.BookingForm || {};
         [data-action="next"], 
         .survey-next, 
         .btn-next, 
-        button:not([type="submit"]):not(.btn-submit):not(.survey-submit)
+        button:not([type="submit"]):not(.btn-submit):not(.survey-submit),
+        .ghl-next,
+        button:contains("Next"),
+        button:contains("Continue"),
+        div[data-v] button:not([type="submit"])
       `);
       
       const submitButtons = document.querySelectorAll(`
@@ -117,51 +121,80 @@ window.BookingForm = window.BookingForm || {};
         button[id*="submit"],
         .ghl-submit,
         .quote-btn,
-        [data-action="submit"]
+        [data-action="submit"],
+        .ghl-btn,
+        .ghl-submit-btn,
+        button:contains("GET"),
+        button:contains("QUOTE"),
+        div[data-v] button
       `);
       
       // Enhance next buttons with fade transitions
       nextButtons.forEach(btn => {
         if (!btn.dataset.surveyEnhanced) {
+          console.log('Found next button:', btn, 'Text:', btn.textContent.trim());
+          
           btn.addEventListener('click', (e) => {
-            // Add fade transition for step change
+            console.log('Next button clicked - applying fade transition');
+            
+            // Add fade transition for step change - try multiple selector patterns
             const currentStep = document.querySelector(`
               .ghl-survey-step:not([style*="display: none"]), 
               .survey-step.active, 
               [data-step].active,
               .step-container.active,
-              .form-step:not([style*="display: none"])
-            `);
+              .form-step:not([style*="display: none"]),
+              div[data-v]:not([style*="display: none"]):not([style*="visibility: hidden"]),
+              .survey-page:not([style*="display: none"]),
+              .step:not(.hidden)
+            `) || document.querySelector('div[data-v]');
+            
+            console.log('Current step found:', currentStep);
             
             if (currentStep) {
               currentStep.classList.add('survey-step-fade-out');
+              console.log('Added fade-out class to current step');
               
               setTimeout(() => {
-                // Find and fade in next step
+                // Find and fade in next step - more comprehensive search
                 const allSteps = document.querySelectorAll(`
                   .ghl-survey-step, 
                   .survey-step, 
                   [data-step],
                   .step-container,
-                  .form-step
+                  .form-step,
+                  div[data-v],
+                  .survey-page,
+                  .step
                 `);
+                
+                console.log('All steps found:', allSteps.length);
                 
                 let nextStep = null;
                 let foundCurrent = false;
                 
                 for (let step of allSteps) {
                   if (foundCurrent && step !== currentStep) {
-                    nextStep = step;
-                    break;
+                    // Check if this step is likely to be shown next
+                    const isHidden = step.style.display === 'none' || 
+                                   step.style.visibility === 'hidden' ||
+                                   step.classList.contains('hidden');
+                    if (!isHidden) {
+                      nextStep = step;
+                      break;
+                    }
                   }
                   if (step === currentStep) {
                     foundCurrent = true;
                   }
                 }
                 
+                console.log('Next step found:', nextStep);
+                
                 if (nextStep) {
                   nextStep.classList.remove('survey-step-fade-out');
                   nextStep.classList.add('survey-step-fade-in');
+                  console.log('Added fade-in class to next step');
                 }
               }, 200);
             }
@@ -173,37 +206,42 @@ window.BookingForm = window.BookingForm || {};
       // Enhance submit buttons
       submitButtons.forEach(btn => {
         if (!btn.dataset.submitEnhanced) {
+          console.log('Found submit button:', btn, 'Text:', btn.textContent.trim());
+          
           // Change button text to "GET YOUR QUOTE!" and add arrow
           const originalText = btn.textContent.trim();
-          const needsTextChange = !originalText.toUpperCase().includes('GET YOUR QUOTE') && (
-            originalText.toLowerCase().includes('submit') || 
-            originalText.toLowerCase().includes('get') || 
-            originalText.toLowerCase().includes('quote') ||
-            originalText.toLowerCase().includes('next') ||
-            originalText.toLowerCase().includes('send') ||
-            originalText.toLowerCase().includes('finish') ||
-            originalText.toLowerCase().includes('complete')
+          const needsTextChange = originalText.toUpperCase().includes('QUOTES') || (
+            !originalText.toUpperCase().includes('GET YOUR QUOTE') && (
+              originalText.toLowerCase().includes('submit') || 
+              originalText.toLowerCase().includes('get') || 
+              originalText.toLowerCase().includes('quote') ||
+              originalText.toLowerCase().includes('next') ||
+              originalText.toLowerCase().includes('send') ||
+              originalText.toLowerCase().includes('finish') ||
+              originalText.toLowerCase().includes('complete')
+            )
           );
           
-          if (needsTextChange) {
-            // Create structured button content with new text
-            btn.innerHTML = `
-              <span class="btn-text">GET YOUR QUOTE!</span>
-              <span class="btn-arrow"></span>
-              <span class="btn-processing" style="display: none;">PROCESSING</span>
-            `;
-          } else if (!btn.querySelector('.btn-arrow')) {
-            // Just add arrow and processing span if text is already good
-            const currentText = btn.textContent.trim();
-            btn.innerHTML = `
-              <span class="btn-text">${currentText}</span>
-              <span class="btn-arrow"></span>
-              <span class="btn-processing" style="display: none;">PROCESSING</span>
-            `;
-          }
+          // Always restructure the button to ensure our enhancements work
+          const currentText = needsTextChange ? 'GET YOUR QUOTE!' : originalText;
+          
+          // Remove existing arrow elements
+          const existingArrows = btn.querySelectorAll('.bf-arrow, .btn-arrow, [class*="arrow"]');
+          existingArrows.forEach(arrow => arrow.remove());
+          
+          // Create structured button content
+          btn.innerHTML = `
+            <span class="btn-text">${currentText}</span>
+            <span class="btn-arrow"></span>
+            <span class="btn-processing" style="display: none;">PROCESSING</span>
+          `;
+          
+          console.log('Enhanced button with text:', currentText);
           
           // Add loading state on click
           btn.addEventListener('click', (e) => {
+            console.log('Button clicked - adding loading state');
+            
             // Don't prevent default - let form submit normally
             
             // Add loading state immediately
@@ -219,9 +257,8 @@ window.BookingForm = window.BookingForm || {};
               processingSpan.style.display = 'block';
               textSpan.style.opacity = '0';
               if (arrowSpan) arrowSpan.style.opacity = '0';
+              console.log('Showing PROCESSING state');
             }
-            
-            console.log('Form submission started - showing PROCESSING state');
             
             // Fallback: remove loading state after 10 seconds in case redirect fails
             setTimeout(() => {
@@ -233,6 +270,7 @@ window.BookingForm = window.BookingForm || {};
                   textSpan.style.opacity = '1';
                   if (arrowSpan) arrowSpan.style.opacity = '1';
                 }
+                console.log('Loading state timeout - reset button');
               }
             }, 10000);
           });
@@ -242,9 +280,15 @@ window.BookingForm = window.BookingForm || {};
       });
     };
     
-    // Run immediately and on interval to catch dynamically created buttons
+    // Run immediately and on frequent interval to catch dynamically created buttons
     monitorButtons();
-    setInterval(monitorButtons, 1000);
+    const monitorInterval = setInterval(monitorButtons, 500); // More frequent monitoring
+    
+    // Stop monitoring after 30 seconds to avoid infinite intervals
+    setTimeout(() => {
+      clearInterval(monitorInterval);
+      console.log('Survey enhancement monitoring stopped after 30s');
+    }, 30000);
     
     // Also use MutationObserver for immediate detection
     if (window.MutationObserver) {
@@ -274,8 +318,19 @@ window.BookingForm = window.BookingForm || {};
 
   // Initialize all enhancements
   function init() {
+    console.log('Initializing survey enhancements...');
     addStepTransitions();
     enhanceSurveyNavigation();
+    
+    // Force immediate button enhancement after short delay
+    setTimeout(() => {
+      console.log('Running forced button enhancement...');
+      const allButtons = document.querySelectorAll('button, .btn, [role="button"]');
+      console.log('Found buttons for enhancement:', allButtons.length);
+      allButtons.forEach(btn => {
+        console.log('Button:', btn, 'Text:', btn.textContent.trim(), 'Type:', btn.type);
+      });
+    }, 1000);
     
     console.log('Survey enhancements initialized');
   }
