@@ -127,43 +127,13 @@ try {
   window.addEventListener('resize', reapply, { passive: true });
 } catch(_) {}
 
-// Initialize survey step transitions
+// Initialize survey step transitions (disabled to prevent navigation issues)
 function initSurveyTransitions(rootDoc) {
   if(!rootDoc) rootDoc = document;
   
-  console.log('🔄 Initializing survey transitions...');
-  
-  // Find all step navigation buttons
-  const nextButtons = rootDoc.querySelectorAll('.ghl-btn');
-  
-  nextButtons.forEach(btn => {
-    if (btn.dataset.bfTransitionWired === '1') return;
-    btn.dataset.bfTransitionWired = '1';
-    
-    btn.addEventListener('click', function() {
-      console.log('🔘 Button clicked, checking for step changes...');
-      // Wait a bit for GoHighLevel to process the step change
-      setTimeout(() => {
-        const slides = rootDoc.querySelectorAll('[class*="slide-no-"]');
-        console.log('📋 Found slides:', slides.length);
-        slides.forEach((slide, index) => {
-          const computedStyle = window.getComputedStyle(slide);
-          const isVisible = computedStyle.display !== 'none' && 
-                           computedStyle.visibility !== 'hidden';
-          
-          if (isVisible) {
-            console.log(`✅ Slide ${index + 1} is visible, adding fade-in`);
-            slide.classList.remove('survey-step-fade-out');
-            slide.classList.add('survey-step-fade-in');
-          } else {
-            console.log(`❌ Slide ${index + 1} is hidden, adding fade-out`);
-            slide.classList.remove('survey-step-fade-in');
-            slide.classList.add('survey-step-fade-out');
-          }
-        });
-      }, 100);
-    });
-  });
+  console.log('🔄 Survey transitions disabled to prevent navigation issues');
+  // Transition functionality temporarily disabled until we find a safe approach
+  return;
 }
 
 // Enhance the Step 2 submit button with CTA text + white arrow + loading state
