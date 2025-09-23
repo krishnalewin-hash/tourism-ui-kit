@@ -51,6 +51,10 @@ window.BookingForm.matchFieldLook = matchFieldLook;
 window.BookingForm.applyPlaceholderClass = applyPlaceholderClass;
 
 window.BookingForm.initNow = function(root = document) {
+  // Section 1 & 2: Inject essential styles first
+  window.BookingForm.injectBaselineStyles();
+  window.BookingForm.injectValidationStyles();
+  
   // Section 8: Initial Enhancement Invocation
   // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
   // Adjust order only if dependencies change (icons don't depend on others).

@@ -10,26 +10,16 @@
     <!-- Global configuration (you need to set your API key here) -->
     <script>
         window.CFG = {
-            GMAPS_KEY: 'YOUR_GOOGLE_MAPS_API_KEY_HERE', // Replace with your actual API key
+            GMAPS_KEY: 'AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI',
+            COUNTRIES: ['jm'],
             PLACES: {
-                FIELDS: ['place_id', 'formatted_address', 'geometry', 'name', 'types'],
+                FIELDS: ['place_id','formatted_address','geometry','name','types'],
                 TYPES: ['establishment'],
-                AIRPORT_CODES: {
-                    'Los Angeles International Airport': 'LAX',
-                    'John F. Kennedy International Airport': 'JFK',
-                    'Miami International Airport': 'MIA'
-                },
                 PRIORITY_KEYWORDS: {
-                    airport: ['airport', 'international'],
-                    hotel: ['hotel', 'resort', 'inn']
-                },
-                BIAS_CENTER: {
-                    lat: 34.0522,
-                    lng: -118.2437,
-                    radiusMeters: 50000
+                    airport: ['airport','international airport','terminal','mbj','kin','ocj','neg','ktp'],
+                    hotel: ['hotel','resort','inn','villa','guest house','guesthouse','lodgings','spa','apartments','suite','suites','bnb']
                 }
-            },
-            COUNTRIES: ['US']
+            }
         };
     </script>
     
