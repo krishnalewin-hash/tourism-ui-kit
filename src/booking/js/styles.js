@@ -35,9 +35,9 @@ input[data-q], select[data-q]{
 /* Unified text color across all data-q inputs/selects */
 input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}
 
-/* Larger Google Places Autocomplete dropdown (single-line) */
-.pac-container{font-size:16px !important; line-height:1.35 !important;}
-.pac-item{padding:10px 14px !important; font-size:15px !important;}
+/* Larger Google Places Autocomplete dropdown */
+.pac-container{font-size:18px !important; line-height:1.35 !important;}
+.pac-item{padding:12px 16px !important; font-size:16px !important;}
 .pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}
 .pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}
 
@@ -53,6 +53,20 @@ input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper se
 #pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}
 #pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}
 #pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}
+
+/* Time picker popover */
+#pickup-time-popover{position:absolute;z-index:2147483647;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px;display:none;min-width:230px;font:14px/1.2 system-ui,Arial,sans-serif;}
+
+/* Layout enhancement: Date and Time side-by-side on wider screens */
+@media (min-width: 600px) {
+  .icon-field-wrapper[data-date-time-layout] {
+    display: flex;
+    gap: 12px;
+  }
+  .icon-field-wrapper[data-date-time-layout] .icon-field-wrapper {
+    flex: 1;
+  }
+}
   `);
   inject('booking-form-iconrow-styles', `
   .icon-field-wrapper .icon-input-row{position:relative;}
