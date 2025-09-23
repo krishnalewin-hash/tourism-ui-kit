@@ -57,14 +57,30 @@ input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper se
 /* Time picker popover */
 #pickup-time-popover{position:absolute;z-index:2147483647;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px;display:none;min-width:230px;font:14px/1.2 system-ui,Arial,sans-serif;}
 
-/* Layout enhancement: Date and Time side-by-side on wider screens */
-@media (min-width: 600px) {
-  .icon-field-wrapper[data-date-time-layout] {
-    display: flex;
-    gap: 12px;
+/* Date and Time side-by-side layout for desktop (matches temp.js behavior) */
+@media (min-width:640px){
+  /* Ensure the parent can place items side-by-side */
+  .ghl-question .fields-container.row{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap: 0px 4px; /* adjust or remove if tight on space */
+    align-items:flex-start;
   }
-  .icon-field-wrapper[data-date-time-layout] .icon-field-wrapper {
-    flex: 1;
+
+  /* Default: all wrappers full width (stacked) */
+  .ghl-question .fields-container.row > .form-field-wrapper{
+    width:100%;
+    max-width:100%;
+    flex: 0 0 100%;
+    box-sizing:border-box;
+  }
+
+  /* Make just Pickup Date + Pickup Time half width */
+  .ghl-question .fields-container.row > .form-field-wrapper:has([data-q="pickup_date"]),
+  .ghl-question .fields-container.row > .form-field-wrapper:has([data-q="pickup_time"]){
+    width: calc(50% - 2px) !important;      /* override .col-12 */
+    max-width: calc(50% - 2px) !important;  /* override .col-12 */
+    flex: 0 0 calc(50% - 2px) !important;   /* override .col-12 */
   }
 }
   `);
