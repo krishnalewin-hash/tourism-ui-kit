@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP-Safe Tourism Widget Embedder</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+        
+        .tourism-widget-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 12px;
+            transition: height 0.3s ease;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            font-size: 16px;
+            color: #d32f2f;
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="loading" id="loading">Loading quote results...</div>
+        <div class="error" id="error" style="display: none;">
+            Failed to load quote results. Please check your parameters and try again.
+        </div>
+        <iframe 
+            id="tourism-iframe"
+            class="tourism-widget-iframe"
+            style="display: none;"
+            title="Tourism Quote Results"
+            loading="lazy">
+        </iframe>
+    </div>
+
+    <script>
+        (function() {
+            // This script works within strict CSP policies because it doesn't use eval, 
+            // doesn't load external scripts, and only manipulates DOM elements
+            
+            function getUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                const iframeParams = new URLSearchParams();
+                
+                // Forward relevant parameters to iframe
+                const forwardParams = [
+                    'pickup_location', 'dropoff_location', 'pickup_date', 'pickup_time',
+                    'passengers', 'number_of_passengers', 'first_name', 'last_name', 
+                    'email', 'phone', 'client', 'gmaps_key', 'base'
+                ];
+                
+                forwardParams.forEach(param => {
+                    const value = params.get(param);
+                    if (value) {
+                        iframeParams.set(param, value);
+                    }
+                });
+                
+                // Set defaults if not provided
+                if (!iframeParams.get('client')) {
+                    iframeParams.set('client', 'demo');
+                }
+                
+                return iframeParams;
+            }
+            
+            function loadIframe() {
+                const iframe = document.getElementById('tourism-iframe');
+                const loading = document.getElementById('loading');
+                const error = document.getElementById('error');
+                
+                try {
+                    const params = getUrlParams();
+                    
+                    // Use the iframe embed page (this should be hosted on a CDN or your server)
+                    // You can change this URL to point to your hosted version
+                    const baseUrl = 'https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/demo/iframe-embed-quote-results.html';
+                    iframe.src = baseUrl + '?' + params.toString();
+                    
+                    iframe.onload = function() {
+                        loading.style.display = 'none';
+                        iframe.style.display = 'block';
+                    };
+                    
+                    iframe.onerror = function() {
+                        loading.style.display = 'none';
+                        error.style.display = 'flex';
+                    };
+                    
+                    // Listen for iframe resize messages
+                    window.addEventListener('message', function(event) {
+                        if (event.data && event.data.type === 'iframe-resize') {
+                            iframe.style.height = event.data.height + 'px';
+                        }
+                    });
+                    
+                } catch (err) {
+                    console.error('Error loading tourism widget:', err);
+                    loading.style.display = 'none';
+                    error.style.display = 'flex';
+                }
+            }
+            
+            // Load when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadIframe);
+            } else {
+                loadIframe();
+            }
+        })();
+    </script>
+</body>
+</html>
