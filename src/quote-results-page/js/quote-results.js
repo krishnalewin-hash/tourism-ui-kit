@@ -10,8 +10,8 @@
  * Mount:   <div id="quote-calc"></div>
  * Depends: window.CFG.GMAPS_KEY (or a <script> with Maps already loaded)
  */
-(function(){
-  const MOUNT_ID = "quote-calc";
+
+const MOUNT_ID = "quote-calc";
 
   /* ===== 0) DEFAULT CONFIG (fallback if no client config) =========== */
   const DEFAULT_CONFIG = {
@@ -431,4 +431,3 @@
     // Use WhatsApp by default (change to emailUrl or phone as needed)
     window.open(whatsappUrl, '_blank');
   };
-})();
