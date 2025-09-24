@@ -239,6 +239,37 @@ html body input.form-control[data-q='full_name'][aria-invalid='true'] {
   display: none !important;
 }
 
+/* Disable placeholder creep-up behavior for all fields */
+input[data-q]:focus::placeholder,
+input[data-q].input-error::placeholder,
+input[data-q][aria-invalid='true']::placeholder,
+.icon-field-wrapper input[data-q]:focus::placeholder,
+.icon-field-wrapper input[data-q].input-error::placeholder,
+.icon-field-wrapper input[data-q][aria-invalid='true']::placeholder,
+.icon-field-wrapper .icon-input-row input[data-q]:focus::placeholder,
+.icon-field-wrapper .icon-input-row input[data-q].input-error::placeholder,
+.icon-field-wrapper .icon-input-row input[data-q][aria-invalid='true']::placeholder {
+  transform: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  font-size: inherit !important;
+  color: #999 !important;
+}
+
+/* Ensure consistent placeholder behavior for form-control fields too */
+html body #_builder-form input.form-control[data-q]:focus::placeholder,
+html body #_builder-form input.form-control[data-q].input-error::placeholder,
+html body #_builder-form input.form-control[data-q][aria-invalid='true']::placeholder,
+body .hl-app input.form-control[data-q]:focus::placeholder,
+body .hl-app input.form-control[data-q].input-error::placeholder,
+body .hl-app input.form-control[data-q][aria-invalid='true']::placeholder {
+  transform: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  font-size: inherit !important;
+  color: #999 !important;
+}
+
 /* Wrapper may shake but shouldn't show red border */
 .icon-field-wrapper.input-error{border-radius:6px;}
 .field-error{display:block;margin-top:1px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}
