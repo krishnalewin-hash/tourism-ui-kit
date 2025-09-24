@@ -38,7 +38,7 @@
 
   // URL params to keep & forward
   const ALLOW = [
-    "pickup_location","dropoff_location","pickup_date","pickup_time","passengers",
+    "pickup_location","dropoff_location","pickup_date","pickup_time","passengers","number_of_passengers",
     "first_name","last_name","email","phone"
   ];
 
@@ -184,7 +184,7 @@
         const seconds = leg.duration?.value || 0;
 
         // Enhanced pricing with default passengers
-        const rawPax = getParam("passengers");
+        const rawPax = getParam("passengers") || getParam("number_of_passengers");
         const pax = rawPax && parseInt(rawPax) > 0 ? parseInt(rawPax) : CONFIG.defaultPassengers;
         
         const basePP   = pickBandPrice(miles);
@@ -231,7 +231,7 @@
     const dropoff = getParam("dropoff_location");
     const pickupDate = getParam("pickup_date");
     const pickupTime = getParam("pickup_time");
-    const passengers = getParam("passengers") || CONFIG.defaultPassengers;
+    const passengers = getParam("passengers") || getParam("number_of_passengers") || CONFIG.defaultPassengers;
     const firstName = getParam("first_name");
     const lastName = getParam("last_name");
     const email = getParam("email");
@@ -258,7 +258,7 @@
     // Get trip details for contact form
     const pickup = getParam("pickup_location");
     const dropoff = getParam("dropoff_location");
-    const passengers = getParam("passengers") || CONFIG.defaultPassengers;
+    const passengers = getParam("passengers") || getParam("number_of_passengers") || CONFIG.defaultPassengers;
     
     // Create contact message
     const message = `Hi! I'd like to book a transfer from ${pickup} to ${dropoff} for ${passengers} passenger(s). Please contact me with more details.`;
