@@ -463,6 +463,127 @@ window.BookingForm.injectCtaStyles = function() {
   `);
 };
 
+// Anti-creep JavaScript solution
+window.BookingForm.installAntiCreepSolution = function() {
+  console.log('Installing anti-creep solution...');
+  
+  // Function to reset placeholder transforms
+  function resetPlaceholderTransform(input) {
+    if (!input) return;
+    
+    // Reset any inline transform styles that might be applied by GoHighLevel
+    const style = input.style;
+    if (style.transform && style.transform.includes('translateY')) {
+      style.transform = style.transform.replace(/translateY\([^)]*\)/g, 'translateY(0px)');
+    }
+    
+    // Force font-size on the placeholder
+    const computedStyle = getComputedStyle(input, '::placeholder');
+    if (computedStyle.fontSize !== '20px') {
+      // Re-inject our specific CSS rule for this input
+      const inputId = input.id || input.getAttribute('data-q') || Math.random().toString(36);
+      const css = `
+        input[data-q="${input.getAttribute('data-q')}"]:focus::placeholder,
+        input[data-q="${input.getAttribute('data-q')}"]:placeholder-shown::placeholder,
+        input[data-q="${input.getAttribute('data-q')}"].input-error::placeholder,
+        input[data-q="${input.getAttribute('data-q')}"][aria-invalid='true']::placeholder {
+          transform: translateY(0px) !important;
+          transition: none !important;
+          opacity: 1 !important;
+          font-size: 20px !important;
+          color: #999 !important;
+        }
+      `;
+      
+      const styleEl = document.createElement('style');
+      styleEl.id = `anti-creep-${inputId}`;
+      styleEl.textContent = css;
+      
+      // Remove any existing anti-creep style for this input
+      const existingStyle = document.getElementById(`anti-creep-${inputId}`);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      document.head.appendChild(styleEl);
+    }
+  }
+  
+  // Monitor all input fields with data-q attributes
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          // Check if the node itself is an input with data-q
+          if (node.matches && node.matches('input[data-q]')) {
+            resetPlaceholderTransform(node);
+            
+            // Add event listeners for focus and error states
+            node.addEventListener('focus', () => resetPlaceholderTransform(node));
+            node.addEventListener('blur', () => resetPlaceholderTransform(node));
+            node.addEventListener('input', () => resetPlaceholderTransform(node));
+            
+            // Watch for class changes (error states)
+            const attrObserver = new MutationObserver(() => {
+              resetPlaceholderTransform(node);
+            });
+            attrObserver.observe(node, { attributes: true, attributeFilter: ['class', 'aria-invalid'] });
+          }
+          
+          // Check for input elements within the added node
+          const inputs = node.querySelectorAll ? node.querySelectorAll('input[data-q]') : [];
+          inputs.forEach(input => {
+            resetPlaceholderTransform(input);
+            
+            // Add event listeners for focus and error states
+            input.addEventListener('focus', () => resetPlaceholderTransform(input));
+            input.addEventListener('blur', () => resetPlaceholderTransform(input));
+            input.addEventListener('input', () => resetPlaceholderTransform(input));
+            
+            // Watch for class changes (error states)
+            const attrObserver = new MutationObserver(() => {
+              resetPlaceholderTransform(input);
+            });
+            attrObserver.observe(input, { attributes: true, attributeFilter: ['class', 'aria-invalid'] });
+          });
+        }
+      });
+    });
+  });
+  
+  // Start observing
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+  
+  // Reset existing inputs
+  const existingInputs = document.querySelectorAll('input[data-q]');
+  existingInputs.forEach(input => {
+    resetPlaceholderTransform(input);
+    
+    // Add event listeners
+    input.addEventListener('focus', () => resetPlaceholderTransform(input));
+    input.addEventListener('blur', () => resetPlaceholderTransform(input));
+    input.addEventListener('input', () => resetPlaceholderTransform(input));
+    
+    // Watch for class changes
+    const attrObserver = new MutationObserver(() => {
+      resetPlaceholderTransform(input);
+    });
+    attrObserver.observe(input, { attributes: true, attributeFilter: ['class', 'aria-invalid'] });
+  });
+  
+  // Set up a periodic check every 100ms to catch any transforms that slip through
+  setInterval(() => {
+    document.querySelectorAll('input[data-q]:focus, input[data-q].input-error, input[data-q][aria-invalid="true"]').forEach(input => {
+      resetPlaceholderTransform(input);
+    });
+  }, 100);
+  
+  console.log('Anti-creep solution installed successfully');
+};
+
 // Initialize styles immediately
 window.BookingForm.injectBaselineStyles();
 window.BookingForm.injectValidationStyles();

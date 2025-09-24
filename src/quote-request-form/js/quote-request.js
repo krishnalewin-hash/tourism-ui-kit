@@ -71,6 +71,9 @@ window.BookingForm.initNow = function(root = document) {
   window.BookingForm.installStepTwoSubmitValidation();
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
+  // Install anti-creep JavaScript solution
+  window.BookingForm.installAntiCreepSolution();
+  
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
     window.BookingForm.enhanceVisual(document);
