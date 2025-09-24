@@ -128,12 +128,10 @@ try {
 } catch(_) {}
 
 // Initialize survey step transitions (disabled to prevent navigation issues)
-function initSurveyTransitions(rootDoc) {
-  if(!rootDoc) rootDoc = document;
-  
-  console.log('🔄 Survey transitions disabled to prevent navigation issues');
-  // Transition functionality temporarily disabled until we find a safe approach
-  return;
+// Remove the disabled approach since it causes navigation issues
+// (Survey transitions are handled by GoHighLevel's platform)
+function initSurveyTransitions() {
+  // Intentionally disabled to prevent navigation issues
 }
 
 // Enhance the Step 2 submit button with CTA text + white arrow + loading state
@@ -155,16 +153,10 @@ function enhanceSubmitButton(rootDoc){
       `</span>`;
     
         // Add loading state functionality with fullscreen overlay approach
-    btn.addEventListener('click', function(e) {
-      console.log('🔘 Submit button clicked');
-      
-      // If loading overlay already exists, don't create another
-      if (document.querySelector('.bf-loading-overlay')) {
-        console.log('🚫 Loading overlay already exists');
-        return;
-      }
-      
-      // Create fullscreen loading overlay immediately
+    submitButton.addEventListener('click', function(e) {
+      if (loadingOverlay) {
+        return; // Loading overlay already exists
+      }      // Create fullscreen loading overlay immediately
       const loadingOverlay = document.createElement('div');
       loadingOverlay.className = 'bf-loading-overlay';
       loadingOverlay.innerHTML = `
@@ -195,9 +187,7 @@ function enhanceSubmitButton(rootDoc){
         font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       `;
       
-      console.log('✨ Created fullscreen loading overlay');
       document.body.appendChild(loadingOverlay);
-      console.log('📍 Fullscreen overlay added');
       
       // Check for validation errors after a brief delay
       setTimeout(() => {
@@ -205,13 +195,10 @@ function enhanceSubmitButton(rootDoc){
         const formElement = btn.closest('form');
         const isFormValid = formElement ? formElement.checkValidity() : true;
         
-        console.log('📋 Validation check:', { hasErrors, isFormValid });
-        
         if (hasErrors || !isFormValid) {
-          console.log('❌ Validation failed, removing overlay');
+          // Remove loading overlay if validation fails
           loadingOverlay.remove();
         } else {
-          console.log('✅ Form is submitting, keeping fullscreen overlay visible');
           // Keep overlay visible during submission and redirect
         }
       }, 100);

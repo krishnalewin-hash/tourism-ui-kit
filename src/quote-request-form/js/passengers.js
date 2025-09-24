@@ -127,7 +127,6 @@ window.BookingForm = window.BookingForm || {};
       }
       
       selectEl.dispatchEvent(new Event('input', { bubbles: true }));
-      console.log(`GHL Survey: Synced passenger count "${selectEl.value}" to hidden input`);
     });
     
     // Sync input changes back to the select (for URL parameter population)
@@ -136,7 +135,6 @@ window.BookingForm = window.BookingForm || {};
         selectEl.value = input.value;
         selectEl.setAttribute('value', selectEl.value);
         window.BookingForm.applyPlaceholderClass(selectEl);
-        console.log(`Synced input value "${input.value}" to select`);
       }
     });
     
@@ -166,7 +164,6 @@ window.BookingForm = window.BookingForm || {};
             if (selectEl.value && input.value !== selectEl.value) {
               input.value = selectEl.value;
               input.dispatchEvent(new Event('change', { bubbles: true }));
-              console.log(`Survey transition: Ensured passenger sync "${selectEl.value}"`);
             }
           });
           btn.dataset.passengerMonitor = 'true';
@@ -181,7 +178,6 @@ window.BookingForm = window.BookingForm || {};
             // Final sync before submission
             if (selectEl.value && input.value !== selectEl.value) {
               input.value = selectEl.value;
-              console.log(`Survey submission: Final passenger sync "${selectEl.value}"`);
             }
           });
           form.dataset.passengerMonitor = 'true';

@@ -170,15 +170,5 @@ window.BookingForm.initMapsAndFilters = function() {
   });
 };
 
-// Debug helper: window.__tpFix() to reposition time popover manually
-window.__tpFix = function(){
-  const p=document.getElementById('pickup-time-popover');
-  const i=document.querySelector('input[data-q="pickup_time"]');
-  if(!p||!i) return 'missing element';
-  const r=i.getBoundingClientRect();
-  Object.assign(p.style,{top:(window.scrollY+r.bottom+4)+'px', left:(window.scrollX+r.left)+'px'});
-  return 'repositioned';
-};
-
 // Expose loadGoogleMaps function for backwards compatibility
 window.BookingForm.loadGoogleMaps = loadGoogleMaps;

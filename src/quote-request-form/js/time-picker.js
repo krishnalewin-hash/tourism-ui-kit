@@ -81,8 +81,6 @@ window.BookingForm = window.BookingForm || {};
   }
   root.addEventListener('click', e=>{ const act=e.target.getAttribute('data-act'); if(!act) return; if(act==='hu') adjust(+1,0,false); else if(act==='hd') adjust(-1,0,false); else if(act==='mu') adjust(0,+1,false); else if(act==='md') adjust(0,-1,false); else if(act==='tu'||act==='td') adjust(0,0,true); else if(act==='ok') commit(); else if(act==='x') { close(); state.input?.focus(); } });
   window.__singletonTimePicker = { openFor, close, suppressNextFocusOpen: false };
-  // public helper for debugging
-  window.__tpOpenNow = sel => openFor(document.querySelector(sel));
 })();
 
 // Wire one or more pickup time inputs to the singleton picker
