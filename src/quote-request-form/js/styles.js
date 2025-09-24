@@ -22,7 +22,7 @@ body, input, button, select, textarea {
 
 /* Core icon wrapper + input padding */
 .icon-field-wrapper{position:relative;display:block;width:100%;}
-.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}
+.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:28px;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}
 .icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
 .icon-field-wrapper > input[data-iconized='1'][data-q],
 .icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.3rem !important;}
@@ -196,6 +196,16 @@ select[data-q][aria-invalid='true'] {
 /* Wrapper may shake but shouldn't show red border */
 .icon-field-wrapper.input-error{border-radius:6px;}
 .field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}
+
+/* Fix for icon positioning - prevent error messages from affecting field icon alignment */
+.icon-field-wrapper .field-error {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+  z-index: 10 !important;
+}
 @keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
 .shake{animation:bf-shake 400ms ease-in-out;}
 
