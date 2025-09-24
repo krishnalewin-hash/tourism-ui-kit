@@ -270,6 +270,28 @@ body .hl-app input.form-control[data-q][aria-invalid='true']::placeholder {
   color: #999 !important;
 }
 
+/* Ultra-nuclear placeholder font-size override */
+html body #_builder-form .hl-app input.form-control[data-q]:focus::placeholder,
+html body #_builder-form .hl-app input.form-control[data-q].input-error::placeholder,
+html body #_builder-form .hl-app input.form-control[data-q][aria-invalid='true']::placeholder,
+html body .hl-app #_builder-form input.form-control[data-q]:focus::placeholder,
+html body .hl-app #_builder-form input.form-control[data-q].input-error::placeholder,
+html body .hl-app #_builder-form input.form-control[data-q][aria-invalid='true']::placeholder,
+html body #_builder-form input.form-control.input-error[data-q]:focus::placeholder,
+html body #_builder-form input.form-control[data-q][aria-invalid='true']:focus::placeholder,
+html body #_builder-form input.form-control.input-error[data-q='phone']:focus::placeholder,
+html body #_builder-form input.form-control[data-q='phone'][aria-invalid='true']:focus::placeholder,
+html body #_builder-form input.form-control.input-error[data-q='email']:focus::placeholder,
+html body #_builder-form input.form-control[data-q='email'][aria-invalid='true']:focus::placeholder,
+html body #_builder-form input.form-control.input-error[data-q='full_name']:focus::placeholder,
+html body #_builder-form input.form-control[data-q='full_name'][aria-invalid='true']:focus::placeholder {
+  transform: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  font-size: 20px !important;
+  color: #999 !important;
+}
+
 /* Wrapper may shake but shouldn't show red border */
 .icon-field-wrapper.input-error{border-radius:6px;}
 .field-error{display:block;margin-top:1px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}
