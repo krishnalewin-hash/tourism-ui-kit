@@ -15,8 +15,8 @@ const MOUNT_ID = "quote-calc";
 
   /* ===== 0) DEFAULT CONFIG (fallback if no client config) =========== */
   const DEFAULT_CONFIG = {
-    // GMAPS key: use window.CFG.GMAPS_KEY if present; or set here
-    googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+    // GMAPS key: use window.CFG.GMAPS_KEY if present; client must provide their own key
+    googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "",
 
     // Pricing bands (miles are inclusive of lower bound, exclusive of upper)
     bands: [
