@@ -174,11 +174,22 @@ input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper se
 
 window.BookingForm.injectValidationStyles = function() {
   inject('booking-form-validation-styles', `
-/* Validation visuals - maintain consistent border width and sizing */
-.input-error{
+/* High-specificity error states for ALL input fields to ensure consistency */
+.icon-field-wrapper .icon-input-row > input[data-q].input-error,
+.icon-field-wrapper .icon-input-row > input[data-q][aria-invalid='true'],
+.icon-field-wrapper .icon-input-row > select[data-q].input-error,
+.icon-field-wrapper .icon-input-row > select[data-q][aria-invalid='true'],
+input[data-q].input-error,
+input[data-q][aria-invalid='true'],
+select[data-q].input-error,
+select[data-q][aria-invalid='true'] {
+  background: #fff !important;
   border: 2px solid #e53935 !important;
   box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
+  outline: none !important;
+  border-radius: 4px !important;
 }
+
 /* Wrapper may shake but shouldn't show red border */
 .icon-field-wrapper.input-error{border-radius:6px;}
 .field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}
@@ -242,16 +253,7 @@ select[data-q='number_of_passengers']:active {
   outline: none !important;
 }
 
-/* Number of passengers error states */
-.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'][aria-invalid='true'],
-.icon-field-wrapper .icon-input-row > select[data-q='number_of_passengers'].input-error,
-select[data-q='number_of_passengers'][aria-invalid='true'],
-select[data-q='number_of_passengers'].input-error {
-  background: #fff !important;
-  border: 2px solid #e53935 !important;
-  box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
-  outline: none !important;
-}
+/* Number of passengers error states - now handled by general error styling above */
   `);
   inject('booking-form-fade-styles', `
     .bf-fade-anim{transition:opacity 220ms ease, transform 220ms ease; will-change: opacity, transform;}
