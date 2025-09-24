@@ -193,7 +193,19 @@ select[data-q][aria-invalid='true'] {
   height: auto !important;
 }
 
-/* Specific error styling for step 2 fields (email, phone, full_name) */
+/* Ultra-high specificity error styling for step 2 fields */
+.hl-app input[data-q='email'].input-error,
+.hl-app input[data-q='email'][aria-invalid='true'],
+.hl-app input[data-q='phone'].input-error,
+.hl-app input[data-q='phone'][aria-invalid='true'], 
+.hl-app input[data-q='full_name'].input-error,
+.hl-app input[data-q='full_name'][aria-invalid='true'],
+.form-control[data-q='email'].input-error,
+.form-control[data-q='email'][aria-invalid='true'],
+.form-control[data-q='phone'].input-error,
+.form-control[data-q='phone'][aria-invalid='true'],
+.form-control[data-q='full_name'].input-error,
+.form-control[data-q='full_name'][aria-invalid='true'],
 input[data-q='email'].input-error,
 input[data-q='email'][aria-invalid='true'],
 input[data-q='phone'].input-error,
