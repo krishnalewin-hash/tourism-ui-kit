@@ -60,8 +60,8 @@ window.CFG = {
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-results-page.min.css">
 <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-results-page.min.js"></script>
-<!-- OR Enhanced Version -->
-<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-results-page-enhanced.min.js"></script>
+<!-- Quote Results JavaScript -->
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-results-page.min.js"></script>
 ```
 
 **Features**:
