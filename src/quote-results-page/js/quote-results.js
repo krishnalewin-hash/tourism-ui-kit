@@ -58,38 +58,83 @@
       // Determine base URL for client configs
       const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
       
-      let configUrl;
-      if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
-        configUrl = `${base}/clients/${client}.json`;
-      } else {
-        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}.json`;
+      console.log(`[quote-calc] Loading client config: ${client}`);
+      console.log(`[quote-calc] Base URL: ${base}`);
+
+      // Try built configuration first
+      try {
+        let configUrl;
+        if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+          configUrl = `${base}/clients/_build/${client}.json`;
+        } else {
+          configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
+        }
+
+        console.log(`[quote-calc] Fetching built config: ${configUrl}`);
+        
+        const response = await fetch(configUrl, { cache: 'no-store' });
+        if (response.ok) {
+          const clientConfig = await response.json();
+          
+          // Update CONFIG with client-specific settings
+          if (clientConfig.QUOTE_RESULTS_CONFIG) {
+            CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
+          } else if (clientConfig.PRICING_RATES) {
+            convertPricingRatesToConfig(clientConfig.PRICING_RATES);
+          }
+          
+          // Override Google Maps key if present in client config
+          if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
+          }
+          
+          console.log(`[quote-calc] Successfully loaded ${client} configuration from built config`);
+          return CONFIG;
+        } else {
+          console.log(`[quote-calc] Built config returned ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.log(`[quote-calc] Built config fetch failed: ${error.message}`);
       }
 
-      console.log(`[quote-calc] Loading client config: ${client} from ${configUrl}`);
-      
-      const response = await fetch(configUrl, { cache: 'no-store' });
-      if (!response.ok) {
-        console.warn(`[quote-calc] Failed to load client config for "${client}", using defaults`);
-        return CONFIG; // Return default config
+      // Fallback: Try legacy single file
+      try {
+        let legacyUrl;
+        if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+          legacyUrl = `${base}/clients/${client}.json`;
+        } else {
+          legacyUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}.json`;
+        }
+
+        console.log(`[quote-calc] Trying legacy config: ${legacyUrl}`);
+        
+        const response = await fetch(legacyUrl, { cache: 'no-store' });
+        if (response.ok) {
+          const clientConfig = await response.json();
+          
+          // Update CONFIG with client-specific settings
+          if (clientConfig.QUOTE_RESULTS_CONFIG) {
+            CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
+          } else if (clientConfig.PRICING_RATES) {
+            convertPricingRatesToConfig(clientConfig.PRICING_RATES);
+          }
+          
+          // Override Google Maps key if present in client config
+          if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
+          }
+          
+          console.log(`[quote-calc] Successfully loaded ${client} configuration from legacy config`);
+          return CONFIG;
+        } else {
+          console.log(`[quote-calc] Legacy config returned ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.log(`[quote-calc] Legacy config fetch failed: ${error.message}`);
       }
-      
-      const clientConfig = await response.json();
-      
-      // Update CONFIG with client-specific settings
-      if (clientConfig.QUOTE_RESULTS_CONFIG) {
-        // Use dedicated quote results config if present
-        CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
-      } else if (clientConfig.PRICING_RATES) {
-        // Convert existing pricing rates to quote results format
-        convertPricingRatesToConfig(clientConfig.PRICING_RATES);
-      }
-      
-      // Override Google Maps key if present in client config
-      if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
-        CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
-      }
-      
-      console.log(`[quote-calc] Loaded config for client: ${client}`, CONFIG);
+
+      // Final fallback: Use defaults
+      console.warn(`[quote-calc] No configuration found for ${client}, using defaults`);
       return CONFIG;
       
     } catch (error) {
