@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "client": "kamar-tours",
+  "files": {
+    "config": "config.json",
+    "pricing": "pricing.json",
+    "catalog": "catalog.json",
+    "branding": "branding.json"
+  },
+  "components": {
+    "quote-request-form": ["config"],
+    "quote-results-page": ["config", "pricing"],
+    "cards": ["config", "catalog", "branding"]
+  }
+}

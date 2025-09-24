@@ -1,0 +1,39 @@
+{
+  "PRICING_RATES": {
+    "shuttle": {
+      "perMile": 1.50,
+      "perMinute": 0.50,
+      "minimum": 25,
+      "baseRate": 12
+    },
+    "private": {
+      "perMile": 2.50,
+      "perMinute": 0.75,
+      "minimum": 35,
+      "baseRate": 35
+    },
+    "zones": {
+      "MBJ_AREA": { "shuttle": { "base": 12 }, "private": { "base": 35 } },
+      "OCHO_RIOS": { "shuttle": { "base": 25 }, "private": { "base": 80 } },
+      "NEGRIL": { "shuttle": { "base": 28 }, "private": { "base": 95 } }
+    }
+  },
+  "QUOTE_RESULTS_CONFIG": {
+    "bands": [
+      { "maxMi": 10, "pricePP": 25 },
+      { "maxMi": 20, "pricePP": 35 },
+      { "maxMi": 40, "pricePP": 50 },
+      { "maxMi": 999, "pricePP": 65 }
+    ],
+    "minPricePP": 25,
+    "defaultPassengers": 1,
+    "remote": {
+      "keywords": [
+        "tryall","round hill","dublin castle","anchovy","greenwood",
+        "bluefields","sheffield","orange bay","rhodes hall"
+      ],
+      "surchargePP": 8
+    },
+    "map": { "zoom": 9 }
+  }
+}

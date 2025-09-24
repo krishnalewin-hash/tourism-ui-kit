@@ -1,0 +1,9 @@
+{
+  "copy": {
+    "flight": "Flight tracking included",
+    "wifi": "Complimentary Wi-Fi",
+    "water": "Complimentary refreshments",
+    "cancel": "Free cancellation up to 24 hours",
+    "inclusive": "All taxes and fees included"
+  }
+}

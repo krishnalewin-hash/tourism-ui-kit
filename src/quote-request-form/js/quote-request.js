@@ -1,5 +1,8 @@
 // src/booking/js/booking.js
 
+// IMPORTANT: Load async config loader FIRST before other modules
+import './async-config-loader.js';
+
 // Include all modules by importing them (they'll be bundled)
 import './config.js';
 import './styles.js';
@@ -54,37 +57,40 @@ window.BookingForm.initNow = function(root = document) {
   // Section 1 & 2: Inject essential styles first
   window.BookingForm.injectBaselineStyles();
   window.BookingForm.injectValidationStyles();
-  
-  // Section 8: Initial Enhancement Invocation
-  // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
-  // Adjust order only if dependencies change (icons don't depend on others).
-  
-  window.BookingForm.attachPickupDateGuard(document);
-  window.BookingForm.attachPickupTimePicker(document);
-  window.BookingForm.enhanceVisual(document);
-  window.BookingForm.enhanceNextButtonMobile(document);
-  window.BookingForm.enhanceSubmitButton(document);
-  window.BookingForm.initSurveyTransitions(document);
-  
-  // Install validation for both steps
-  window.BookingForm.installStepOneNextValidation();
-  window.BookingForm.installStepTwoSubmitValidation();
-  // Step 1 NEXT validation is installed by its module above (IIFE).
-  
-  // Secondary run to catch late-rendered inputs
-  setTimeout(()=>{
+};
+
+// Section 8: Form Enhancement Function (called after config is loaded)
+window.BookingForm.enhance = function() {
+  console.log('[BookingForm] Starting form enhancement...');
+    
+    // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
+    // Adjust order only if dependencies change (icons don't depend on others).
+    
+    window.BookingForm.attachPickupDateGuard(document);
+    window.BookingForm.attachPickupTimePicker(document);
     window.BookingForm.enhanceVisual(document);
-  },400);
+    window.BookingForm.enhanceNextButtonMobile(document);
+    window.BookingForm.enhanceSubmitButton(document);
+    window.BookingForm.initSurveyTransitions(document);
+    
+    // Install validation for both steps
+    window.BookingForm.installStepOneNextValidation();
+    window.BookingForm.installStepTwoSubmitValidation();
+    
+    // Secondary run to catch late-rendered inputs
+    setTimeout(()=>{
+      window.BookingForm.enhanceVisual(document);
+    },400);
 
-  // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
-  window.BookingForm.initMapsAndFilters();
+    // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
+    window.BookingForm.initMapsAndFilters();
 
-  // Watch for late-rendered/replaced fields (GHL)
-  window.BookingForm.observeLateFields();
+    // Watch for late-rendered/replaced fields (GHL)
+    window.BookingForm.observeLateFields();
 
-  // Section 11: Populate URL parameters after components are initialized
-  setTimeout(() => {
-    try {
+    // Section 11: Populate URL parameters after components are initialized
+    setTimeout(() => {
+      try {
       const qs = new URLSearchParams(location.search);
       window.BookingForm.cacheIncomingParams(qs);
       
@@ -189,10 +195,9 @@ window.BookingForm.initNow = function(root = document) {
       console.warn('URL parameter population failed:', e);
     }
   }, 800); // Longer delay to ensure passenger select is created
+  
+  console.log('[BookingForm] Form enhancement complete');
 };
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => window.BookingForm.initNow(document), { once: true });
-} else {
-  window.BookingForm.initNow(document);
-}
+// Note: Form enhancement is now called by async-config-loader.js after config loads
+// The old DOM ready initialization is replaced by the config-driven approach

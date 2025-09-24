@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modular Config System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .client-test {
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        #quote-calc {
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #f0f0f0;
+        }
+        .active {
+            background: #007cba;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tourism UI Kit - Modular Configuration System Test</h1>
+    
+    <div class="test-section">
+        <h2>Configuration System Test</h2>
+        <p>This test demonstrates the modular client configuration system that supports:</p>
+        <ul>
+            <li><strong>Modular Structure:</strong> Client configs split into separate files (config.json, pricing.json, catalog.json, branding.json)</li>
+            <li><strong>Manifest-driven Loading:</strong> Components load only the files they need</li>
+            <li><strong>Built Configs:</strong> Development files combined into single JSONs for CDN distribution</li>
+            <li><strong>Backward Compatibility:</strong> Legacy single-file configs still supported</li>
+        </ul>
+        
+        <div class="controls">
+            <button onclick="testClient('demo')" id="demo-btn" class="active">Test Demo Client</button>
+            <button onclick="testClient('kamar-tours')" id="kamar-tours-btn">Test Kamar Tours</button>
+            <button onclick="testClient('tour-driver')" id="tour-driver-btn">Test Tour Driver</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Client Configuration Details</h2>
+        <div id="config-details"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Quote Calculator Widget</h2>
+        <p>The quote calculator below will load different pricing configurations based on the selected client:</p>
+        <ul>
+            <li><strong>Demo:</strong> Budget pricing ($25-65 per person)</li>
+            <li><strong>Kamar Tours:</strong> Mid-range pricing ($30-80 per person)</li>
+            <li><strong>Tour Driver:</strong> Premium pricing ($120-264 per person)</li>
+        </ul>
+        <div id="quote-calc"></div>
+    </div>
+
+    <script>
+        // Set up base configuration for local testing
+        window.CFG = {
+            base: '..',  // Use local files
+            client: 'demo',
+            GMAPS_KEY: 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA'
+        };
+
+        // Simulate URL parameters for quote calculation
+        const params = new URLSearchParams();
+        params.set('pickup_location', 'Sangster International Airport (MBJ), Norman Manley Boulevard, Montego Bay, Jamaica');
+        params.set('dropoff_location', 'Negril, Jamaica');
+        params.set('pickup_date', '2024-01-15');
+        params.set('pickup_time', '14:00');
+        params.set('passengers', '2');
+        params.set('first_name', 'John');
+        params.set('last_name', 'Doe');
+        params.set('email', 'john.doe@example.com');
+        params.set('phone', '+1234567890');
+        
+        // Update URL with test parameters
+        if (window.location.search === '') {
+            window.history.replaceState({}, '', '?' + params.toString());
+        }
+
+        async function testClient(clientName) {
+            console.log(`\n=== Testing client: ${clientName} ===`);
+            
+            // Update active button
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${clientName}-btn`).classList.add('active');
+            
+            // Update global config
+            window.CFG.client = clientName;
+            
+            // Show configuration details
+            await showClientConfig(clientName);
+            
+            // Reload quote calculator
+            document.getElementById('quote-calc').innerHTML = '';
+            
+            // Load and reinitialize quote calculator
+            if (window.QuoteResults) {
+                delete window.QuoteResults;
+            }
+            
+            // Reload the script
+            const script = document.querySelector('script[src*="quote-results"]');
+            if (script) {
+                script.remove();
+            }
+            
+            const newScript = document.createElement('script');
+            newScript.src = '../dist/quote-results-page.min.js?t=' + Date.now();
+            newScript.onload = () => {
+                console.log(`Quote calculator loaded for ${clientName}`);
+            };
+            document.head.appendChild(newScript);
+        }
+
+        async function showClientConfig(clientName) {
+            const detailsDiv = document.getElementById('config-details');
+            detailsDiv.innerHTML = '<p>Loading configuration...</p>';
+            
+            try {
+                // Try to load modular config first
+                const manifestUrl = `../clients/${clientName}/manifest.json`;
+                let configHtml = `<h3>${clientName} Configuration</h3>`;
+                
+                try {
+                    const manifestResponse = await fetch(manifestUrl);
+                    if (manifestResponse.ok) {
+                        const manifest = await manifestResponse.json();
+                        configHtml += '<h4>📁 Modular Structure:</h4>';
+                        configHtml += `<p><strong>Version:</strong> ${manifest.version}</p>`;
+                        configHtml += '<p><strong>Files:</strong></p><ul>';
+                        
+                        for (const [type, filename] of Object.entries(manifest.files)) {
+                            configHtml += `<li><strong>${type}:</strong> ${filename}</li>`;
+                        }
+                        configHtml += '</ul>';
+                        
+                        configHtml += '<p><strong>Component Dependencies:</strong></p><ul>';
+                        for (const [component, deps] of Object.entries(manifest.components)) {
+                            configHtml += `<li><strong>${component}:</strong> ${deps.join(', ')}</li>`;
+                        }
+                        configHtml += '</ul>';
+                    }
+                } catch (e) {
+                    configHtml += '<h4>📄 Legacy Structure:</h4>';
+                    configHtml += `<p>Single file: ${clientName}.json</p>`;
+                }
+                
+                // Try to load built config
+                try {
+                    const builtUrl = `../clients/_build/${clientName}.json`;
+                    const builtResponse = await fetch(builtUrl);
+                    if (builtResponse.ok) {
+                        const builtConfig = await builtResponse.json();
+                        configHtml += '<h4>🔧 Built Configuration:</h4>';
+                        if (builtConfig._meta) {
+                            configHtml += `<p><strong>Build Time:</strong> ${builtConfig._meta.buildTime}</p>`;
+                            configHtml += `<p><strong>Source:</strong> ${builtConfig._meta.source}</p>`;
+                        }
+                        if (builtConfig.QUOTE_RESULTS_CONFIG) {
+                            const pricing = builtConfig.QUOTE_RESULTS_CONFIG;
+                            configHtml += '<p><strong>Pricing Bands:</strong></p><ul>';
+                            pricing.bands.forEach(band => {
+                                configHtml += `<li>Up to ${band.maxMi} miles: $${band.pricePP} per person</li>`;
+                            });
+                            configHtml += '</ul>';
+                            configHtml += `<p><strong>Minimum Price:</strong> $${pricing.minPricePP} per person</p>`;
+                            if (pricing.remote) {
+                                configHtml += `<p><strong>Remote Surcharge:</strong> $${pricing.remote.surchargePP} per person</p>`;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    configHtml += '<p>❌ Built config not available</p>';
+                }
+                
+                detailsDiv.innerHTML = configHtml;
+                
+            } catch (error) {
+                detailsDiv.innerHTML = `<p>❌ Error loading configuration: ${error.message}</p>`;
+            }
+        }
+
+        // Initialize with demo client
+        window.addEventListener('load', () => {
+            testClient('demo');
+        });
+    </script>
+
+    <!-- Load quote calculator CSS -->
+    <link rel="stylesheet" href="../dist/quote-results-page.min.css">
+    
+    <!-- Load quote calculator JS -->
+    <script src="../dist/quote-results-page.min.js"></script>
+    
+    <!-- Load Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA&libraries=places"></script>
+</body>
+</html>

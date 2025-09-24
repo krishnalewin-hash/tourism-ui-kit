@@ -6,14 +6,28 @@ window.BookingForm = window.BookingForm || {};
 // Section 3: Google Maps Loader (dynamic include + readiness poll)
 function loadGoogleMaps(callback){
   if (window.google?.maps?.places) return callback();
+  
+  // Wait for configuration if not ready
+  if (!window.BookingForm.configReady) {
+    console.log('[Maps] Waiting for configuration...');
+    window.BookingForm.onConfigReady = window.BookingForm.onConfigReady || [];
+    window.BookingForm.onConfigReady.push(() => loadGoogleMaps(callback));
+    return;
+  }
+  
   if (document.querySelector('script[data-gmaps-loader]')){
     const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
     setTimeout(()=>clearInterval(poll), window.BookingForm.CONFIG.mapsLoadTimeoutMs);
     return;
   }
+  
+  const apiKey = window.BookingForm.CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
+  console.log(`[Maps] Loading Google Maps with API key: ${apiKey.substring(0, 10)}...`);
+  
   const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.BookingForm.CONFIG.googleApiKey)}&libraries=places`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
   s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
+  s.onload = () => console.log('[Maps] Google Maps loaded successfully');
   s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
   document.head.appendChild(s);
   const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);

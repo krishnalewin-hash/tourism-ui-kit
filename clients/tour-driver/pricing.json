@@ -1,0 +1,40 @@
+{
+  "PRICING_RATES": {
+    "BASE_RATES": {
+      "SEDAN": 120,
+      "SUV": 150,
+      "MINIVAN": 180
+    },
+    "DISTANCE_BANDS": [
+      {"maxKm": 15, "multiplier": 1.0},
+      {"maxKm": 30, "multiplier": 1.2},
+      {"maxKm": 50, "multiplier": 1.4},
+      {"maxKm": 100, "multiplier": 1.8},
+      {"maxKm": 999, "multiplier": 2.2}
+    ],
+    "REMOTE_AREAS": {
+      "THRESHOLD_KM": 75,
+      "SURCHARGE_USD": 25
+    }
+  },
+  "QUOTE_RESULTS_CONFIG": {
+    "bands": [
+      { "maxMi": 9, "pricePP": 120 },
+      { "maxMi": 19, "pricePP": 144 },
+      { "maxMi": 31, "pricePP": 168 },
+      { "maxMi": 62, "pricePP": 216 },
+      { "maxMi": 999, "pricePP": 264 }
+    ],
+    "minPricePP": 120,
+    "defaultPassengers": 1,
+    "remote": {
+      "keywords": [
+        "tryall","round hill","dublin castle","anchovy","greenwood",
+        "bluefields","sheffield","orange bay","rhodes hall",
+        "falmouth","martha brae","rio bueno"
+      ],
+      "surchargePP": 25
+    },
+    "map": { "zoom": 9 }
+  }
+}
