@@ -16,7 +16,7 @@
   /* ===== 0) DEFAULT CONFIG (fallback if no client config) =========== */
   const DEFAULT_CONFIG = {
     // GMAPS key: use window.CFG.GMAPS_KEY if present; or set here
-    googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "",
+    googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
 
     // Pricing bands (miles are inclusive of lower bound, exclusive of upper)
     bands: [
@@ -253,18 +253,40 @@
 
   /* ===== 5) Google Maps Loader ======================================= */
   function loadMaps(cb){
-    if (window.google && google.maps && google.maps.DirectionsService) return cb();
-    const key = CONFIG.googleApiKey;
-    if (!key) { console.error("[quote-calc] Missing Google Maps API key"); cb("no-key"); return; }
-    if (document.querySelector("script[data-qc-gmaps]")){
-      const check = () => window.google?.maps?.DirectionsService ? cb() : setTimeout(check, 100);
-      check(); return;
+    console.log(`[quote-calc] Loading Google Maps...`);
+    if (window.google && google.maps && google.maps.DirectionsService) {
+      console.log(`[quote-calc] Google Maps already loaded`);
+      return cb();
     }
+    
+    const key = CONFIG.googleApiKey;
+    console.log(`[quote-calc] Using API key: ${key?.substring(0, 15)}...`);
+    
+    if (!key) { 
+      console.error("[quote-calc] Missing Google Maps API key"); 
+      cb("no-key"); 
+      return; 
+    }
+    
+    if (document.querySelector("script[data-qc-gmaps]")){
+      console.log(`[quote-calc] Google Maps script already exists, waiting for load...`);
+      const check = () => window.google?.maps?.DirectionsService ? cb() : setTimeout(check, 100);
+      check(); 
+      return;
+    }
+    
+    console.log(`[quote-calc] Creating Google Maps script tag`);
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
     script.setAttribute("data-qc-gmaps", "1");
-    script.onload = () => cb();
-    script.onerror = () => { console.error("[quote-calc] Failed to load Google Maps"); cb("load-error"); };
+    script.onload = () => {
+      console.log(`[quote-calc] Google Maps script loaded successfully`);
+      cb();
+    };
+    script.onerror = () => { 
+      console.error("[quote-calc] Failed to load Google Maps"); 
+      cb("load-error"); 
+    };
     document.head.appendChild(script);
   }
 
@@ -275,6 +297,10 @@
 
     const pickup = getParam("pickup_location");
     const dropoff = getParam("dropoff_location");
+    
+    console.log(`[quote-calc] Starting calculation with pickup: ${pickup}, dropoff: ${dropoff}`);
+    console.log(`[quote-calc] Initial CONFIG.googleApiKey: ${CONFIG.googleApiKey?.substring(0, 15)}...`);
+    
     if (!pickup || !dropoff) {
       mount.innerHTML = `<div class="qc-error">Missing pickup or dropoff location</div>`;
       return;
@@ -285,6 +311,7 @@
     // Load client-specific config first
     try {
       await loadClientConfig();
+      console.log(`[quote-calc] After config loading, CONFIG.googleApiKey: ${CONFIG.googleApiKey?.substring(0, 15)}...`);
     } catch (error) {
       console.warn('[quote-calc] Failed to load client config, using defaults:', error);
     }
