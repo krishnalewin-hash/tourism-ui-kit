@@ -252,7 +252,7 @@ input[data-q][aria-invalid='true']::placeholder,
   transform: none !important;
   transition: none !important;
   opacity: 1 !important;
-  font-size: inherit !important;
+  font-size: 20px !important;
   color: #999 !important;
 }
 
@@ -266,7 +266,7 @@ body .hl-app input.form-control[data-q][aria-invalid='true']::placeholder {
   transform: none !important;
   transition: none !important;
   opacity: 1 !important;
-  font-size: inherit !important;
+  font-size: 20px !important;
   color: #999 !important;
 }
 
