@@ -193,7 +193,7 @@ select[data-q][aria-invalid='true'] {
   height: auto !important;
 }
 
-/* Nuclear option - Maximum specificity for step 2 fields */
+/* Nuclear option - Maximum specificity for step 2 fields with correct styling */
 body .hl-app input.form-control.input-error[data-q='phone'],
 body .hl-app input.form-control[data-q='phone'][aria-invalid='true'],
 body .hl-app input.form-control.input-error[data-q='email'], 
@@ -206,20 +206,16 @@ html body input.form-control.input-error[data-q='email'],
 html body input.form-control[data-q='email'][aria-invalid='true'],
 html body input.form-control.input-error[data-q='full_name'],
 html body input.form-control[data-q='full_name'][aria-invalid='true'] {
-  border: 2px solid #e53935 !important;
-  border-color: #e53935 !important;
-  box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
-  outline: 2px solid #e53935 !important;
   background: #fff !important;
+  border: 2px solid #e53935 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: #e53935 !important;
   border-radius: 4px !important;
+  box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
+  outline: none !important;
   min-height: 56px !important;
   height: auto !important;
-}
-
-/* Test selector - this should make fields bright blue if our CSS is working */
-input[data-q='email'].input-error,
-input[data-q='phone'].input-error {
-  background: blue !important;
 }
 
 /* Hide GoHighLevel's default error messages to prevent conflicts */
