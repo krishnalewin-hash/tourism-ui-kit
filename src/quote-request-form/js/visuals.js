@@ -152,11 +152,14 @@ function enhanceSubmitButton(rootDoc){
       `</svg>`+
       `</span>`;
     
-        // Add loading state functionality with fullscreen overlay approach
-    submitButton.addEventListener('click', function(e) {
-      if (loadingOverlay) {
+    // Add loading state functionality with fullscreen overlay approach
+    btn.addEventListener('click', function(e) {
+      // Check if overlay already exists
+      if (document.querySelector('.bf-loading-overlay')) {
         return; // Loading overlay already exists
-      }      // Create fullscreen loading overlay immediately
+      }
+      
+      // Create fullscreen loading overlay immediately
       const loadingOverlay = document.createElement('div');
       loadingOverlay.className = 'bf-loading-overlay';
       loadingOverlay.innerHTML = `
