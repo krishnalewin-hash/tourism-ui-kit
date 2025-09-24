@@ -13,6 +13,22 @@
 
 const MOUNT_ID = "quote-calc";
 
+// Inline CSS styles for the component
+const QUOTE_RESULTS_CSS = `:root{--card-bg:#fff;--card-border:#ececec;--muted:#6b7280;--accent:#D65130;--accent-600:#b54224;--shadow:0 8px 24px rgba(0,0,0,.06);--radius:12px;--font:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}html,body{margin:0;padding:0}body{font-family:var(--font);color:#111827;background:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:5px;font-weight:700;text-decoration:none}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover,.btn-primary:focus{background:var(--accent-600)}.btn:focus{outline:2px solid #000;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skeleton-list{display:grid;gap:16px}.skeleton{display:grid;grid-template-columns:320px 1fr 200px;gap:20px;background:#fff;border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.shimmer{position:relative;background:#eef0f3;overflow:hidden;border-radius:12px}.shimmer::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 100%);animation:shimmer 1.4s infinite}@keyframes shimmer{100%{transform:translateX(100%)}}.sk-img{height:100%;min-height:220px}.sk-line{height:14px;border-radius:8px}.sk-line.lg{height:20px}.sk-pad{padding:18px 16px;display:flex;flex-direction:column;gap:12px}.sk-right{padding:16px;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--card-border)}.sk-pill{height:36px;border-radius:5px}@media (max-width:1024px){.skeleton{grid-template-columns:260px 1fr 180px}}@media (max-width:860px){.skeleton{grid-template-columns:1fr}.sk-right{border-left:none;border-top:1px solid var(--card-border)}.sk-img{min-height:180px}}#quote-calc{box-sizing:border-box;max-width:1100px;margin:24px auto;padding:24px;border:1px solid #ececec;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.qc-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media (max-width:900px){.qc-row{grid-template-columns:1fr;gap:24px}#quote-calc{padding:10px}}.qc-map{width:100%;height:400px;border-radius:12px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb}.qc-details{display:flex;flex-direction:column;gap:0px}.qc-detail-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6}.qc-detail-item:last-of-type{border-bottom:none}.qc-detail-label{font-weight:800;color:#374151;font-size:18px}.qc-detail-value{font-weight:400;color:#111827;font-size:18px}.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}.qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}.qc-btn-primary{background:#059669;color:white;border:2px solid #059669}.qc-btn-primary:hover{background:#047857;border-color:#047857}.qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}.qc-btn-secondary:hover{background:#f9fafb;border-color:#9ca3af}.qc-err{padding:12px;border:1px solid #f3d2d2;background:#fff6f6;color:#9b1c1c;border-radius:10px}.qc-shimmer{position:relative;border-radius:10px;background:#eef0f3;overflow:hidden}.qc-shimmer:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 100%);animation:qc-shimmer 1.4s infinite}@keyframes qc-shimmer{100%{transform:translateX(100%)}}`;
+
+// Function to inject CSS styles into the document
+function injectStyles() {
+  // Check if styles are already injected
+  if (document.getElementById('quote-results-styles')) {
+    return;
+  }
+  
+  const styleElement = document.createElement('style');
+  styleElement.id = 'quote-results-styles';
+  styleElement.textContent = QUOTE_RESULTS_CSS;
+  document.head.appendChild(styleElement);
+}
+
   /* ===== 0) DEFAULT CONFIG (fallback if no client config) =========== */
   const DEFAULT_CONFIG = {
     // GMAPS key: use window.CFG.GMAPS_KEY if present; client must provide their own key
@@ -292,6 +308,9 @@ const MOUNT_ID = "quote-calc";
 
   /* ===== 6) Main Calculator Engine ==================================== */
   async function calculate(){
+    // Inject CSS styles first
+    injectStyles();
+    
     const mount = document.getElementById(MOUNT_ID);
     if (!mount) { console.warn(`[quote-calc] No element #${MOUNT_ID} found`); return; }
 
