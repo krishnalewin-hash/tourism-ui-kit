@@ -21,8 +21,8 @@ body, input, button, select, textarea {
 }
 
 /* Core icon wrapper + input padding */
-.icon-field-wrapper{position:relative;display:block;width:100%;margin-bottom:24px;}
-.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:30px;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}
+.icon-field-wrapper{position:relative;display:block;width:100%;}
+.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}
 .icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}
 .icon-field-wrapper > input[data-iconized='1'][data-q],
 .icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.3rem !important;}
