@@ -32,11 +32,11 @@ input[data-q], select[data-q]{
   display:inline-block !important;
   width:100% !important;
   min-width:200px !important;
-  padding:15px 20px 15px 2.25rem !important; /* leaves room for the icon */
+  padding:10px 18px 10px 2.25rem !important; /* leaves room for the icon */
   border:2px solid #DDDDDDFF !important;
   box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
   background:#fff !important;
-  line-height:1.2 !important;
+  line-height:1.4 !important;
   box-sizing:border-box !important;
   min-height:56px !important;
   height:auto !important;
@@ -191,8 +191,15 @@ select[data-q][aria-invalid='true'] {
   border-radius: 4px !important;
   min-height: 56px !important;
   height: auto !important;
-  padding: 15px 20px 15px 2.25rem !important;
-  line-height: 1.2 !important;
+}
+
+/* Specific fix for input elements to match select element text positioning */
+.icon-field-wrapper .icon-input-row > input[data-q].input-error,
+.icon-field-wrapper .icon-input-row > input[data-q][aria-invalid='true'],
+input[data-q].input-error:not([type="date"]):not([type="time"]),
+input[data-q][aria-invalid='true']:not([type="date"]):not([type="time"]) {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
 }
 
 /* Wrapper may shake but shouldn't show red border */
