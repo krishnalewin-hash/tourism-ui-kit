@@ -193,25 +193,13 @@ select[data-q][aria-invalid='true'] {
   height: auto !important;
 }
 
-/* Ultra-high specificity error styling for step 2 fields */
-.hl-app input[data-q='email'].input-error,
-.hl-app input[data-q='email'][aria-invalid='true'],
-.hl-app input[data-q='phone'].input-error,
-.hl-app input[data-q='phone'][aria-invalid='true'], 
-.hl-app input[data-q='full_name'].input-error,
-.hl-app input[data-q='full_name'][aria-invalid='true'],
-.form-control[data-q='email'].input-error,
-.form-control[data-q='email'][aria-invalid='true'],
-.form-control[data-q='phone'].input-error,
-.form-control[data-q='phone'][aria-invalid='true'],
-.form-control[data-q='full_name'].input-error,
-.form-control[data-q='full_name'][aria-invalid='true'],
-input[data-q='email'].input-error,
-input[data-q='email'][aria-invalid='true'],
-input[data-q='phone'].input-error,
-input[data-q='phone'][aria-invalid='true'],
-input[data-q='full_name'].input-error,
-input[data-q='full_name'][aria-invalid='true'] {
+/* Specific error styling for step 2 fields based on actual HTML structure */
+input.form-control.input-error[data-q='phone'],
+input.form-control[data-q='phone'][aria-invalid='true'],
+input.form-control.input-error[data-q='email'], 
+input.form-control[data-q='email'][aria-invalid='true'],
+input.form-control.input-error[data-q='full_name'],
+input.form-control[data-q='full_name'][aria-invalid='true'] {
   background: #fff !important;
   border: 2px solid #e53935 !important;
   box-shadow: 0 0 0 2px rgba(229,57,53,0.15) !important;
