@@ -76,5 +76,23 @@
       "shuttle": { "name": "Shuttle: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-shuttle", "img": "/demo/images/tour-image.jpeg", "fromPrice": 28 },
       "private": { "name": "Private: MBJ ↔ Negril", "url": "/airport-transfer-sangster-to-negril-private", "img": "/demo/images/tour-image.jpeg", "fromPrice": 95 }
     }
+  },
+  "QUOTE_RESULTS_CONFIG": {
+    "bands": [
+      { "maxMi": 10, "pricePP": 25 },
+      { "maxMi": 20, "pricePP": 35 },
+      { "maxMi": 40, "pricePP": 50 },
+      { "maxMi": 999, "pricePP": 65 }
+    ],
+    "minPricePP": 25,
+    "defaultPassengers": 1,
+    "remote": {
+      "keywords": [
+        "tryall","round hill","dublin castle","anchovy","greenwood",
+        "bluefields","sheffield","orange bay","rhodes hall"
+      ],
+      "surchargePP": 8
+    },
+    "map": { "zoom": 9 }
   }
 }

@@ -1,10 +1,11 @@
 /*!
- * Quote Calc Enhanced (Distance → Price) — results page widget with default total
+ * Quote Calc Enhanced (Distance → Price) — results page widget with client-specific pricing
  * - Always shows total price (defaults to 1 passenger if none specified)
  * - Reads lead params (URL first, then sessionStorage fallback)
  * - Loads Google Maps JS (if not already present)
  * - Draws route map (DirectionsService/Renderer)
- * - Calculates price from distance bands + remote surcharge + minimum
+ * - Calculates price from client-specific distance bands + remote surcharge + minimum
+ * - Supports client-specific pricing configuration from /clients/{client}.json
  *
  * Mount:   <div id="quote-calc"></div>
  * Depends: window.CFG.GMAPS_KEY (or a <script> with Maps already loaded)
@@ -12,8 +13,8 @@
 (function(){
   const MOUNT_ID = "quote-calc";
 
-  /* ===== 0) CONFIG (edit to taste) =================================== */
-  const CONFIG = {
+  /* ===== 0) DEFAULT CONFIG (fallback if no client config) =========== */
+  const DEFAULT_CONFIG = {
     // GMAPS key: use window.CFG.GMAPS_KEY if present; or set here
     googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "",
 
@@ -36,13 +37,89 @@
     map: { zoom: 9 }               // default map zoom (will auto-fit route)
   };
 
+  // Global config that will be populated from client or defaults
+  let CONFIG = { ...DEFAULT_CONFIG };
+
   // URL params to keep & forward
   const ALLOW = [
     "pickup_location","dropoff_location","pickup_date","pickup_time","passengers","number_of_passengers",
     "first_name","last_name","email","phone"
   ];
 
-  /* ===== 1) Utilities ================================================= */
+  /* ===== 1) CLIENT CONFIG LOADER ===================================== */
+  async function loadClientConfig() {
+    try {
+      // Determine client from various sources
+      const client = window.CFG?.client || 
+                    new URLSearchParams(location.search).get('client') || 
+                    sessionStorage.getItem('client') || 
+                    'demo';
+      
+      // Determine base URL for client configs
+      const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+      
+      let configUrl;
+      if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+        configUrl = `${base}/clients/${client}.json`;
+      } else {
+        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}.json`;
+      }
+
+      console.log(`[quote-calc] Loading client config: ${client} from ${configUrl}`);
+      
+      const response = await fetch(configUrl, { cache: 'no-store' });
+      if (!response.ok) {
+        console.warn(`[quote-calc] Failed to load client config for "${client}", using defaults`);
+        return CONFIG; // Return default config
+      }
+      
+      const clientConfig = await response.json();
+      
+      // Update CONFIG with client-specific settings
+      if (clientConfig.QUOTE_RESULTS_CONFIG) {
+        // Use dedicated quote results config if present
+        CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
+      } else if (clientConfig.PRICING_RATES) {
+        // Convert existing pricing rates to quote results format
+        convertPricingRatesToConfig(clientConfig.PRICING_RATES);
+      }
+      
+      // Override Google Maps key if present in client config
+      if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+        CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
+      }
+      
+      console.log(`[quote-calc] Loaded config for client: ${client}`, CONFIG);
+      return CONFIG;
+      
+    } catch (error) {
+      console.error('[quote-calc] Error loading client config:', error);
+      return CONFIG; // Return default config on error
+    }
+  }
+
+  /* ===== 2) PRICING CONVERTER ======================================== */
+  function convertPricingRatesToConfig(pricingRates) {
+    // Convert legacy pricing rates to new format
+    if (pricingRates.DISTANCE_BANDS && pricingRates.BASE_RATES) {
+      // Convert tour-driver style config
+      const basePrice = pricingRates.BASE_RATES.SEDAN || 120;
+      CONFIG.bands = pricingRates.DISTANCE_BANDS.map(band => ({
+        maxMi: Math.round(band.maxKm * 0.621371), // Convert km to miles
+        pricePP: Math.round(basePrice * band.multiplier)
+      }));
+      
+      if (pricingRates.REMOTE_AREAS) {
+        CONFIG.remote.surchargePP = pricingRates.REMOTE_AREAS.SURCHARGE_USD || 5;
+      }
+    } else if (pricingRates.zones) {
+      // Convert demo/kamar-tours style zone-based config to distance bands
+      // For now, use default bands but could be enhanced to convert zones
+      console.log('[quote-calc] Zone-based pricing detected, using default distance bands');
+    }
+  }
+
+  /* ===== 3) Utilities ================================================= */
   const qs = new URLSearchParams(location.search);
   const getParam = (k) => {
     const v = qs.get(k);
@@ -71,7 +148,7 @@
     return 0;
   }
 
-  /* ===== UI builders ================================================== */
+  /* ===== 4) UI builders ================================================== */
   function buildCardHTML(state){
     const { pickup, dropoff, miles, seconds, pp, total, pax } = state;
 
@@ -129,7 +206,7 @@
     `;
   }
 
-  /* ===== 2) Google Maps Loader ======================================= */
+  /* ===== 5) Google Maps Loader ======================================= */
   function loadMaps(cb){
     if (window.google && google.maps && google.maps.DirectionsService) return cb();
     const key = CONFIG.googleApiKey;
@@ -146,8 +223,8 @@
     document.head.appendChild(script);
   }
 
-  /* ===== 3) Main Calculator Engine ==================================== */
-  function calculate(){
+  /* ===== 6) Main Calculator Engine ==================================== */
+  async function calculate(){
     const mount = document.getElementById(MOUNT_ID);
     if (!mount) { console.warn(`[quote-calc] No element #${MOUNT_ID} found`); return; }
 
@@ -159,6 +236,13 @@
     }
 
     mount.innerHTML = skeletonHTML();
+
+    // Load client-specific config first
+    try {
+      await loadClientConfig();
+    } catch (error) {
+      console.warn('[quote-calc] Failed to load client config, using defaults:', error);
+    }
 
     loadMaps((err) => {
       if (err) {
@@ -217,14 +301,14 @@
     });
   }
 
-  /* ===== 4) Auto-run on page load ===================================== */
+  /* ===== 7) Auto-run on page load ===================================== */
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", calculate);
   } else {
     calculate();
   }
 
-  /* ===== 5) Button Handlers =========================================== */
+  /* ===== 8) Button Handlers =========================================== */
   window.handlePayNow = function() {
     // Get current trip details
     const pickup = getParam("pickup_location");
