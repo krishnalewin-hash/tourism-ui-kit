@@ -193,7 +193,21 @@ select[data-q][aria-invalid='true'] {
   height: auto !important;
 }
 
-/* Nuclear option - Maximum specificity for step 2 fields with correct styling */
+/* Ultra-nuclear option - Override even the #_builder-form selectors from the screenshot */
+html body #_builder-form input.form-control.input-error[data-q],
+html body #_builder-form input.form-control[data-q][aria-invalid='true'],
+html body #_builder-form input[data-q].input-error,
+html body #_builder-form input[data-q][aria-invalid='true'],
+html body #_builder-form .hl-app input.form-control.input-error[data-q],
+html body #_builder-form .hl-app input.form-control[data-q][aria-invalid='true'],
+html body .hl-app #_builder-form input.form-control.input-error[data-q],
+html body .hl-app #_builder-form input.form-control[data-q][aria-invalid='true'],
+body #_builder-form input.form-control.input-error[data-q='phone'],
+body #_builder-form input.form-control[data-q='phone'][aria-invalid='true'],
+body #_builder-form input.form-control.input-error[data-q='email'], 
+body #_builder-form input.form-control[data-q='email'][aria-invalid='true'],
+body #_builder-form input.form-control.input-error[data-q='full_name'],
+body #_builder-form input.form-control[data-q='full_name'][aria-invalid='true'],
 body .hl-app input.form-control.input-error[data-q='phone'],
 body .hl-app input.form-control[data-q='phone'][aria-invalid='true'],
 body .hl-app input.form-control.input-error[data-q='email'], 
@@ -216,6 +230,8 @@ html body input.form-control[data-q='full_name'][aria-invalid='true'] {
   outline: none !important;
   min-height: 56px !important;
   height: auto !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: #222 !important;
 }
 
 /* Hide GoHighLevel's default error messages to prevent conflicts */
