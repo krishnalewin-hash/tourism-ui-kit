@@ -100,7 +100,10 @@ function injectStyles() {
           }
           
           // Override Google Maps key if present in client config
-          if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+          // Check SHARED_CONFIG first, then fallback to FORM_CONFIG for backward compatibility
+          if (clientConfig.SHARED_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.SHARED_CONFIG.GMAPS_KEY;
+          } else if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
             CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
           }
           
@@ -136,7 +139,10 @@ function injectStyles() {
           }
           
           // Override Google Maps key if present in client config
-          if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+          // Check SHARED_CONFIG first, then fallback to FORM_CONFIG for backward compatibility
+          if (clientConfig.SHARED_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.SHARED_CONFIG.GMAPS_KEY;
+          } else if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
             CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
           }
           

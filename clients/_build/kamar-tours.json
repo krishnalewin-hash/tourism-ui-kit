@@ -1,6 +1,6 @@
 {
   "START_OVER_URL": "https://kamartours.com/booking",
-  "FORM_CONFIG": {
+  "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": [
       "jm"
@@ -43,7 +43,9 @@
           "bnb"
         ]
       }
-    },
+    }
+  },
+  "FORM_CONFIG": {
     "FIELD_MAPPING": {
       "pickup_location": [
         "[data-q=\"pickup_location\"]",
@@ -80,50 +82,6 @@
       "phone": [
         "[name=\"phone\"]"
       ]
-    }
-  },
-  "WINDOW_CFG": {
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
-    "COUNTRIES": [
-      "jm"
-    ],
-    "PLACES": {
-      "FIELDS": [
-        "place_id",
-        "formatted_address",
-        "geometry",
-        "name",
-        "types"
-      ],
-      "TYPES": [
-        "establishment"
-      ],
-      "PRIORITY_KEYWORDS": {
-        "airport": [
-          "airport",
-          "international airport",
-          "terminal",
-          "mbj",
-          "kin",
-          "ocj",
-          "neg",
-          "ktp"
-        ],
-        "hotel": [
-          "hotel",
-          "resort",
-          "inn",
-          "villa",
-          "guest house",
-          "guesthouse",
-          "lodgings",
-          "spa",
-          "apartments",
-          "suite",
-          "suites",
-          "bnb"
-        ]
-      }
     }
   },
   "QUOTE_RESULTS_CONFIG": {
@@ -221,7 +179,7 @@
   },
   "_meta": {
     "client": "kamar-tours",
-    "buildTime": "2025-09-24T23:38:38.301Z",
+    "buildTime": "2025-09-24T23:49:40.615Z",
     "version": "1.0.0",
     "source": "modular"
   }

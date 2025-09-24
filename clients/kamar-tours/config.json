@@ -1,6 +1,6 @@
 {
   "START_OVER_URL": "https://kamartours.com/booking",
-  "FORM_CONFIG": {
+  "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": ["jm"],
     "CURRENCY": "USD",
@@ -11,7 +11,9 @@
         "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
         "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
       }
-    },
+    }
+  },
+  "FORM_CONFIG": {
     "FIELD_MAPPING": {
       "pickup_location": ["[data-q=\"pickup_location\"]", "[name=\"pickup_location\"]"],
       "dropoff_location": ["[data-q=\"drop-off_location\"]", "[name=\"drop-off_location\"]", "[name=\"dropoff_location\"]"],
@@ -22,18 +24,6 @@
       "last_name": ["[name=\"last_name\"]"],
       "email": ["[name=\"email\"]"],
       "phone": ["[name=\"phone\"]"]
-    }
-  },
-  "WINDOW_CFG": {
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
-    "COUNTRIES": ["jm"],
-    "PLACES": {
-      "FIELDS": ["place_id","formatted_address","geometry","name","types"],
-      "TYPES": ["establishment"],
-      "PRIORITY_KEYWORDS": {
-        "airport": ["airport","international airport","terminal","mbj","kin","ocj","neg","ktp"],
-        "hotel": ["hotel","resort","inn","villa","guest house","guesthouse","lodgings","spa","apartments","suite","suites","bnb"]
-      }
     }
   }
 }

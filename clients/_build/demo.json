@@ -1,6 +1,6 @@
 {
   "START_OVER_URL": "/airport-transfers",
-  "FORM_CONFIG": {
+  "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": [
       "jm"
@@ -43,7 +43,9 @@
           "bnb"
         ]
       }
-    },
+    }
+  },
+  "FORM_CONFIG": {
     "FIELD_MAPPING": {
       "pickup_location": [
         "[data-q=\"pickup_location\"]",
@@ -217,7 +219,7 @@
   },
   "_meta": {
     "client": "demo",
-    "buildTime": "2025-09-24T23:38:38.299Z",
+    "buildTime": "2025-09-24T23:49:40.614Z",
     "version": "1.0.0",
     "source": "modular"
   }
