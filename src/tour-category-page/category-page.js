@@ -173,6 +173,22 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
     console.warn('[tour-category] Failed to load client config, using manual configuration');
   }
   
+  // If client config loading failed but we have a client specified, try to set DATA_URL manually
+  if (!window.CFG?.DATA_URL && window.CFG?.client) {
+    console.log('[tour-category] Attempting manual DATA_URL fallback for client:', window.CFG.client);
+    
+    // Hard-coded fallbacks for known clients
+    const clientDataUrls = {
+      'tour-driver': 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+      'demo': 'https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/data/tour-driver-tours.json'
+    };
+    
+    if (clientDataUrls[window.CFG.client]) {
+      window.CFG.DATA_URL = clientDataUrls[window.CFG.client];
+      console.log('[tour-category] Using fallback DATA_URL:', window.CFG.DATA_URL);
+    }
+  }
+  
   await __waitForConfig__('#tour-list');
   const { DATA_URL, FILTER, LIST_SELECTOR } = window.CFG || {};
   const listSel  = LIST_SELECTOR || '#tour-list';

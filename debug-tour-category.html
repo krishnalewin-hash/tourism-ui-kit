@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Category Debug Test</title>
+    <style>
+        .debug { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin: 10px 0; 
+            font-family: monospace; 
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        .error { background: #ffe6e6; color: #d00; }
+        .success { background: #e6ffe6; color: #080; }
+        .info { background: #e6f3ff; color: #006; }
+    </style>
+</head>
+<body>
+    <h1>Tour Category Component Debug</h1>
+    <div id="debug-log" class="debug info">Loading component...</div>
+    
+    <!-- Mount Points -->
+    <div id="skeleton" class="skeleton-list" aria-hidden="true"></div>
+    <div id="tour-list" class="tour-list" hidden aria-live="polite"></div>
+
+    <!-- Configuration -->
+    <script>
+    window.CFG = {
+        client: 'tour-driver',
+        FILTER: { mode: 'type', value: 'Food & Culinary' },
+        LIST_SELECTOR: '#tour-list'
+    };
+    
+    // Debug logging
+    const debugLog = document.getElementById('debug-log');
+    const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    
+    function addDebugMessage(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logElement = document.createElement('div');
+        logElement.className = `debug ${type}`;
+        logElement.textContent = `[${timestamp}] ${message}`;
+        debugLog.appendChild(logElement);
+        console.log(`[DEBUG] ${message}`);
+    }
+    
+    console.log = (...args) => {
+        originalConsoleLog(...args);
+        addDebugMessage(args.join(' '), 'info');
+    };
+    
+    console.error = (...args) => {
+        originalConsoleError(...args);
+        addDebugMessage(`ERROR: ${args.join(' ')}`, 'error');
+    };
+    
+    console.warn = (...args) => {
+        originalConsoleWarn(...args);
+        addDebugMessage(`WARNING: ${args.join(' ')}`, 'info');
+    };
+    
+    addDebugMessage('Initial CFG: ' + JSON.stringify(window.CFG));
+    addDebugMessage('DOM ready state: ' + document.readyState);
+    
+    // Monitor changes
+    let checkCount = 0;
+    const monitor = setInterval(() => {
+        checkCount++;
+        const skeleton = document.getElementById('skeleton');
+        const tourList = document.getElementById('tour-list');
+        const isSkeletonVisible = skeleton && !skeleton.hasAttribute('aria-hidden');
+        const tourListContent = tourList ? tourList.innerHTML : '';
+        
+        addDebugMessage(`Check ${checkCount}: skeleton visible=${isSkeletonVisible}, tour-list content length=${tourListContent.length}`);
+        
+        if (window.CFG && window.CFG.DATA_URL) {
+            addDebugMessage('DATA_URL found: ' + window.CFG.DATA_URL, 'success');
+        }
+        
+        if (window.TourCategory) {
+            addDebugMessage('TourCategory object available', 'success');
+        }
+        
+        // Stop monitoring after 30 seconds
+        if (checkCount > 60) {
+            clearInterval(monitor);
+            addDebugMessage('Monitoring stopped - component may have failed to initialize', 'error');
+        }
+    }, 500);
+    
+    // Test API directly
+    setTimeout(async () => {
+        try {
+            addDebugMessage('Testing API directly...');
+            const response = await fetch('https://tour-driver-data-proxy.krishna-0a3.workers.dev', {
+                cache: 'no-store'
+            });
+            addDebugMessage(`API Response: ${response.status} ${response.statusText}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                addDebugMessage(`API returned ${data.tours ? data.tours.length : 'no'} tours`);
+                
+                if (data.tours && data.tours.length > 0) {
+                    const sampleTour = data.tours[0];
+                    addDebugMessage('Sample tour fields: ' + Object.keys(sampleTour).join(', '));
+                    
+                    // Check for Food & Culinary tours
+                    const foodTours = data.tours.filter(tour => 
+                        tour.type === 'Food & Culinary' || 
+                        tour.category === 'Food & Culinary' ||
+                        (tour.type && tour.type.toLowerCase().includes('food')) ||
+                        (tour.category && tour.category.toLowerCase().includes('food'))
+                    );
+                    addDebugMessage(`Found ${foodTours.length} Food & Culinary tours`, foodTours.length > 0 ? 'success' : 'error');
+                }
+            } else {
+                addDebugMessage(`API Error: ${response.status}`, 'error');
+            }
+        } catch (error) {
+            addDebugMessage(`API Test Failed: ${error.message}`, 'error');
+        }
+    }, 2000);
+    
+    </script>
+
+    <!-- Single-file component (includes CSS + JS + fonts) -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@eba6e6e/dist/tour-category-page.min.js"></script>
+    
+    <script>
+    // Final check after component loads
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            addDebugMessage('=== FINAL STATUS ===');
+            addDebugMessage('window.CFG: ' + JSON.stringify(window.CFG, null, 2));
+            addDebugMessage('window.TourCategory available: ' + !!window.TourCategory);
+            addDebugMessage('Skeleton hidden: ' + document.getElementById('skeleton').hasAttribute('aria-hidden'));
+            addDebugMessage('Tour list content: ' + (document.getElementById('tour-list').innerHTML.length > 0 ? 'HAS CONTENT' : 'EMPTY'));
+        }, 5000);
+    });
+    </script>
+</body>
+</html>

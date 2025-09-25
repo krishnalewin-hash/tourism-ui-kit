@@ -1,0 +1,52 @@
+{
+  "tours": [
+    {
+      "id": "blue-mountain-coffee",
+      "name": "Blue Mountain Coffee Tour",
+      "slug": "blue-mountain-coffee",
+      "description": "Experience Jamaica's world-famous Blue Mountain coffee with a guided tour of local plantations.",
+      "category": "Food & Culinary",
+      "type": "Food & Culinary",
+      "duration": "6 hours",
+      "location": "Blue Mountains",
+      "fromPrice": 95,
+      "image": "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400",
+      "url": "https://tourdriver.com/tours/blue-mountain-coffee",
+      "highlights": ["Coffee plantation visit", "Traditional lunch", "Mountain views"],
+      "difficulty": "Easy"
+    },
+    {
+      "id": "rum-distillery-tour",
+      "name": "Appleton Estate Rum Tour",
+      "slug": "appleton-rum-tour",
+      "description": "Discover the art of rum making at Jamaica's oldest sugar estate and distillery.",
+      "category": "Food & Culinary",
+      "type": "Food & Culinary",
+      "duration": "4 hours",
+      "location": "St. Elizabeth",
+      "fromPrice": 75,
+      "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400",
+      "url": "https://tourdriver.com/tours/appleton-rum-tour",
+      "highlights": ["Rum tasting", "Production tour", "Historical artifacts"],
+      "difficulty": "Easy"
+    },
+    {
+      "id": "jerk-cooking-class",
+      "name": "Authentic Jerk Cooking Experience",
+      "slug": "jerk-cooking-class",
+      "description": "Learn to cook authentic Jamaican jerk chicken and pork with local spices and techniques.",
+      "category": "Food & Culinary",
+      "type": "Food & Culinary",  
+      "duration": "3 hours",
+      "location": "Negril",
+      "fromPrice": 65,
+      "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400",
+      "url": "https://tourdriver.com/tours/jerk-cooking-class",
+      "highlights": ["Hands-on cooking", "Recipe cards included", "Full meal included"],
+      "difficulty": "Easy"
+    }
+  ],
+  "version": "1.0.0",
+  "lastUpdated": "2025-09-24T19:00:00Z",
+  "categories": ["Food & Culinary", "Adventure", "Nature", "Cultural"]
+}
