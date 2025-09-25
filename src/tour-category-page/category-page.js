@@ -416,3 +416,47 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
     hideSkeleton();
   });
 })();
+
+// Export TourCategory API for programmatic usage
+window.TourCategory = {
+  init: async function(config = {}) {
+    // Override window.CFG with provided config
+    window.CFG = { ...window.CFG, ...config };
+    
+    // Inject styles and fonts
+    injectStyles();
+    injectGoogleFonts();
+    
+    // Load client configuration if client is specified
+    if (config.client) {
+      try {
+        await loadClientConfig();
+      } catch (error) {
+        console.warn('[tour-category] Failed to load client config, using manual configuration');
+      }
+    }
+    
+    // Wait for DOM if needed
+    if (document.readyState === 'loading') {
+      await new Promise(res => document.addEventListener('DOMContentLoaded', res, { once: true }));
+    }
+    
+    // Initialize with current config
+    const { DATA_URL, FILTER, LIST_SELECTOR } = window.CFG || {};
+    const listSel = LIST_SELECTOR || config.elementId || '#tour-list';
+    const mount = document.querySelector(listSel);
+    const skeleton = document.getElementById('skeleton');
+    
+    if (!mount) {
+      console.error(`[tour-category] Mount element not found: ${listSel}`);
+      return;
+    }
+    
+    if (!DATA_URL) {
+      console.error('[tour-category] No DATA_URL configured');
+      return;
+    }
+    
+    console.log('[tour-category] Programmatic initialization complete');
+  }
+};
