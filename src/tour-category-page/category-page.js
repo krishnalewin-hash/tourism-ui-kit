@@ -177,15 +177,24 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
   if (!window.CFG?.DATA_URL && window.CFG?.client) {
     console.log('[tour-category] Attempting manual DATA_URL fallback for client:', window.CFG.client);
     
-    // Hard-coded fallbacks for known clients
-    const clientDataUrls = {
-      'tour-driver': 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
-      'demo': 'https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/data/tour-driver-tours.json'
-    };
-    
-    if (clientDataUrls[window.CFG.client]) {
-      window.CFG.DATA_URL = clientDataUrls[window.CFG.client];
-      console.log('[tour-category] Using fallback DATA_URL:', window.CFG.DATA_URL);
+    // Check if a custom fallback URL was provided
+    if (window.CFG.fallbackUrl) {
+      window.CFG.DATA_URL = window.CFG.fallbackUrl;
+      console.log('[tour-category] Using custom fallback DATA_URL:', window.CFG.DATA_URL);
+    } else {
+      // Hard-coded fallbacks for known clients
+      const clientDataUrls = {
+        'tour-driver': 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+        'kamar-tours': 'https://kamar-tours-data-proxy.krishna-0a3.workers.dev', // Example
+        'demo': 'https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/data/tour-driver-tours.json'
+      };
+      
+      if (clientDataUrls[window.CFG.client]) {
+        window.CFG.DATA_URL = clientDataUrls[window.CFG.client];
+        console.log('[tour-category] Using hardcoded fallback DATA_URL:', window.CFG.DATA_URL);
+      } else {
+        console.warn(`[tour-category] No fallback DATA_URL found for client: ${window.CFG.client}. Please provide window.CFG.fallbackUrl or window.CFG.DATA_URL manually.`);
+      }
     }
   }
   
