@@ -182,10 +182,27 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
       window.CFG.DATA_URL = window.CFG.fallbackUrl;
       console.log('[tour-category] Using custom fallback DATA_URL:', window.CFG.DATA_URL);
     } else {
-      console.warn(`[tour-category] No DATA_URL available for client: ${window.CFG.client}. Please either:`);
-      console.warn('1. Ensure client config exists in clients folder, or');
-      console.warn('2. Provide window.CFG.fallbackUrl, or');
-      console.warn('3. Set window.CFG.DATA_URL directly');
+      console.warn(`[tour-category] No DATA_URL available for client: ${window.CFG.client}. Component will not work without DATA_URL.`);
+      console.warn('Please provide one of the following:');
+      console.warn('1. window.CFG.fallbackUrl = "https://your-api.com/tours"');
+      console.warn('2. window.CFG.DATA_URL = "https://your-api.com/tours"');
+      console.warn('3. Ensure client config exists and is accessible');
+      
+      // Show error in UI instead of hanging
+      const mount = document.querySelector(window.CFG.LIST_SELECTOR || '#tour-list');
+      const skeleton = document.getElementById('skeleton');
+      if (mount && skeleton) {
+        skeleton.style.display = 'none';
+        mount.hidden = false;
+        mount.innerHTML = `
+          <div style="padding: 20px; background: #ffe6e6; border: 1px solid #ff9999; border-radius: 8px; color: #cc0000;">
+            <h3>Configuration Error</h3>
+            <p>Unable to load tour data for client: <strong>${window.CFG.client}</strong></p>
+            <p>Please check the browser console for configuration instructions.</p>
+          </div>
+        `;
+      }
+      return; // Exit early
     }
   }
   
