@@ -173,28 +173,19 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
     console.warn('[tour-category] Failed to load client config, using manual configuration');
   }
   
-  // If client config loading failed but we have a client specified, try to set DATA_URL manually
+  // If client config loading failed but we have a client specified, try custom fallback
   if (!window.CFG?.DATA_URL && window.CFG?.client) {
-    console.log('[tour-category] Attempting manual DATA_URL fallback for client:', window.CFG.client);
+    console.log('[tour-category] Client config loading failed for:', window.CFG.client);
     
     // Check if a custom fallback URL was provided
     if (window.CFG.fallbackUrl) {
       window.CFG.DATA_URL = window.CFG.fallbackUrl;
       console.log('[tour-category] Using custom fallback DATA_URL:', window.CFG.DATA_URL);
     } else {
-      // Hard-coded fallbacks for known clients
-      const clientDataUrls = {
-        'tour-driver': 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
-        'kamar-tours': 'https://kamar-tours-data-proxy.krishna-0a3.workers.dev', // Example
-        'demo': 'https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/data/tour-driver-tours.json'
-      };
-      
-      if (clientDataUrls[window.CFG.client]) {
-        window.CFG.DATA_URL = clientDataUrls[window.CFG.client];
-        console.log('[tour-category] Using hardcoded fallback DATA_URL:', window.CFG.DATA_URL);
-      } else {
-        console.warn(`[tour-category] No fallback DATA_URL found for client: ${window.CFG.client}. Please provide window.CFG.fallbackUrl or window.CFG.DATA_URL manually.`);
-      }
+      console.warn(`[tour-category] No DATA_URL available for client: ${window.CFG.client}. Please either:`);
+      console.warn('1. Ensure client config exists in clients folder, or');
+      console.warn('2. Provide window.CFG.fallbackUrl, or');
+      console.warn('3. Set window.CFG.DATA_URL directly');
     }
   }
   
@@ -346,7 +337,21 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
           ${duration ? `<span><span aria-hidden="true">⏱ </span><span class="sr-only">Duration: </span>${duration}</span>` : ''}
           ${location ? `<span><span aria-hidden="true">📍 </span><span class="sr-only">Location: </span>${location}</span>` : ''}
           ${type ? `<span><span aria-hidden="true">🏷 </span><span class="sr-only">Type: </span>${type}</span>` : ''}
-          ${group ? `<span><span aria-hidden="true">👥 </span><span class="sr-only">Group: </span>${group}</span>` : ''}
+             <!-- Mount Points -->
+        <div id="skeleton" class="skeleton-list" aria-hidden="true"></div>
+        <div id="tour-list" class="tour-list" hidden aria-live="polite"></div>
+        
+        <!-- Configuration -->
+        <script>
+        window.CFG = {
+          client: 'tour-driver',
+          FILTER: { mode: 'type', value: 'Food & Culinary' },
+          LIST_SELECTOR: '#tour-list'
+        };
+        </script>
+        
+        <!-- Single-file component (includes CSS + JS + fonts) -->
+        <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@91a9e41/dist/tour-category-page.min.js"></script>     ${group ? `<span><span aria-hidden="true">👥 </span><span class="sr-only">Group: </span>${group}</span>` : ''}
         </div>
         ${excerpt ? `<p class="tour-desc">${excerpt}</p>` : ''}
       </div>
