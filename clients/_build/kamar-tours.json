@@ -43,7 +43,8 @@
           "bnb"
         ]
       }
-    }
+    },
+    "TOUR_DATA_URL": "https://your-tour-data-api.example.com"
   },
   "FORM_CONFIG": {
     "FIELD_MAPPING": {
@@ -179,7 +180,7 @@
   },
   "_meta": {
     "client": "kamar-tours",
-    "buildTime": "2025-09-25T00:21:20.803Z",
+    "buildTime": "2025-09-25T00:32:19.772Z",
     "version": "1.0.0",
     "source": "modular"
   }

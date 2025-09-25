@@ -11,7 +11,8 @@
         "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
         "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
       }
-    }
+    },
+    "TOUR_DATA_URL": "https://your-tour-data-api.example.com"
   },
   "FORM_CONFIG": {
     "FIELD_MAPPING": {

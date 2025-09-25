@@ -43,7 +43,8 @@
           "bnb"
         ]
       }
-    }
+    },
+    "TOUR_DATA_URL": "https://your-tour-data-api.example.com"
   },
   "FORM_CONFIG": {
     "FIELD_MAPPING": {
@@ -219,7 +220,7 @@
   },
   "_meta": {
     "client": "demo",
-    "buildTime": "2025-09-25T00:21:20.802Z",
+    "buildTime": "2025-09-25T00:32:19.770Z",
     "version": "1.0.0",
     "source": "modular"
   }

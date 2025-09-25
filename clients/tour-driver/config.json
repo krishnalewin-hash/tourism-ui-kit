@@ -11,7 +11,8 @@
         "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
         "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
       }
-    }
+    },
+    "TOUR_DATA_URL": "https://tour-driver-data-proxy.krishna-0a3.workers.dev"
   },
   "FORM_CONFIG": {
     "FIELD_MAPPING": {

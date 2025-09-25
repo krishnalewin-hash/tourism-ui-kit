@@ -29,6 +29,93 @@ function injectGoogleFonts() {
   document.head.appendChild(fontLink);
 }
 
+// Client configuration loader (similar to quote-results component)
+async function loadClientConfig() {
+  try {
+    // Determine client from various sources
+    const client = window.CFG?.client || 
+                  new URLSearchParams(location.search).get('client') || 
+                  sessionStorage.getItem('client') || 
+                  'demo';
+    
+    // Determine base URL for client configs
+    const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+    
+    console.log(`[tour-category] Loading client config: ${client}`);
+    console.log(`[tour-category] Base URL: ${base}`);
+
+    // Try built configuration first
+    try {
+      let configUrl;
+      if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+        configUrl = `${base}/clients/_build/${client}.json`;
+      } else {
+        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
+      }
+
+      console.log(`[tour-category] Fetching built config: ${configUrl}`);
+      
+      const response = await fetch(configUrl, { cache: 'no-store' });
+      if (response.ok) {
+        const clientConfig = await response.json();
+        
+        // Check for tour data URL in client config
+        if (clientConfig.SHARED_CONFIG?.TOUR_DATA_URL) {
+          window.CFG = window.CFG || {};
+          window.CFG.DATA_URL = clientConfig.SHARED_CONFIG.TOUR_DATA_URL;
+        }
+        
+        console.log(`[tour-category] Successfully loaded ${client} configuration from built config`);
+        console.log(`[tour-category] Using DATA_URL: ${window.CFG?.DATA_URL}`);
+        return clientConfig;
+      } else {
+        console.log(`[tour-category] Built config returned ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.log(`[tour-category] Built config fetch failed: ${error.message}`);
+    }
+
+    // Fallback: Try legacy single file
+    try {
+      let legacyUrl;
+      if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+        legacyUrl = `${base}/clients/${client}.json`;
+      } else {
+        legacyUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}.json`;
+      }
+
+      console.log(`[tour-category] Trying legacy config: ${legacyUrl}`);
+      
+      const response = await fetch(legacyUrl, { cache: 'no-store' });
+      if (response.ok) {
+        const clientConfig = await response.json();
+        
+        // Check for tour data URL in client config
+        if (clientConfig.SHARED_CONFIG?.TOUR_DATA_URL) {
+          window.CFG = window.CFG || {};
+          window.CFG.DATA_URL = clientConfig.SHARED_CONFIG.TOUR_DATA_URL;
+        }
+        
+        console.log(`[tour-category] Successfully loaded ${client} configuration from legacy config`);
+        console.log(`[tour-category] Using DATA_URL: ${window.CFG?.DATA_URL}`);
+        return clientConfig;
+      } else {
+        console.log(`[tour-category] Legacy config returned ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.log(`[tour-category] Legacy config fetch failed: ${error.message}`);
+    }
+
+    // Final fallback: Use defaults
+    console.warn(`[tour-category] No configuration found for ${client}, using defaults`);
+    return null;
+    
+  } catch (error) {
+    console.error('[tour-category] Error loading client config:', error);
+    return null;
+  }
+}
+
 async function __waitForConfig__(selectorFallback='#tour-list') {
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   function readConfig() {
@@ -63,6 +150,13 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
   // Inject styles and fonts first
   injectStyles();
   injectGoogleFonts();
+  
+  // Load client configuration to get DATA_URL
+  try {
+    await loadClientConfig();
+  } catch (error) {
+    console.warn('[tour-category] Failed to load client config, using manual configuration');
+  }
   
   await __waitForConfig__('#tour-list');
   const { DATA_URL, FILTER, LIST_SELECTOR } = window.CFG || {};

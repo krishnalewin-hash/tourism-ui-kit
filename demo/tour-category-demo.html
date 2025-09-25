@@ -72,13 +72,13 @@ window.CFG = {
             </div>
             
             <div class="new-way">
-                <h3>✅ New Integration (Single File):</h3>
+                <h3>✅ New Integration (Single File + Auto Config):</h3>
                 <pre><code>&lt;div id="skeleton" class="skeleton-list"&gt;&lt;/div&gt;
 &lt;div id="tour-list" class="tour-list" hidden&gt;&lt;/div&gt;
 
 &lt;script&gt;
 window.CFG = {
-  DATA_URL: 'https://tour-driver-data-proxy...',
+  client: 'tour-driver',  // Auto-loads DATA_URL from config
   FILTER: { mode: 'type', value: 'Food & Culinary' },
   LIST_SELECTOR: '#tour-list'
 };
@@ -91,6 +91,7 @@ window.CFG = {
         <h3>Features Included:</h3>
         <ul>
             <li>✅ Single-file distribution (CSS + JS + Fonts)</li>
+            <li>✅ Auto client configuration loading</li>
             <li>✅ Responsive card grid layout</li>
             <li>✅ Loading skeleton animation</li>
             <li>✅ Smart caching with SWR (Stale While Revalidate)</li>
@@ -100,7 +101,7 @@ window.CFG = {
             <li>✅ Client-side and server-side filtering</li>
         </ul>
         
-        <p><strong>Bundle Size:</strong> 10.6kb (includes everything: CSS, JS, font loading)</p>
+        <p><strong>Bundle Size:</strong> 12.6kb (includes everything: CSS, JS, font loading, config loading)</p>
     </div>
 
     <div class="demo-content">
@@ -114,7 +115,7 @@ window.CFG = {
         console.log('Setting up Tour Category configuration...');
         
         window.CFG = {
-            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            client: 'tour-driver',  // Auto-loads DATA_URL from client config
             FILTER: { mode: 'type', value: 'Food & Culinary' },
             LIST_SELECTOR: '#tour-list'
         };

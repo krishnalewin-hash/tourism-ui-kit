@@ -43,7 +43,8 @@
           "bnb"
         ]
       }
-    }
+    },
+    "TOUR_DATA_URL": "https://tour-driver-data-proxy.krishna-0a3.workers.dev"
   },
   "FORM_CONFIG": {
     "FIELD_MAPPING": {
@@ -219,7 +220,7 @@
   },
   "_meta": {
     "client": "tour-driver",
-    "buildTime": "2025-09-25T00:21:20.804Z",
+    "buildTime": "2025-09-25T00:32:19.774Z",
     "version": "1.0.0",
     "source": "modular"
   }
