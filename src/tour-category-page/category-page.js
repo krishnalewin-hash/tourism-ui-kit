@@ -39,7 +39,22 @@ async function loadClientConfig() {
                   'demo';
     
     // Determine base URL for client configs
-    const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+    // Try to detect commit hash from the script tag that loaded this component
+    let detectedBase = 'krishnalewin-hash/tourism-ui-kit@main';
+    try {
+      const scriptTags = document.querySelectorAll('script[src*="krishnalewin-hash/tourism-ui-kit"]');
+      for (const script of scriptTags) {
+        const match = script.src.match(/krishnalewin-hash\/tourism-ui-kit@([^\/]+)/);
+        if (match) {
+          detectedBase = `krishnalewin-hash/tourism-ui-kit@${match[1]}`;
+          break;
+        }
+      }
+    } catch (e) {
+      console.log('[tour-category] Could not detect base URL from script tag');
+    }
+    
+    const base = window.CFG?.base || detectedBase;
     
     console.log(`[tour-category] Loading client config: ${client}`);
     console.log(`[tour-category] Base URL: ${base}`);
