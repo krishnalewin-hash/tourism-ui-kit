@@ -166,11 +166,16 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
   injectStyles();
   injectGoogleFonts();
   
-  // Load client configuration to get DATA_URL
-  try {
-    await loadClientConfig();
-  } catch (error) {
-    console.warn('[tour-category] Failed to load client config, using manual configuration');
+  // Only load client configuration if DATA_URL is not already provided
+  if (!window.CFG?.DATA_URL) {
+    console.log('[tour-category] No DATA_URL found, attempting to load client configuration...');
+    try {
+      await loadClientConfig();
+    } catch (error) {
+      console.warn('[tour-category] Failed to load client config, using manual configuration');
+    }
+  } else {
+    console.log('[tour-category] DATA_URL already provided, skipping client config loading:', window.CFG.DATA_URL);
   }
   
   // If client config loading failed but we have a client specified, try custom fallback

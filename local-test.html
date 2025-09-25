@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Tour Category Test</title>
+</head>
+<body>
+    <h1>Local Tour Category Test</h1>
+    
+    <!-- Mount Points -->
+    <div id="skeleton" class="skeleton-list" aria-hidden="true"></div>
+    <div id="tour-list" class="tour-list" hidden aria-live="polite"></div>
+
+    <!-- Configuration -->
+    <script>
+    window.CFG = {
+      DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+      FILTER: { mode: 'type', value: 'Food & Culinary' },
+      LIST_SELECTOR: '#tour-list'
+    };
+    
+    console.log('Config set:', window.CFG);
+    </script>
+
+    <!-- Single-file component (LOCAL VERSION) -->
+    <script src="./dist/tour-category-page.min.js"></script>
+    
+    <script>
+    // Check if it loads
+    setTimeout(() => {
+        console.log('TourCategory available:', !!window.TourCategory);
+        console.log('Final CFG:', window.CFG);
+        console.log('Tour list content:', document.getElementById('tour-list').innerHTML.length);
+    }, 3000);
+    </script>
+</body>
+</html>
