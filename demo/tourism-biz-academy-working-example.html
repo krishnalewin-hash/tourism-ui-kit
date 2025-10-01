@@ -3,60 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tourism Biz Academy - Tour Detail</title>
+    <title>Montego Bay Cooking Class - Tourism Biz Academy</title>
     
-    <!-- Block A CSS from GitHub CDN -->
+    <!-- Block A CSS via CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-a.css">
-    
-    <style>
-        body { 
-            margin: 0; 
-            padding: 20px; 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #f5f7fa; 
-        }
-        .status-info { 
-            background: #e8f5e8; 
-            border: 1px solid #4caf50; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            font-family: monospace;
-            font-size: 14px;
-        }
-        .status-info h3 { 
-            margin: 0 0 10px; 
-            color: #2e7d32; 
-        }
-    </style>
 </head>
 <body>
-    <div class="status-info">
-        <h3>✅ Tourism Biz Academy - Working Block A Example</h3>
-        <p><strong>Issue Fixed:</strong> Using a tour that exists in the demo data</p>
-        <p><strong>Client:</strong> demo | <strong>Tour:</strong> beach-adventure</p>
-        <p><strong>CDN Status:</strong> Files loaded from GitHub successfully</p>
-    </div>
-
-    <!-- Block A HTML Structure -->
+    <!-- Block A: Complete HTML Structure -->
     <div class="tdp-wrap" id="tdp-top">
         <h1 class="tdp-title" id="tdp-title"></h1>
         <div class="tdp-meta" id="tdp-meta"></div>
 
-        <!-- Skeleton for initial paint -->
+        <!-- Skeleton for initial paint (REQUIRED) -->
         <div id="tdp-top-skel">
             <div class="tdp-skel-line" style="width:40%;margin:10px 0 8px"></div>
             <div class="tdp-skel-line" style="width:65%;height:14px"></div>
         </div>
 
-        <!-- Hero skeleton -->
+        <!-- Hero skeleton (REQUIRED) -->
         <section id="heroSkel">
             <div class="skCell sk big"></div>
             <div class="skCell sk"></div>
             <div class="skCell sk"></div>
         </section>
 
-        <!-- Main (hero) gallery -->
+        <!-- Main (hero) gallery (REQUIRED) -->
         <section class="hero-gallery" id="heroGallery" style="display:none">
             <div class="hero-count" id="heroCount" style="display:none">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -68,7 +39,7 @@
         </section>
     </div>
 
-    <!-- Lightbox -->
+    <!-- Lightbox (REQUIRED) -->
     <div class="lb" id="lightbox" aria-hidden="true">
         <span class="close" id="lbClose">×</span>
         <span class="nav prev" id="lbPrev">‹</span>
@@ -76,46 +47,16 @@
         <span class="nav next" id="lbNext">›</span>
     </div>
 
-    <!-- Configuration Script -->
     <script>
-        // ✅ FIXED: Configure with a tour that exists in demo data
+        // Configuration for Tourism Biz Academy
         window.CFG = {
             DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
             CLIENT: 'demo',
-            SLUG: 'beach-adventure' // ← This tour exists in the demo data
+            SLUG: 'montego-bay-cooking-class'
         };
-        
-        console.log('Block A Configuration:', window.CFG);
     </script>
     
-    <!-- Block A JavaScript from GitHub CDN -->
+    <!-- Block A JavaScript via CDN -->
     <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-a.js"></script>
-
-    <div style="margin-top: 40px; padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
-        <h3>🚀 For Your Site (Tourism Biz Academy)</h3>
-        <p><strong>The issue:</strong> Your tour slug <code>montego-bay-cooking-class</code> doesn't exist in the demo data.</p>
-        
-        <h4>Solutions:</h4>
-        <ol>
-            <li><strong>Use existing demo tours:</strong>
-                <ul>
-                    <li>beach-adventure</li>
-                    <li>mountain-trek</li>
-                    <li>city-walking-tour</li>
-                    <li>wine-tasting</li>
-                    <li>safari-experience</li>
-                </ul>
-            </li>
-            <li><strong>Set up your own client:</strong> Create a client config for Tourism Biz Academy with your own tour data</li>
-            <li><strong>Add your tour to demo data:</strong> Add "montego-bay-cooking-class" to the demo dataset</li>
-        </ol>
-
-        <h4>Quick Fix for Testing:</h4>
-        <p>Change your URL structure to use an existing tour:</p>
-        <code>https://tourismbizacademy.com/beach-adventure</code>
-        
-        <h4>To Fix Hydration Error:</h4>
-        <p>Make sure the HTML structure is identical on server and client side. The hydration error usually happens with server-side rendering frameworks like Next.js, Nuxt, etc.</p>
-    </div>
 </body>
 </html>
