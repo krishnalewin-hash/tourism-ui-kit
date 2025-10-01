@@ -17,8 +17,8 @@
 
 .related-tours-section h2 {
   margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: bolder;
   color: #111827;
   text-align: center;
 }
@@ -26,9 +26,20 @@
 .related-tours-section h3 {
   margin: 0 0 20px 0;
   font-size: 18px !important;
-  font-weight: 400;
+  font-weight: 400 !important;
   color: #111827;
   text-align: center;
+}
+
+/* Additional specificity for h3 styling */
+.tdp3-wrap .related-tours-section h3 {
+  font-size: 18px !important;
+  font-weight: 400 !important;
+}
+
+section.related-tours-section h3 {
+  font-size: 18px !important;
+  font-weight: 400 !important;
 }
 
 /* Tours Grid */
@@ -260,11 +271,14 @@
   }
   
   .related-tours-section h2 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
-  .related-tours-section h3 {
+  .related-tours-section h3,
+  .tdp3-wrap .related-tours-section h3,
+  section.related-tours-section h3 {
     font-size: 16px !important;
+    font-weight: 400 !important;
   }
   
   .tour-card-content {
