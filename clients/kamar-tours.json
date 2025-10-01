@@ -1,5 +1,7 @@
 {
   "START_OVER_URL": "https://kamartours.com/booking",
+  "TOUR_DATA_URL": "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
+  "TOUR_CLIENT_ID": "kamar-tours",
   "FORM_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": ["jm"],

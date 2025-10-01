@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use Block A - Tour Hero Section</title>
+    
+    <!-- ===== BLOCK A IMPLEMENTATION ===== -->
+    
+    <!-- 1. Include Block A CSS via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-a.css">
+    
+    <!-- OR include locally -->
+    <!-- <link rel="stylesheet" href="src/tour-detail/css/block-a.css"> -->
+    
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #f5f7fa; 
+        }
+        .usage-info { 
+            background: #e3f2fd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+        }
+        .usage-info h2 { 
+            margin: 0 0 15px; 
+            color: #1565c0; 
+        }
+        .usage-info p { 
+            margin: 10px 0; 
+            line-height: 1.6; 
+        }
+        .usage-info code { 
+            background: #fff; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-family: 'Monaco', 'Consolas', monospace; 
+        }
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .code-example h3 {
+            margin: 0 0 15px;
+            color: #495057;
+        }
+        .code-example pre {
+            margin: 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="usage-info">
+        <h2>🚀 Block A - Tour Hero Section</h2>
+        <p><strong>What is Block A?</strong> The hero section component that displays tour title, meta information, and a 3-image gallery with lightbox functionality.</p>
+        <p><strong>Perfect for:</strong> Tour landing pages, tour detail pages, or any page that needs a compelling visual introduction to a tour.</p>
+        <p><strong>Current tour:</strong> <code>beach-adventure</code> from Tour Driver (Demo)</p>
+    </div>
+
+    <!-- ===== LIVE EXAMPLE ===== -->
+    
+    <!-- 2. Add the HTML structure -->
+    <div class="tdp-wrap" id="tdp-top">
+        <h1 class="tdp-title" id="tdp-title"></h1>
+        <div class="tdp-meta" id="tdp-meta"></div>
+
+        <!-- Skeleton for initial paint -->
+        <div id="tdp-top-skel">
+            <div class="tdp-skel-line" style="width:40%;margin:10px 0 8px"></div>
+            <div class="tdp-skel-line" style="width:65%;height:14px"></div>
+        </div>
+
+        <!-- Hero skeleton -->
+        <section id="heroSkel">
+            <div class="skCell sk big"></div>
+            <div class="skCell sk"></div>
+            <div class="skCell sk"></div>
+        </section>
+
+        <!-- Main (hero) gallery -->
+        <section class="hero-gallery" id="heroGallery" style="display:none">
+            <div class="hero-count" id="heroCount" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 7h3l1.2-2.4A2 2 0 0 1 10 4h4a2 2 0 0 1 1.8 1.1L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span id="heroCountNum"></span>
+            </div>
+        </section>
+    </div>
+
+    <!-- Lightbox (owned by Block A) -->
+    <div class="lb" id="lightbox" aria-hidden="true">
+        <span class="close" id="lbClose">×</span>
+        <span class="nav prev" id="lbPrev">‹</span>
+        <img id="lbImg" alt="">
+        <span class="nav next" id="lbNext">›</span>
+    </div>
+
+    <!-- ===== IMPLEMENTATION CODE EXAMPLES ===== -->
+    
+    <div class="code-example">
+        <h3>📋 Step 1: Include CSS</h3>
+        <pre><code>&lt;!-- Via CDN (Recommended) --&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-a.css"&gt;
+
+&lt;!-- OR locally --&gt;
+&lt;link rel="stylesheet" href="src/tour-detail/css/block-a.css"&gt;</code></pre>
+    </div>
+
+    <div class="code-example">
+        <h3>🏗️ Step 2: Add HTML Structure</h3>
+        <pre><code>&lt;!-- Block A: Tour Hero Section --&gt;
+&lt;div class="tdp-wrap" id="tdp-top"&gt;
+    &lt;h1 class="tdp-title" id="tdp-title"&gt;&lt;/h1&gt;
+    &lt;div class="tdp-meta" id="tdp-meta"&gt;&lt;/div&gt;
+
+    &lt;!-- Skeleton loading --&gt;
+    &lt;div id="tdp-top-skel"&gt;
+        &lt;div class="tdp-skel-line" style="width:40%;margin:10px 0 8px"&gt;&lt;/div&gt;
+        &lt;div class="tdp-skel-line" style="width:65%;height:14px"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Hero skeleton --&gt;
+    &lt;section id="heroSkel"&gt;
+        &lt;div class="skCell sk big"&gt;&lt;/div&gt;
+        &lt;div class="skCell sk"&gt;&lt;/div&gt;
+        &lt;div class="skCell sk"&gt;&lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Hero gallery --&gt;
+    &lt;section class="hero-gallery" id="heroGallery" style="display:none"&gt;
+        &lt;div class="hero-count" id="heroCount" style="display:none"&gt;
+            &lt;svg viewBox="0 0 24 24" fill="none"&gt;
+                &lt;path d="M4 7h3l1.2-2.4A2 2 0 0 1 10 4h4a2 2 0 0 1 1.8 1.1L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5"/&gt;
+                &lt;circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/&gt;
+            &lt;/svg&gt;
+            &lt;span id="heroCountNum"&gt;&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+&lt;/div&gt;
+
+&lt;!-- Lightbox --&gt;
+&lt;div class="lb" id="lightbox" aria-hidden="true"&gt;
+    &lt;span class="close" id="lbClose"&gt;×&lt;/span&gt;
+    &lt;span class="nav prev" id="lbPrev"&gt;‹&lt;/span&gt;
+    &lt;img id="lbImg" alt=""&gt;
+    &lt;span class="nav next" id="lbNext"&gt;›&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="code-example">
+        <h3>⚡ Step 3: Configure and Load JavaScript</h3>
+        <pre><code>&lt;!-- Optional: Configure before loading script --&gt;
+&lt;script&gt;
+window.CFG = {
+    DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+    CLIENT: 'demo',        // Your client name
+    SLUG: 'beach-adventure' // Optional: override URL detection
+};
+&lt;/script&gt;
+
+&lt;!-- Load Block A JavaScript --&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-a.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+    <div class="code-example">
+        <h3>🎯 URL Structure</h3>
+        <pre><code>Auto-detects tour slug from URLs like:
+• /tours/beach-adventure
+• /tours/mountain-trek  
+• /path/to/safari-experience
+
+Or from query parameter:
+• ?slug=beach-adventure
+
+Available demo tours:
+• beach-adventure
+• mountain-trek
+• city-walking-tour
+• wine-tasting
+• safari-experience</code></pre>
+    </div>
+
+    <div class="code-example">
+        <h3>✨ Features Included</h3>
+        <pre><code>✅ Tour title and meta information display
+✅ 3-image hero gallery with responsive grid
+✅ Full-screen lightbox with keyboard navigation
+✅ Skeleton loading animations
+✅ Local storage caching with SWR pattern
+✅ Automatic image preloading for performance
+✅ Mobile-responsive design
+✅ Accessible markup and keyboard support</code></pre>
+    </div>
+
+    <!-- 3. Include Block A JavaScript -->
+    <script>
+        // Configure before loading
+        window.CFG = {
+            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            CLIENT: 'demo',
+            SLUG: 'beach-adventure' // You can also let it auto-detect from URL
+        };
+    </script>
+    
+    <!-- Via CDN (Recommended) -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-a.js"></script>
+    
+    <!-- OR locally -->
+    <!-- <script src="src/tour-detail/js/block-a.js"></script> -->
+</body>
+</html>

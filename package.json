@@ -5,7 +5,6 @@
   "scripts": {
     "build:quote-request:js": "esbuild src/quote-request-form/js/quote-request.js --bundle --minify --format=iife --global-name=TourBooking --outfile=dist/quote-request-form.min.js",
     "build:quote-results:js": "esbuild src/quote-results-page/js/quote-results.js --bundle --minify --format=iife --global-name=QuoteResults --outfile=dist/quote-results-page.min.js",
-    "build:tour-category:js": "esbuild src/tour-category-page/category-page.js --bundle --minify --format=iife --global-name=TourCategory --outfile=dist/tour-category-page.min.js",
     "build:quote-results:css": "postcss src/quote-results-page/css/quote-results.css -o dist/quote-results-page.min.css",
     "build:legacy:cards:js": "esbuild src/legacy/cards/js/widget.js --bundle --minify --format=iife --global-name=TourCards --outfile=dist/cards.min.js",
     "build:legacy:cards:css": "postcss src/legacy/cards/css/index-cards.css -o dist/cards.min.css",
@@ -16,7 +15,7 @@
     "build:legacy:form-enhancer:js": "esbuild src/legacy/form-enhancer/js/enhancer.js --bundle --minify --format=iife --global-name=FormEnhancer --outfile=dist/form-enhancer.min.js",
     "build:legacy:simple-enhancer:js": "esbuild src/legacy/form-enhancer/js/simple-enhancer.js --bundle --minify --format=iife --global-name=SimpleFormEnhancer --outfile=dist/simple-form-enhancer.min.js",
     "build:legacy:client-enhancer:js": "esbuild src/legacy/form-enhancer/js/client-aware-enhancer.js --bundle --minify --format=iife --global-name=ClientFormEnhancer --outfile=dist/client-form-enhancer.min.js",
-    "build": "npm run build:quote-request:js && npm run build:quote-results:js && npm run build:tour-category:js && npm run build:configs",
+    "build": "npm run build:quote-request:js && npm run build:quote-results:js && npm run build:configs",
     "build:configs": "node build-client-configs.js",
     "build:legacy": "npm run build:legacy:cards:js && npm run build:legacy:cards:css && npm run build:legacy:detail:js && npm run build:legacy:detail:css && npm run build:legacy:booking:js && npm run build:legacy:booking:css && npm run build:legacy:form-enhancer:js && npm run build:legacy:simple-enhancer:js && npm run build:legacy:client-enhancer:js",
     "build:all": "npm run build && npm run build:legacy",
