@@ -1,5 +1,8 @@
 {
   "START_OVER_URL": "/airport-transfers",
+  "SHARED_CONFIG": {
+    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+  },
   "FORM_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": ["jm"],
