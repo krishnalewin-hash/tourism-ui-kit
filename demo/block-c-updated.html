@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Related Tours</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/css/variables.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/css/base.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/css/skeleton.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-c.css">
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/js/icons-lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/shared/js/params.js"></script>
+</head>
+<body>
+    <div class="tdp3-wrap">
+        <section class="related-tours-section" id="related-tours-section">
+            <h2>Related Tours</h2>
+            <h3>More Adventure Tours</h3>
+            
+            <!-- Skeleton loading -->
+            <div class="related-tours-skeleton" id="related-tours-skeleton">
+                <div class="tour-card-skeleton">
+                    <div class="sk-image"></div>
+                    <div class="sk-content">
+                        <div class="sk-line lg" style="width:80%"></div>
+                        <div class="sk-line sm" style="width:60%"></div>
+                        <div class="sk-line" style="width:95%"></div>
+                        <div class="sk-line" style="width:85%"></div>
+                        <div class="sk-button"></div>
+                    </div>
+                </div>
+                <div class="tour-card-skeleton">
+                    <div class="sk-image"></div>
+                    <div class="sk-content">
+                        <div class="sk-line lg" style="width:80%"></div>
+                        <div class="sk-line sm" style="width:60%"></div>
+                        <div class="sk-line" style="width:95%"></div>
+                        <div class="sk-line" style="width:85%"></div>
+                        <div class="sk-button"></div>
+                    </div>
+                </div>
+                <div class="tour-card-skeleton">
+                    <div class="sk-image"></div>
+                    <div class="sk-content">
+                        <div class="sk-line lg" style="width:80%"></div>
+                        <div class="sk-line sm" style="width:60%"></div>
+                        <div class="sk-line" style="width:95%"></div>
+                        <div class="sk-line" style="width:85%"></div>
+                        <div class="sk-button"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related tours grid (hidden initially) -->
+            <div class="related-tours-grid" id="related-tours-grid" style="display:none"></div>
+        </section>
+    </div>
+
+    <script>
+        // Ensure CFG exists for Block C (in case Block A hasn't loaded yet)
+        window.CFG = window.CFG || {
+            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            CLIENT: 'demo'
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-c.js"></script>
+</body>
+</html>
