@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block C - Related Tours Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/css/variables.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/css/base.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/css/skeleton.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/tour-detail/css/block-c.css">
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/js/icons-lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@latest/src/shared/js/params.js"></script>
+    
+    <script>
+        // Set up test configuration and tour data for Block C
+        window.CFG = {
+            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            CLIENT: 'demo',
+            SLUG: 'southern-sri-lanka-explorer'
+        };
+
+        // Mock current tour data (this would normally come from Block A/B)
+        window.__TOUR_DATA__ = {
+            'southern-sri-lanka-explorer': {
+                slug: 'southern-sri-lanka-explorer',
+                name: 'Southern Sri Lanka Explorer',
+                type: 'Adventure',
+                excerpt: 'Discover the wild beauty of southern Sri Lanka',
+                image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?w=400&h=200&fit=crop',
+                fromPrice: 299,
+                location: 'Southern Province',
+                duration: '5 days',
+                group: 'Small group'
+            }
+        };
+
+        // Mock all tours data (this would normally come from API)
+        window.__ALL_TOURS_DATA__ = [
+            {
+                slug: 'southern-sri-lanka-explorer',
+                name: 'Southern Sri Lanka Explorer',
+                type: 'Adventure',
+                excerpt: 'Discover the wild beauty of southern Sri Lanka with whale watching, national parks, and pristine beaches.',
+                image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?w=400&h=200&fit=crop',
+                fromPrice: 299,
+                location: 'Southern Province',
+                duration: '5 days',
+                group: 'Small group'
+            },
+            {
+                slug: 'ella-hiking-adventure',
+                name: 'Ella Hiking Adventure',
+                type: 'Adventure',
+                excerpt: 'Trek through tea plantations and climb to stunning viewpoints in the hill country.',
+                image: 'https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=400&h=200&fit=crop',
+                fromPrice: 199,
+                location: 'Ella',
+                duration: '3 days',
+                group: 'Small group'
+            },
+            {
+                slug: 'kandy-cultural-tour',
+                name: 'Kandy Cultural Tour',
+                type: 'Cultural',
+                excerpt: 'Explore the ancient capital and sacred Temple of the Tooth in the heart of Sri Lanka.',
+                image: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=400&h=200&fit=crop',
+                fromPrice: 149,
+                location: 'Kandy',
+                duration: '2 days',
+                group: 'Any size'
+            },
+            {
+                slug: 'yala-safari-experience',
+                name: 'Yala Safari Experience',
+                type: 'Adventure',
+                excerpt: 'Spot leopards, elephants, and exotic birds in Sri Lanka\'s premier national park.',
+                image: 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=400&h=200&fit=crop',
+                fromPrice: 179,
+                location: 'Yala National Park',
+                duration: '2 days',
+                group: 'Small group'
+            },
+            {
+                slug: 'colombo-city-highlights',
+                name: 'Colombo City Highlights',
+                type: 'Cultural',
+                excerpt: 'Discover the vibrant capital city with its colonial architecture and bustling markets.',
+                image: 'https://images.unsplash.com/photo-1588233188035-dfaa6c28e001?w=400&h=200&fit=crop',
+                fromPrice: 89,
+                location: 'Colombo',
+                duration: '1 day',
+                group: 'Any size'
+            },
+            {
+                slug: 'sigiriya-rock-fortress',
+                name: 'Sigiriya Rock Fortress',
+                type: 'Cultural',
+                excerpt: 'Climb the ancient rock fortress and explore the ruins of a 5th-century palace.',
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop',
+                fromPrice: 129,
+                location: 'Sigiriya',
+                duration: '1 day',
+                group: 'Any size'
+            }
+        ];
+    </script>
+</head>
+<body>
+    <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+        <h1>Block C Test - Related Tours</h1>
+        <p>Current tour: <strong>Southern Sri Lanka Explorer</strong> (Adventure type)</p>
+        <p>Should show other Adventure tours below:</p>
+        
+        <section class="related-tours" id="related-tours">
+            <div class="container">
+                <h2 class="related-tours__title">Related Tours</h2>
+                <div class="related-tours__grid" id="related-tours-grid">
+                    <!-- Skeleton loading cards -->
+                    <div class="related-tour-card skeleton-card">
+                        <div class="skeleton skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-title"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-price"></div>
+                        </div>
+                    </div>
+                    <div class="related-tour-card skeleton-card">
+                        <div class="skeleton skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-title"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-price"></div>
+                        </div>
+                    </div>
+                    <div class="related-tour-card skeleton-card">
+                        <div class="skeleton skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-title"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-price"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Modified Block C script for testing - intercepts the API call
+        (function() {
+            'use strict';
+
+            const CFG = window.CFG || {
+                DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+                CLIENT: 'demo'
+            };
+
+            const SLUG = CFG.SLUG || 'southern-sri-lanka-explorer';
+            const norm = s => String(s || '').trim().toLowerCase();
+
+            // ---------- Filter related tours ----------
+            function getRelatedTours(currentTour, allTours, maxResults = 3) {
+                if (!currentTour || !currentTour.type || !Array.isArray(allTours)) {
+                    return [];
+                }
+
+                const currentType = norm(currentTour.type);
+                const currentSlug = norm(currentTour.slug);
+
+                return allTours
+                    .filter(tour => {
+                        return norm(tour.type) === currentType && norm(tour.slug) !== currentSlug;
+                    })
+                    .slice(0, maxResults);
+            }
+
+            // ---------- Create tour card HTML ----------
+            function createTourCard(tour) {
+                const image = tour.image || 'https://via.placeholder.com/400x200?text=No+Image';
+                const title = tour.name || 'Untitled Tour';
+                const description = tour.excerpt || 'No description available.';
+                const price = tour.fromPrice ? `From $${tour.fromPrice}` : 'Price on request';
+                const location = tour.location || '';
+                const duration = tour.duration || '';
+                const group = tour.group || '';
+                
+                // Build tour URL (you can customize this based on your URL structure)
+                const tourUrl = `?slug=${tour.slug}` || '#';
+
+                const meta = [];
+                if (duration) meta.push(`⏱ ${duration}`);
+                if (location) meta.push(`📍 ${location}`);
+                if (group) meta.push(`👥 ${group}`);
+
+                return `
+                    <div class="tour-card">
+                        <div class="tour-card-image">
+                            <img src="${image}" alt="${title}" loading="lazy" decoding="async">
+                            <div class="tour-card-price">${price}</div>
+                        </div>
+                        <div class="tour-card-content">
+                            <h4 class="tour-card-title">${title}</h4>
+                            ${meta.length ? `<div class="tour-card-meta">${meta.map(m => `<span>${m}</span>`).join('')}</div>` : ''}
+                            <p class="tour-card-description">${description}</p>
+                            <a href="${tourUrl}" class="tour-card-button">View Details</a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ---------- Render related tours ----------
+            function render(currentTour, allTours) {
+                const container = document.getElementById('related-tours-grid');
+                const section = document.getElementById('related-tours');
+                
+                if (!container || !section) {
+                    console.error('Container or section not found');
+                    return;
+                }
+
+                const relatedTours = getRelatedTours(currentTour, allTours, 3);
+                console.log('Current tour:', currentTour);
+                console.log('All tours:', allTours);
+                console.log('Related tours found:', relatedTours);
+
+                if (relatedTours.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No related tours found.</p>';
+                    return;
+                }
+
+                // Update section title to show category
+                const sectionTitle = section.querySelector('.related-tours__title');
+                if (sectionTitle && currentTour.type) {
+                    sectionTitle.textContent = `More ${currentTour.type} Tours`;
+                }
+
+                // Render tour cards
+                container.innerHTML = relatedTours.map(tour => createTourCard(tour)).join('');
+                container.style.display = '';
+                section.style.display = '';
+            }
+
+            // ---------- Initialize test ----------
+            setTimeout(() => {
+                const currentTour = window.__TOUR_DATA__[SLUG];
+                const allTours = window.__ALL_TOURS_DATA__;
+                
+                if (currentTour && allTours) {
+                    render(currentTour, allTours);
+                } else {
+                    console.error('Test data not found');
+                    const container = document.getElementById('related-tours-grid');
+                    if (container) {
+                        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Test data not loaded.</p>';
+                    }
+                }
+            }, 500);
+        })();
+    </script>
+</body>
+</html>
