@@ -79,7 +79,51 @@ function injectStyles() {
       console.log(`[quote-calc] Loading client config: ${client}`);
       console.log(`[quote-calc] Base URL: ${base}`);
 
-      // Try built configuration first
+      // Load directly from core configuration (single source of truth)
+      try {
+        let configUrl;
+        if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
+          configUrl = `${base}/clients/${client}/core/config.json`;
+        } else {
+          configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}/core/config.json`;
+        }
+
+        console.log(`[quote-calc] Fetching core config: ${configUrl}`);
+        
+        const response = await fetch(configUrl, { cache: 'no-store' });
+        if (response.ok) {
+          const clientConfig = await response.json();
+          
+          // Update CONFIG with client-specific settings from core config
+          if (clientConfig.QUOTE_RESULTS_CONFIG) {
+            CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
+          } else if (clientConfig.PRICING_RATES) {
+            convertPricingRatesToConfig(clientConfig.PRICING_RATES);
+          }
+          
+          // Set transfer payment URL if present
+          if (clientConfig.TRANSFER_PAYMENT_URL) {
+            CONFIG.transferPaymentUrl = clientConfig.TRANSFER_PAYMENT_URL;
+          }
+          
+          // Override Google Maps key if present in client config
+          // Check SHARED_CONFIG first, then fallback to FORM_CONFIG for backward compatibility
+          if (clientConfig.SHARED_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.SHARED_CONFIG.GMAPS_KEY;
+          } else if (clientConfig.FORM_CONFIG?.GMAPS_KEY) {
+            CONFIG.googleApiKey = clientConfig.FORM_CONFIG.GMAPS_KEY;
+          }
+          
+          console.log(`[quote-calc] Successfully loaded ${client} core configuration`);
+          return CONFIG;
+        } else {
+          console.warn(`[quote-calc] Core config not found (${response.status}), trying built config fallback`);
+        }
+      } catch (error) {
+        console.warn(`[quote-calc] Failed to load core config:`, error);
+      }
+
+      // Fallback: Try built configuration (for backward compatibility)
       try {
         let configUrl;
         if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
@@ -88,7 +132,7 @@ function injectStyles() {
           configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
         }
 
-        console.log(`[quote-calc] Fetching built config: ${configUrl}`);
+        console.log(`[quote-calc] Fetching built config fallback: ${configUrl}`);
         
         const response = await fetch(configUrl, { cache: 'no-store' });
         if (response.ok) {

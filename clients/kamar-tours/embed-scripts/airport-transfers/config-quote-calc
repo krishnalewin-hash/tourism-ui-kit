@@ -41,7 +41,7 @@
         });
     </script>
 
-    <!-- Load Quote Results Component (latest with map debugging) -->
-    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@81f2297/src/quote-results-page/js/quote-results.js"></script>
+    <!-- Load Quote Results Component (latest with updated URLs) -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@49c1900/src/quote-results-page/js/quote-results.js"></script>
 </body>
 </html>
