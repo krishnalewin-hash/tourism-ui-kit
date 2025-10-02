@@ -105,6 +105,11 @@ function injectStyles() {
           if (clientConfig.TRANSFER_PAYMENT_URL) {
             CONFIG.transferPaymentUrl = clientConfig.TRANSFER_PAYMENT_URL;
           }
+
+          // Set contact configuration if present
+          if (clientConfig.CONTACT_CONFIG) {
+            CONFIG.contactConfig = clientConfig.CONTACT_CONFIG;
+          }
           
           // Override Google Maps key if present in client config
           // Check SHARED_CONFIG first, then fallback to FORM_CONFIG for backward compatibility
@@ -497,18 +502,36 @@ function injectStyles() {
     const dropoff = getParam("dropoff_location");
     const passengers = getParam("passengers") || getParam("number_of_passengers") || CONFIG.defaultPassengers;
     
-    // Create contact message
-    const message = `Hi! I'd like to book a transfer from ${pickup} to ${dropoff} for ${passengers} passenger(s). Please contact me with more details.`;
-    
-    // Option 1: WhatsApp (customize phone number)
-    const whatsappUrl = `https://wa.me/1876XXXXXXX?text=${encodeURIComponent(message)}`;
-    
-    // Option 2: Email (customize email)
-    const emailUrl = `mailto:bookings@tourdriver.com?subject=Transfer Booking Request&body=${encodeURIComponent(message)}`;
-    
-    // Option 3: Phone call
-    // window.location.href = 'tel:+1876XXXXXXX';
-    
-    // Use WhatsApp by default (change to emailUrl or phone as needed)
-    window.open(whatsappUrl, '_blank');
+    // Use client-specific contact configuration or fallback to defaults
+    const contactConfig = CONFIG.contactConfig || {
+      type: "email",
+      email: {
+        address: "bookings@tourdriver.com",
+        subject: "Transfer Booking Request",
+        message: "Hi! I'd like to book a transfer from {pickup} to {dropoff} for {passengers} passenger(s). Please contact me with more details."
+      }
+    };
+
+    // Replace placeholders in message templates
+    const replacePlaceholders = (text) => {
+      return text
+        .replace('{pickup}', pickup || '[Pickup Location]')
+        .replace('{dropoff}', dropoff || '[Dropoff Location]')
+        .replace('{passengers}', passengers || 1);
+    };
+
+    if (contactConfig.type === "whatsapp" && contactConfig.whatsapp) {
+      // WhatsApp option
+      const message = replacePlaceholders(contactConfig.whatsapp.message);
+      const whatsappUrl = `https://wa.me/${contactConfig.whatsapp.number}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    } else if (contactConfig.type === "phone" && contactConfig.phone) {
+      // Phone call option
+      window.location.href = `tel:+${contactConfig.phone.number}`;
+    } else {
+      // Email option (default)
+      const message = replacePlaceholders(contactConfig.email.message);
+      const emailUrl = `mailto:${contactConfig.email.address}?subject=${encodeURIComponent(contactConfig.email.subject)}&body=${encodeURIComponent(message)}`;
+      window.location.href = emailUrl;
+    }
   };

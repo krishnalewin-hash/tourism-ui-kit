@@ -66,5 +66,20 @@
     "map": {
       "zoom": 9
     }
+  },
+  "CONTACT_CONFIG": {
+    "type": "email",
+    "whatsapp": {
+      "number": "18764445555",
+      "message": "Hi! I'd like to book a transfer from {pickup} to {dropoff} for {passengers} passenger(s). Please contact me with more details."
+    },
+    "email": {
+      "address": "bookings@tourismbizacademy.com",
+      "subject": "Transfer Booking Request",
+      "message": "Hi! I'd like to book a transfer from {pickup} to {dropoff} for {passengers} passenger(s). Please contact me with more details."
+    },
+    "phone": {
+      "number": "18764445555"
+    }
   }
 }
