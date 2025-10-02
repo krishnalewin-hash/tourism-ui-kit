@@ -6,11 +6,11 @@
   // Use existing CFG or set defaults
   const CFG = window.CFG || {
     DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
-    CLIENT: 'demo'
+    CLIENT: 'tour-driver'
   };
   
   const DATA_URL = CFG.DATA_URL;
-  const CLIENT = CFG.CLIENT || 'demo';
+  const CLIENT = CFG.CLIENT || 'tour-driver';
   
   if (!DATA_URL) {
     console.error('[Tours] Missing CFG.DATA_URL');

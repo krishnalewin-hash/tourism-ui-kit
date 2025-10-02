@@ -17,7 +17,7 @@ async function loadClientConfiguration() {
   const client = window.CFG?.client || 
                 new URLSearchParams(location.search).get('client') || 
                 sessionStorage.getItem('client') || 
-                'demo';
+                'tour-driver';
 
   // Determine base URL for configs
   const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';

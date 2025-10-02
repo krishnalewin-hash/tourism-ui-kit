@@ -7,8 +7,8 @@
 
   async function loadClientConfig() {
     try {
-      // Get client from window.CLIENT_ID or default to 'demo'
-      const clientId = window.CLIENT_ID || 'demo';
+      // Get client from window.CLIENT_ID or default to 'tour-driver'
+      const clientId = window.CLIENT_ID || 'tour-driver';
       const base = window.BASE_URL || 'krishnalewin-hash/tourism-ui-kit@main';
       
       const configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${clientId}.json`;

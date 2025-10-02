@@ -13,7 +13,7 @@ async function boot(){
 
   // 2) read which client to load
   const mount = document.querySelector('.tourkit-cards'); // e.g., <div class="tourkit-cards" data-client="demo" data-base="USER/tourism-ui-kit@main"></div>
-  const clientKey = mount?.dataset?.client || 'demo';
+  const clientKey = mount?.dataset?.client || 'tour-driver';
   const base = mount?.dataset?.base || 'krishnalewin-hash/tourism-ui-kit@main';
 
   // 3) fetch per-client config

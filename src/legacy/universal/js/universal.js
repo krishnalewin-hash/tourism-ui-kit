@@ -11,7 +11,7 @@ async function initUniversalWidget() {
   if (!mount) return;
   
   const mode = mount.dataset.mode || 'auto';
-  const clientKey = mount.dataset.client || 'demo';
+  const clientKey = mount.dataset.client || 'tour-driver';
   const base = mount.dataset.base || 'krishnalewin-hash/tourism-ui-kit@main';
   
   // Auto-detect mode based on page context if not specified

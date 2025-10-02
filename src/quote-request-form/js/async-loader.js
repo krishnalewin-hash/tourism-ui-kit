@@ -19,7 +19,7 @@
       return window.CFG;
     }
 
-    const client = window.CFG?.client || 'demo';
+    const client = window.CFG?.client || 'tour-driver';
     const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
     
     try {
