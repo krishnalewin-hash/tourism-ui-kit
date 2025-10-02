@@ -68,7 +68,7 @@
     }
   },
   "CONTACT_CONFIG": {
-    "type": "email",
+    "type": "whatsapp",
     "whatsapp": {
       "number": "18768315333",
       "message": "Hi! I'd like to book a transfer from {pickup} to {dropoff} for {passengers} passenger(s). Please contact me with more details."
