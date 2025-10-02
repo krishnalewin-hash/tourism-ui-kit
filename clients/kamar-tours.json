@@ -1,5 +1,6 @@
 {
   "START_OVER_URL": "https://kamartours.com/booking",
+  "TRANSFER_PAYMENT_URL": "https://kamartours.com/book",
   "TOUR_DATA_URL": "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
   "TOUR_CLIENT_ID": "kamar-tours",
   "FORM_CONFIG": {

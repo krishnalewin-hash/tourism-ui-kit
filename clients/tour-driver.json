@@ -1,5 +1,6 @@
 {
   "START_OVER_URL": "https://tourdriver.com/booking",
+  "TRANSFER_PAYMENT_URL": "https://tourdriver.com/book",
   "FORM_CONFIG": {
     "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
     "COUNTRIES": ["jm"],

@@ -34,6 +34,9 @@ function injectStyles() {
     // GMAPS key: use window.CFG.GMAPS_KEY if present; client must provide their own key
     googleApiKey: (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || "",
 
+    // Payment URL for transfers
+    transferPaymentUrl: "https://tourdriver.com/book",
+
     // Pricing bands (miles are inclusive of lower bound, exclusive of upper)
     bands: [
       { maxMi: 10,  pricePP: 30 },  // 0–<10mi → $30 pp
@@ -97,6 +100,11 @@ function injectStyles() {
             convertPricingRatesToConfig(clientConfig.PRICING_RATES);
           }
           
+          // Set transfer payment URL if present
+          if (clientConfig.TRANSFER_PAYMENT_URL) {
+            CONFIG.transferPaymentUrl = clientConfig.TRANSFER_PAYMENT_URL;
+          }
+          
           // Override Google Maps key if present in client config
           // Check SHARED_CONFIG first, then fallback to FORM_CONFIG for backward compatibility
           if (clientConfig.SHARED_CONFIG?.GMAPS_KEY) {
@@ -134,6 +142,11 @@ function injectStyles() {
             CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
           } else if (clientConfig.PRICING_RATES) {
             convertPricingRatesToConfig(clientConfig.PRICING_RATES);
+          }
+          
+          // Set transfer payment URL if present
+          if (clientConfig.TRANSFER_PAYMENT_URL) {
+            CONFIG.transferPaymentUrl = clientConfig.TRANSFER_PAYMENT_URL;
           }
           
           // Override Google Maps key if present in client config
@@ -428,8 +441,8 @@ function injectStyles() {
     if (email) bookingParams.set('email', email);
     if (phone) bookingParams.set('phone', phone);
 
-    // Redirect to booking page (customize this URL for each client)
-    const bookingUrl = `https://tourdriver.com/book?${bookingParams.toString()}`;
+    // Redirect to booking page using client-specific payment URL
+    const bookingUrl = `${CONFIG.transferPaymentUrl}?${bookingParams.toString()}`;
     window.location.href = bookingUrl;
   };
 
