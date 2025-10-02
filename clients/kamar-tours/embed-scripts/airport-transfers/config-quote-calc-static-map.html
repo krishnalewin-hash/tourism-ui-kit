@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Calculator - Static Map</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Configuration with static map fallback -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours',
+            debug: true,
+            // Force static map mode to bypass Directions API issues
+            useStaticMap: true
+        };
+        
+        console.log('[DEBUG] Using static map fallback mode');
+    </script>
+
+    <!-- Load Quote Results Component -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@81f2297/src/quote-results-page/js/quote-results.js"></script>
+    
+    <!-- Override map functionality to use static maps -->
+    <script>
+        // Wait for the main script to load, then override map rendering
+        setTimeout(() => {
+            // Override the map rendering with static map
+            const originalCalculate = window.calculate;
+            if (originalCalculate) {
+                window.calculate = async function() {
+                    await originalCalculate();
+                    
+                    // After calculation, replace any map with static version
+                    setTimeout(() => {
+                        const mapNode = document.getElementById('qc-map');
+                        if (mapNode) {
+                            // Get URL parameters
+                            const params = new URLSearchParams(window.location.search);
+                            const pickup = params.get('pickup_location') || 'Airport';
+                            const dropoff = params.get('dropoff_location') || 'Destination';
+                            
+                            // Use Static Maps API (requires less permissions)
+                            const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?` +
+                                `size=400x300&` +
+                                `markers=color:green|label:A|${encodeURIComponent(pickup)}&` +
+                                `markers=color:red|label:B|${encodeURIComponent(dropoff)}&` +
+                                `path=color:0x0000ff|weight:3|${encodeURIComponent(pickup)}|${encodeURIComponent(dropoff)}&` +
+                                `key=AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA`;
+                            
+                            mapNode.innerHTML = `
+                                <img src="${staticMapUrl}" 
+                                     alt="Route map from ${pickup} to ${dropoff}"
+                                     style="width:100%;height:100%;object-fit:cover;border-radius:12px;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
+                                    <div>
+                                        <p style="margin:0;font-size:16px;margin-bottom:8px;">📍 ${pickup}</p>
+                                        <p style="margin:0;font-size:14px;margin-bottom:16px;">↓</p>
+                                        <p style="margin:0;font-size:16px;">📍 ${dropoff}</p>
+                                    </div>
+                                </div>
+                            `;
+                            mapNode.classList.remove('qc-shimmer');
+                            console.log('[DEBUG] Static map applied');
+                        }
+                    }, 1000);
+                };
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
