@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Calculator</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Configuration for tour-driver client -->
+    <script>
+        window.CFG = {
+            client: 'tour-driver',
+            debug: true  // Enable detailed console logging
+        };
+        
+        // Add some debugging
+        console.log('[DEBUG] Window CFG set:', window.CFG);
+        console.log('[DEBUG] Using hybrid approach: Distance Matrix + optional route map');
+        
+        // Monitor for config loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('[DEBUG] Available APIs:', {
+                    hasGoogle: !!window.google,
+                    hasMaps: !!window.google?.maps,
+                    hasDistanceMatrix: !!window.google?.maps?.DistanceMatrixService,
+                    hasDirections: !!window.google?.maps?.DirectionsService
+                });
+                
+                // Check if map container exists
+                const mapNode = document.getElementById('qc-map');
+                console.log('[DEBUG] Map container found:', !!mapNode);
+                if (mapNode) {
+                    console.log('[DEBUG] Map container content:', mapNode.innerHTML);
+                    console.log('[DEBUG] Map container classes:', mapNode.className);
+                }
+            }, 3000);
+        });
+    </script>
+
+    <!-- Load Quote Results Component (latest with map debugging) -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@81f2297/src/quote-results-page/js/quote-results.js"></script>
+</body>
+</html>

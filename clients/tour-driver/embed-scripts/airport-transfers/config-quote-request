@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Request Form</title>
+</head>
+<body>
+    <!-- Mount point for the quote request form -->
+    <div id="quote-request-form"></div>
+
+    <!-- Configuration for tour-driver client -->
+    <script>
+        window.CFG = {
+            client: 'tour-driver',
+            debug: true
+        };
+        
+        console.log('[DEBUG] Tour Driver quote request form loaded');
+    </script>
+
+    <!-- Load Quote Request Form Component -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-request-form/js/quote-request.js"></script>
+</body>
+</html>

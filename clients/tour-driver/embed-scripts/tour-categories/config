@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Categories</title>
+</head>
+<body>
+    <!-- Mount point for tour categories -->
+    <div id="tour-categories"></div>
+
+    <!-- Configuration for tour-driver client -->
+    <script>
+        window.CFG = {
+            client: 'tour-driver',
+            debug: true
+        };
+        
+        console.log('[DEBUG] Tour Driver categories loaded');
+    </script>
+
+    <!-- Load Tour Categories Component -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-categories/js/tour-categories.js"></script>
+</body>
+</html>

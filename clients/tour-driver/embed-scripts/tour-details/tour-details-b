@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Details - Block B</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-b.css">
+</head>
+<body>
+    <div class="tdp2-wrap">
+        <section class="tour-info-section" id="tour-info-section">
+            <div class="tour-info-skeleton" id="tour-info-skeleton">
+                <!-- skeleton content -->
+            </div>
+            <div class="tour-info-content" id="tour-info-content" style="display:none"></div>
+        </section>
+    </div>
+
+    <script>
+        window.CFG = {
+            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            CLIENT: 'tour-driver',
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-b.js"></script>
+</body>
+</html>

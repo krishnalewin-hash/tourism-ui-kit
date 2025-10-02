@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Related Tours</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-c.css">
+</head>
+<body>
+    <div class="tdp3-wrap">
+        <section class="related-tours-section" id="related-tours-section">
+            <h2>Related Tours</h2>
+            <h3>More Adventure Tours</h3>
+            
+            <!-- Skeleton loading -->
+            <div class="related-tours-skeleton" id="related-tours-skeleton">
+                <!-- skeleton content same as before -->
+            </div>
+
+            <!-- Related tours grid -->
+            <div class="related-tours-grid" id="related-tours-grid" style="display:none"></div>
+        </section>
+    </div>
+
+    <script>
+        window.CFG = {
+            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+            CLIENT: 'tour-driver',
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-c-enhanced.js"></script>
+</body>
+</html>
