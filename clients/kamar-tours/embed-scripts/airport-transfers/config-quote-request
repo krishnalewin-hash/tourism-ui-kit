@@ -4,4 +4,4 @@ window.CFG = {
     base: 'krishnalewin-hash/tourism-ui-kit@main'
 };
 </script>
-<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js"></script>
+<script src="https://fastly.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js"></script>
