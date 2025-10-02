@@ -480,6 +480,9 @@ function injectStyles() {
     calculate();
   }
 
+  // Expose calculate function globally for debugging
+  window.calculate = calculate;
+
   /* ===== 8) Button Handlers =========================================== */
   window.handlePayNow = function() {
     // Get current trip details

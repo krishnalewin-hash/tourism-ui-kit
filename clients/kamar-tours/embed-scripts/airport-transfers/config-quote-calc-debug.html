@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Calculator - DEBUG</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Enhanced debugging configuration -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours',
+            debug: true  // Enable detailed console logging
+        };
+        
+        // Enhanced debugging
+        console.log('[DEBUG] Window CFG set:', window.CFG);
+        console.log('[DEBUG] Using hybrid approach: Distance Matrix + optional route map');
+        console.log('[DEBUG] Current URL:', window.location.href);
+        console.log('[DEBUG] URL params:', Object.fromEntries(new URLSearchParams(window.location.search)));
+        
+        // Monitor for config loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('[DEBUG] Available APIs:', {
+                    hasGoogle: !!window.google,
+                    hasMaps: !!window.google?.maps,
+                    hasDistanceMatrix: !!window.google?.maps?.DistanceMatrixService,
+                    hasDirections: !!window.google?.maps?.DirectionsService
+                });
+                
+                // Check if our main function exists
+                console.log('[DEBUG] Script loaded successfully:', typeof window.calculate !== 'undefined');
+                
+                // Try to trigger calculation manually if it exists
+                if (typeof window.calculate === 'function') {
+                    console.log('[DEBUG] Manually triggering calculate function...');
+                    window.calculate();
+                } else {
+                    console.error('[DEBUG] calculate function not found - script may not have loaded properly');
+                }
+            }, 3000);
+        });
+        
+        // Monitor script loading
+        window.addEventListener('error', (e) => {
+            console.error('[DEBUG] Script loading error:', e);
+        });
+    </script>
+
+    <!-- Try multiple loading strategies -->
+    
+    <!-- Strategy 1: Use specific commit hash -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@e16602a/src/quote-results-page/js/quote-results.js"></script>
+    
+    <!-- Strategy 2: Fallback to raw GitHub if jsdelivr fails -->
+    <script>
+        setTimeout(() => {
+            if (typeof calculate === 'undefined') {
+                console.log('[DEBUG] First script failed, trying raw GitHub...');
+                const script = document.createElement('script');
+                script.src = 'https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/src/quote-results-page/js/quote-results.js';
+                script.onload = () => console.log('[DEBUG] Raw GitHub script loaded');
+                script.onerror = () => console.error('[DEBUG] Raw GitHub script failed');
+                document.head.appendChild(script);
+            }
+        }, 2000);
+    </script>
+    
+    <!-- Strategy 3: Final fallback with timestamp -->
+    <script>
+        setTimeout(() => {
+            if (typeof calculate === 'undefined') {
+                console.log('[DEBUG] Second script failed, trying with timestamp...');
+                const script = document.createElement('script');
+                script.src = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js?t=${Date.now()}`;
+                script.onload = () => console.log('[DEBUG] Timestamp script loaded');
+                script.onerror = () => console.error('[DEBUG] All scripts failed');
+                document.head.appendChild(script);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
