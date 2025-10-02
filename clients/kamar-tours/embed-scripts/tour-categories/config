@@ -1,0 +1,16 @@
+<!-- FONT + STYLES + MARKUP + RENDERER -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<div id="skeleton" class="skeleton-list" aria-hidden="true"></div>
+<div id="tour-list" class="tour-list" hidden aria-live="polite"></div>
+
+<script>
+window.CFG = {
+  DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+  CLIENT: 'kamar-tours',
+  FILTER: { mode: 'type', value: 'Carnival & Cultural Events' },
+  LIST_SELECTOR: '#tour-list'
+};
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tour-category-cards@v1.0.0/cards.css">
+<script defer src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tour-category-cards@v1.0.0/cards.js"></script>

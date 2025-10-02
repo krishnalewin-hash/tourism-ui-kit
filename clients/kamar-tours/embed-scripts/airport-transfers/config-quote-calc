@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Calculator</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Configuration with debugging enabled -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours',
+            debug: true  // Enable detailed console logging
+        };
+        
+        // Add some debugging
+        console.log('[DEBUG] Window CFG set:', window.CFG);
+        console.log('[DEBUG] Using hybrid approach: Distance Matrix + optional route map');
+        
+        // Monitor for config loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('[DEBUG] Available APIs:', {
+                    hasGoogle: !!window.google,
+                    hasMaps: !!window.google?.maps,
+                    hasDistanceMatrix: !!window.google?.maps?.DistanceMatrixService,
+                    hasDirections: !!window.google?.maps?.DirectionsService
+                });
+            }, 2000);
+        });
+    </script>
+
+    <!-- Load Quote Results Component (with cache bypass) -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js?v=2025-10-02"></script>
+</body>
+</html>

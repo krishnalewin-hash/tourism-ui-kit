@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/block-b.css">
+</head>
+<body>
+    <!-- Block B: Details Section -->
+    <div class="tdp2-wrap">
+        <section class="section" id="overview">
+            <div id="sk-overview" class="skel-lines">
+                <div class="sk skel-line lg" style="width:40%"></div>
+                <div class="sk skel-line" style="width:95%"></div>
+                <div class="sk skel-line" style="width:92%"></div>
+                <div class="sk skel-line" style="width:88%"></div>
+                <div class="sk skel-line" style="width:70%"></div>
+            </div>
+        </section>
+
+        <section class="section" id="highlightsWrap" style="display:none">
+            <h3>Highlights</h3>
+            <div id="sk-highlights" class="skel-lines" style="grid-template-columns:repeat(4, minmax(90px, 1fr)); gap:8px">
+                <div class="sk skel-line" style="height:28px; border-radius:999px"></div>
+                <div class="sk skel-line" style="height:28px; border-radius:999px"></div>
+            </div>
+            <div class="chips" id="highlights" style="display:none"></div>
+        </section>
+
+        <section class="section" id="galleryWrap" style="display:none">
+            <h3>Gallery</h3>
+            <div id="sk-gallery" class="gallery-skel">
+                <div class="sk cell"></div><div class="sk cell"></div><div class="sk cell"></div>
+                <div class="sk cell"></div><div class="sk cell"></div><div class="sk cell"></div>
+            </div>
+            <div class="gallery" id="gallery" style="display:none"></div>
+        </section>
+
+        <section class="section accordion" id="accordion">
+            <div id="sk-accordion" class="skel-lines">
+                <div class="sk skel-line lg" style="width:55%"></div>
+                <div class="sk skel-line" style="width:95%"></div>
+                <div class="sk skel-line" style="width:92%"></div>
+                <div class="sk skel-line" style="width:88%"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/block-b.js"></script>
+</body>
+</html>

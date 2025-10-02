@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Calculator - TEST LATEST</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Configuration with debugging enabled -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours',
+            debug: true  // Enable detailed console logging
+        };
+        
+        // Add some debugging
+        console.log('[DEBUG] Window CFG set:', window.CFG);
+        console.log('[DEBUG] Using hybrid approach: Distance Matrix + optional route map');
+        console.log('[DEBUG] Script version: LATEST - bypassing CDN cache');
+        
+        // Monitor for config loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('[DEBUG] Available APIs:', {
+                    hasGoogle: !!window.google,
+                    hasMaps: !!window.google?.maps,
+                    hasDistanceMatrix: !!window.google?.maps?.DistanceMatrixService,
+                    hasDirections: !!window.google?.maps?.DirectionsService
+                });
+            }, 2000);
+        });
+    </script>
+
+    <!-- Load Quote Results Component with cache bypass -->
+    <script src="https://raw.githubusercontent.com/krishnalewin-hash/tourism-ui-kit/main/src/quote-results-page/js/quote-results.js"></script>
+    
+    <!-- Fallback: If raw GitHub fails, try jsdelivr with timestamp -->
+    <script>
+        // Check if the script loaded properly
+        setTimeout(() => {
+            if (typeof calculate === 'undefined') {
+                console.log('[DEBUG] Main script failed to load, trying fallback...');
+                const script = document.createElement('script');
+                script.src = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js?t=${Date.now()}`;
+                document.head.appendChild(script);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

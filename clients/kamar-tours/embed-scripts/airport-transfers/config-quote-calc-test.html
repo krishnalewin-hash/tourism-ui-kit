@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Quote Results - TEST</title>
+</head>
+<body>
+    <!-- Mount point for the quote calculator -->
+    <div id="quote-calc"></div>
+
+    <!-- Test configuration with direct API key -->
+    <script>
+        window.CFG = {
+            client: 'kamar-tours',
+            debug: true,
+            // Fallback API key for testing - replace with a working key
+            GMAPS_KEY: 'YOUR_WORKING_API_KEY_HERE',
+            // Force using the fallback instead of client config
+            skipClientConfig: true
+        };
+        
+        console.log('[TEST] Starting with direct API key configuration');
+        console.log('[TEST] Client:', window.CFG.client);
+        console.log('[TEST] Has API Key:', !!window.CFG.GMAPS_KEY);
+    </script>
+
+    <!-- Load Quote Results Component -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js"></script>
+    
+    <script>
+        // Add URL parameters for testing
+        const testParams = new URLSearchParams({
+            pickup_location: 'Norman Manley International Airport, Kingston, Jamaica',
+            dropoff_location: 'Blue Mountain Coffee Shop, Kingston, Jamaica',
+            passengers: '2'
+        });
+        
+        // Add to URL for testing
+        if (!window.location.search) {
+            console.log('[TEST] No URL params found, you can add these for testing:');
+            console.log('[TEST] ?' + testParams.toString());
+        }
+    </script>
+</body>
+</html>

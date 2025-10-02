@@ -3,7 +3,8 @@
  * - Always shows total price (defaults to 1 passenger if none specified)
  * - Reads lead params (URL first, then sessionStorage fallback)
  * - Loads Google Maps JS (if not already present)
- * - Draws route map (DirectionsService/Renderer)
+ * - Uses Distance Matrix API for reliable distance calculation
+ * - Shows interactive route map when Directions API is available (fallback gracefully)
  * - Calculates price from client-specific distance bands + remote surcharge + minimum
  * - Supports client-specific pricing configuration from /clients/{client}.json
  *
@@ -14,7 +15,7 @@
 const MOUNT_ID = "quote-calc";
 
 // Inline CSS styles for the component
-const QUOTE_RESULTS_CSS = `:root{--card-bg:#fff;--card-border:#ececec;--muted:#6b7280;--accent:#D65130;--accent-600:#b54224;--shadow:0 8px 24px rgba(0,0,0,.06);--radius:12px;--font:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}html,body{margin:0;padding:0}body{font-family:var(--font);color:#111827;background:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:5px;font-weight:700;text-decoration:none}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover,.btn-primary:focus{background:var(--accent-600)}.btn:focus{outline:2px solid #000;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skeleton-list{display:grid;gap:16px}.skeleton{display:grid;grid-template-columns:320px 1fr 200px;gap:20px;background:#fff;border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.shimmer{position:relative;background:#eef0f3;overflow:hidden;border-radius:12px}.shimmer::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 100%);animation:shimmer 1.4s infinite}@keyframes shimmer{100%{transform:translateX(100%)}}.sk-img{height:100%;min-height:220px}.sk-line{height:14px;border-radius:8px}.sk-line.lg{height:20px}.sk-pad{padding:18px 16px;display:flex;flex-direction:column;gap:12px}.sk-right{padding:16px;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--card-border)}.sk-pill{height:36px;border-radius:5px}@media (max-width:1024px){.skeleton{grid-template-columns:260px 1fr 180px}}@media (max-width:860px){.skeleton{grid-template-columns:1fr}.sk-right{border-left:none;border-top:1px solid var(--card-border)}.sk-img{min-height:180px}}#quote-calc{box-sizing:border-box;max-width:1100px;margin:24px auto;padding:24px;border:1px solid #ececec;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.qc-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media (max-width:900px){.qc-row{grid-template-columns:1fr;gap:24px}#quote-calc{padding:10px}}.qc-map{width:100%;height:400px;border-radius:12px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb}.qc-details{display:flex;flex-direction:column;gap:0px}.qc-detail-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6}.qc-detail-item:last-of-type{border-bottom:none}.qc-detail-label{font-weight:800;color:#374151;font-size:18px}.qc-detail-value{font-weight:400;color:#111827;font-size:18px}.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}.qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}.qc-btn-primary{background:#059669;color:white;border:2px solid #059669}.qc-btn-primary:hover{background:#047857;border-color:#047857}.qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}.qc-btn-secondary:hover{background:#f9fafb;border-color:#9ca3af}.qc-err{padding:12px;border:1px solid #f3d2d2;background:#fff6f6;color:#9b1c1c;border-radius:10px}.qc-shimmer{position:relative;border-radius:10px;background:#eef0f3;overflow:hidden}.qc-shimmer:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 100%);animation:qc-shimmer 1.4s infinite}@keyframes qc-shimmer{100%{transform:translateX(100%)}}`;
+const QUOTE_RESULTS_CSS = `:root{--card-bg:#fff;--card-border:#ececec;--muted:#6b7280;--accent:#D65130;--accent-600:#b54224;--shadow:0 8px 24px rgba(0,0,0,.06);--radius:12px;--font:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}html,body{margin:0;padding:0}body{font-family:var(--font);color:#111827;background:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:5px;font-weight:700;text-decoration:none}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover,.btn-primary:focus{background:var(--accent-600)}.btn:focus{outline:2px solid #000;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}#quote-calc{box-sizing:border-box;max-width:1100px;margin:24px auto;padding:24px;border:1px solid #ececec;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.qc-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media (max-width:900px){.qc-row{grid-template-columns:1fr;gap:24px}#quote-calc{padding:16px}}.qc-map{width:100%;height:400px;border-radius:12px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb}.qc-details{display:flex;flex-direction:column;gap:0px}.qc-detail-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6}.qc-detail-item:last-of-type{border-bottom:none}.qc-detail-label{font-weight:800;color:#374151;font-size:18px}.qc-detail-value{font-weight:400;color:#111827;font-size:18px}.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}.qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}.qc-btn-primary{background:#059669;color:white;border:2px solid #059669}.qc-btn-primary:hover{background:#047857;border-color:#047857}.qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}.qc-btn-secondary:hover{background:#f9fafb;border-color:#9ca3af}.qc-error{padding:16px;border:1px solid #f3d2d2;background:#fff6f6;color:#9b1c1c;border-radius:10px;text-align:center}.qc-shimmer{position:relative;border-radius:10px;background:#eef0f3;overflow:hidden}.qc-shimmer:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 100%);animation:qc-shimmer 1.4s infinite}@keyframes qc-shimmer{100%{transform:translateX(100%)}}`;
 
 // Function to inject CSS styles into the document
 function injectStyles() {
@@ -228,13 +229,15 @@ function injectStyles() {
 
   /* ===== 4) UI builders ================================================== */
   function buildCardHTML(state){
-    const { pickup, dropoff, miles, seconds, pp, total, pax } = state;
+    const { pickup, dropoff, miles, seconds, pp, total, pax, showMap = true } = state;
 
     return `
       <div class="qc-row">
+        ${showMap ? `
         <div>
           <div id="qc-map" class="qc-map qc-shimmer" aria-label="Route map"></div>
         </div>
+        ` : ''}
 
         <div class="qc-details">
           <div class="qc-detail-item">
@@ -277,9 +280,18 @@ function injectStyles() {
 
   function skeletonHTML(){
     return `
-      <div class="qc-row">
-        <div class="qc-shimmer" style="height:400px;border-radius:12px;"></div>
-        <div class="qc-shimmer" style="height:400px;border-radius:12px;"></div>
+      <div class="qc-details">
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:20px;margin-bottom:16px;border-radius:4px;"></div>
+        <div class="qc-shimmer" style="height:24px;margin-bottom:24px;border-radius:4px;"></div>
+        <div style="display:flex;gap:12px;">
+          <div class="qc-shimmer" style="height:48px;flex:1;border-radius:8px;"></div>
+          <div class="qc-shimmer" style="height:48px;flex:1;border-radius:8px;"></div>
+        </div>
       </div>
     `;
   }
@@ -287,7 +299,7 @@ function injectStyles() {
   /* ===== 5) Google Maps Loader ======================================= */
   function loadMaps(cb){
     console.log(`[quote-calc] Loading Google Maps...`);
-    if (window.google && google.maps && google.maps.DirectionsService) {
+    if (window.google && google.maps && google.maps.DistanceMatrixService) {
       console.log(`[quote-calc] Google Maps already loaded`);
       return cb();
     }
@@ -303,14 +315,14 @@ function injectStyles() {
     
     if (document.querySelector("script[data-qc-gmaps]")){
       console.log(`[quote-calc] Google Maps script already exists, waiting for load...`);
-      const check = () => window.google?.maps?.DirectionsService ? cb() : setTimeout(check, 100);
+      const check = () => window.google?.maps?.DistanceMatrixService ? cb() : setTimeout(check, 100);
       check(); 
       return;
     }
     
     console.log(`[quote-calc] Creating Google Maps script tag`);
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
     script.setAttribute("data-qc-gmaps", "1");
     script.onload = () => {
       console.log(`[quote-calc] Google Maps script loaded successfully`);
@@ -358,53 +370,105 @@ function injectStyles() {
         return;
       }
 
-      const ds = new google.maps.DirectionsService();
-      ds.route({
-        origin: pickup,
-        destination: dropoff,
-        travelMode: google.maps.TravelMode.DRIVING
-      }, (res, status) => {
+      // Primary calculation using Distance Matrix API (more reliable)
+      const service = new google.maps.DistanceMatrixService();
+      console.log(`[quote-calc] Using Distance Matrix API for calculation`);
+      
+      service.getDistanceMatrix({
+        origins: [pickup],
+        destinations: [dropoff],
+        travelMode: google.maps.TravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.METRIC,
+        avoidHighways: false,
+        avoidTolls: false
+      }, (response, status) => {
         if (status !== "OK") {
-          mount.innerHTML = `<div class="qc-error">Couldn't calculate the route right now. Please try again.</div>`;
-          console.error("[quote-calc] Directions failed:", status);
+          mount.innerHTML = `<div class="qc-error">Couldn't calculate the distance right now. Please try again.</div>`;
+          console.error("[quote-calc] Distance Matrix failed:", status);
           return;
         }
 
-        const leg = res.routes[0].legs[0];
-        const meters  = leg.distance?.value || 0;
-        const miles   = meters / 1609.344;
-        const seconds = leg.duration?.value || 0;
+        const element = response.rows[0].elements[0];
+        if (element.status !== "OK") {
+          mount.innerHTML = `<div class="qc-error">Could not find a route between these locations. Please check the addresses.</div>`;
+          console.error("[quote-calc] Distance Matrix element failed:", element.status);
+          return;
+        }
+
+        const meters = element.distance?.value || 0;
+        const miles = meters / 1609.344;
+        const seconds = element.duration?.value || 0;
 
         // Enhanced pricing with default passengers
         const rawPax = getParam("passengers") || getParam("number_of_passengers");
         const pax = rawPax && parseInt(rawPax) > 0 ? parseInt(rawPax) : CONFIG.defaultPassengers;
         
-        const basePP   = pickBandPrice(miles);
-        const rsPP     = remoteSurchargePP(pickup, dropoff);
-        const pp       = Math.max(CONFIG.minPricePP, basePP + rsPP);
-        const total    = Math.round(pp * pax);
+        const basePP = pickBandPrice(miles);
+        const rsPP = remoteSurchargePP(pickup, dropoff);
+        const pp = Math.max(CONFIG.minPricePP, basePP + rsPP);
+        const total = Math.round(pp * pax);
 
-        // Paint UI (fresh container with map + metrics + price)
+        console.log(`[quote-calc] Distance Matrix calculation successful: ${miles.toFixed(1)} miles, $${total} total`);
+
+        // Render initial UI with calculated quote (show map placeholder)
         const outer = document.createElement("div");
         outer.id = MOUNT_ID;
         outer.innerHTML = buildCardHTML({
           pickup, dropoff,
           miles: Math.round(miles*10)/10,
           seconds, pax,
-          pp, total
+          pp, total,
+          showMap: true
         });
 
         // Replace mount contents
         mount.replaceWith(outer);
 
-        // Instantiate the map inside the new container
+        // Try to enhance with interactive route map (optional)
         const mapNode = document.getElementById("qc-map");
-        const map2 = new google.maps.Map(mapNode, { zoom: CONFIG.map.zoom || 9 });
-        const dr2 = new google.maps.DirectionsRenderer({ map: map2 });
-        dr2.setDirections(res);
-        
-        // Remove shimmer effect once map is loaded
-        mapNode.classList.remove("qc-shimmer");
+        if (mapNode && google.maps.DirectionsService) {
+          console.log(`[quote-calc] Attempting to add interactive route map`);
+          
+          const ds = new google.maps.DirectionsService();
+          ds.route({
+            origin: pickup,
+            destination: dropoff,
+            travelMode: google.maps.TravelMode.DRIVING
+          }, (res, directionsStatus) => {
+            if (directionsStatus === "OK") {
+              // Success! Show the interactive route
+              const map = new google.maps.Map(mapNode, { zoom: CONFIG.map.zoom || 9 });
+              const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+              directionsRenderer.setDirections(res);
+              mapNode.classList.remove("qc-shimmer");
+              console.log(`[quote-calc] Interactive route map displayed successfully`);
+            } else {
+              // Directions failed, but we still have the quote! Show a simple message
+              console.warn(`[quote-calc] Directions API failed (${directionsStatus}), but quote is still available`);
+              mapNode.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
+                  <div>
+                    <p style="margin:0;font-size:16px;margin-bottom:8px;">📍 Route Map Unavailable</p>
+                    <p style="margin:0;font-size:14px;">Distance calculated: ${Math.round(miles*10)/10} miles</p>
+                  </div>
+                </div>
+              `;
+              mapNode.classList.remove("qc-shimmer");
+            }
+          });
+        } else {
+          // No Directions API available, show simple placeholder
+          console.log(`[quote-calc] Directions API not available, showing distance only`);
+          mapNode.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
+              <div>
+                <p style="margin:0;font-size:18px;margin-bottom:8px;">📏 ${Math.round(miles*10)/10} miles</p>
+                <p style="margin:0;font-size:14px;">Estimated ${fmtMin(seconds)}</p>
+              </div>
+            </div>
+          `;
+          mapNode.classList.remove("qc-shimmer");
+        }
       });
     });
   }
