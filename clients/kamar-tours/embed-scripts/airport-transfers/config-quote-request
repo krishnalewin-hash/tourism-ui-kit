@@ -1,7 +1,7 @@
 <script>
 window.CFG = {
     client: 'kamar-tours',
-    base: 'krishnalewin-hash/tourism-ui-kit@7052df2'
+    base: 'krishnalewin-hash/tourism-ui-kit@main'
 };
 </script>
-<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@7052df2/src/quote-results-page/js/quote-results.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js"></script>
