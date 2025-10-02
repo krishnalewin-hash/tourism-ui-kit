@@ -2,7 +2,7 @@
   "START_OVER_URL": "https://tourismbizacademy.com/airport-transfers",
   "TRANSFER_PAYMENT_URL": "https://tourismbizacademy.com/book",
   "SHARED_CONFIG": {
-    "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": ["jm"],
     "CURRENCY": "USD",
     "PLACES": {
