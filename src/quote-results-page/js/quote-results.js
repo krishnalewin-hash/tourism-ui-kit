@@ -117,7 +117,7 @@ function injectStyles() {
           console.log(`[quote-calc] Successfully loaded ${client} core configuration`);
           return CONFIG;
         } else {
-          console.warn(`[quote-calc] Core config not found (${response.status}), trying built config fallback`);
+          console.warn(`[quote-calc] Core config not found (${response.status})`);
         }
       } catch (error) {
         console.warn(`[quote-calc] Failed to load core config:`, error);
