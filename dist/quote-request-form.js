@@ -191,215 +191,7 @@ if (document.readyState === 'loading') {
 } else {
   // DOM already loaded, initialize immediately
   initializeBookingFormWithConfig();
-}// Enhanced quote-request-form with async config loading
-(function() {
-  'use strict';
-
-  // Check if already loaded
-  if (window.BookingFormAsync) return;
-
-  // Create async booking form namespace
-  window.BookingFormAsync = {
-    initialized: false,
-    configLoaded: false,
-    pendingInit: []
-  };
-
-  // Config loader function
-  async function loadClientConfig() {
-    if (window.CFG?.GMAPS_KEY) {
-      console.log('[BookingForm] Using pre-loaded config');
-      return window.CFG;
-    }
-
-    const client = window.CFG?.client || 'tour-driver';
-    const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
-    
-    try {
-      console.log(`[BookingForm] Loading config for client: ${client}`);
-      
-      // Try core config first
-      let configUrl;
-      if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
-        configUrl = `${base}/clients/${client}/core/config.json`;
-      } else {
-        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}/core/config.json`;
-      }
-
-      const response = await fetch(configUrl);
-      if (response.ok) {
-        const config = await response.json();
-        
-        // Merge into window.CFG
-        window.CFG = { 
-          ...window.CFG, 
-          ...config.FORM_CONFIG,
-          // Flatten for easier access
-          GMAPS_KEY: config.FORM_CONFIG?.GMAPS_KEY,
-          COUNTRIES: config.FORM_CONFIG?.COUNTRIES,
-          PLACES: config.FORM_CONFIG?.PLACES,
-          FIELD_MAPPING: config.FORM_CONFIG?.FIELD_MAPPING
-        };
-        
-        console.log('[BookingForm] Config loaded successfully:', window.CFG);
-        return window.CFG;
-      }
-    } catch (error) {
-      console.warn('[BookingForm] Failed to load client config:', error);
-    }
-    
-    // Fallback to defaults
-    window.CFG = window.CFG || {};
-    if (!window.CFG.GMAPS_KEY) {
-      window.CFG.GMAPS_KEY = 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA'; // Demo fallback
-      console.warn('[BookingForm] Using fallback API key');
-    }
-    
-    return window.CFG;
-  }
-
-  // Initialize function
-  async function initializeBookingForm() {
-    if (window.BookingFormAsync.initialized) return;
-    
-    try {
-      // Load config first
-      await loadClientConfig();
-      window.BookingFormAsync.configLoaded = true;
-      
-      // Now load the original booking form logic
-      // This would import/execute the existing quote-request-form code
-      console.log('[BookingForm] Initializing with config:', window.CFG);
-      
-      // Import existing modules (this would be the actual form code)
-      // For now, just mark as initialized
-      window.BookingFormAsync.initialized = true;
-      
-      // Execute any pending initialization callbacks
-      window.BookingFormAsync.pendingInit.forEach(callback => callback());
-      window.BookingFormAsync.pendingInit = [];
-      
-    } catch (error) {
-      console.error('[BookingForm] Initialization failed:', error);
-    }
-  }
-
-  // Public API for waiting for initialization
-  window.BookingFormAsync.ready = function(callback) {
-    if (window.BookingFormAsync.initialized) {
-      callback();
-    } else {
-      window.BookingFormAsync.pendingInit.push(callback);
-    }
-  };
-
-  // Auto-initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeBookingForm);
-  } else {
-    initializeBookingForm();
-  }
-
-})();// Google Places Autocomplete + Airport Code Normalization (Section 6)
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-// Section 6 implementation from temp.js
-function normalizeSafely(el, obs){
-  if (obs) obs.disconnect();
-  el.classList.remove('pac-target-input','disabled','is-disabled');
-  el.removeAttribute('readonly');
-  if (el.getAttribute('aria-disabled') === 'true') el.removeAttribute('aria-disabled');
-  if (el.getAttribute('autocomplete') !== 'on') el.setAttribute('autocomplete','on');
-  if (el.style.opacity) el.style.opacity='';
-  if (obs) obs.observe(el,{attributes:true,attributeFilter:['class','readonly','aria-disabled','autocomplete','style'],attributeOldValue:true});
-}
-
-let biasBoundsFn = null;
-
-function wireAutocomplete(rootDoc){
-  if (!window.google?.maps?.places) return;
-
-  const sels = ['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
-
-  for (const sel of sels){
-    const els = [...rootDoc.querySelectorAll(sel)];
-    for (const el of els){
-      if (!el || el.dataset.placesWired === '1') continue;
-
-      const cs = getComputedStyle(el);
-      if (el.type === 'hidden' || cs.display === 'none' || cs.visibility === 'hidden') continue;
-
-      el.dataset.placesWired = '1';
-
-      const acOpts = {
-        fields: window.BookingForm.CONFIG.places.fields,
-        types:  window.BookingForm.getAutocompleteTypesFromConfig()
-      };
-
-      const b = biasBoundsFn?.();
-      if (b) { acOpts.bounds = b; acOpts.strictBounds = true; }
-
-      if (window.BookingForm.CONFIG.countries?.length) {
-        acOpts.componentRestrictions = { country: window.BookingForm.CONFIG.countries };
-      }
-
-      let ac;
-      try {
-        ac = new google.maps.places.Autocomplete(el, acOpts);
-      } catch (err) {
-        console.error('[Maps] Autocomplete init failed:', err);
-        continue;
-      }
-
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        if (!place?.place_id || !place.geometry) return;
-
-        const isAirport = (place.types || []).includes('airport');
-        const AIRPORT_CODES = window.BookingForm.CONFIG.places.airportCodes;
-        let display = '';
-        if (isAirport && place.name){
-          const code = AIRPORT_CODES[place.name];
-          display = code ? `${place.name} (${code})` : place.name;
-        } else if (place.name){
-          display = place.name;
-        } else if (place.formatted_address){
-          display = place.formatted_address;
-        }
-
-        setTimeout(() => {
-          el.value = display;
-          el.setAttribute('value', display);
-          el.dispatchEvent(new Event('input', { bubbles:true }));
-          el.dispatchEvent(new Event('change', { bubbles:true }));
-          document.documentElement.classList.add('pac-hide');
-          setTimeout(() => document.documentElement.classList.remove('pac-hide'), 700);
-          try { el.blur(); } catch(_) {}
-          try { el.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true })); } catch(_) {}
-          (document.querySelector('input[data-q="drop-off_location"]')
-            || document.querySelector('input[data-q="pickup_date"]')
-            || document.querySelector('input[data-q="pickup_time"]'))?.focus();
-          const hide = () => document.querySelectorAll('.pac-container').forEach(pc => pc.style.display='none');
-          [0,30,80,160,300].forEach(d => setTimeout(hide, d));
-        }, 0);
-      });
-
-      el.addEventListener('focus', () => {
-        try { const nb = biasBoundsFn?.(); if (nb) ac.setBounds(nb); } catch(_) {}
-      }, { once:true });
-
-      let obs;
-      obs = new MutationObserver(() => normalizeSafely(el, obs));
-      normalizeSafely(el, obs);
-    }
-  }
-}
-
-// Expose wireAutocomplete function and biasBoundsFn for external setup
-window.BookingForm.wireAutocomplete = wireAutocomplete;
-window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };// Global configuration for the booking form
+}// Global configuration for the booking form
 window.BookingForm = window.BookingForm || {};
 
 // Function to initialize/update configuration
@@ -461,873 +253,7 @@ window.BookingForm.getAutocompleteTypesFromConfig = function() {
 
   if (filtered.includes('establishment')) return ['establishment'];
   return [filtered[0]];
-};// Prevent past dates + normalize display format
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-window.BookingForm.attachPickupDateGuard = function(rootDoc){
-  const input = rootDoc.querySelector('input[data-q="pickup_date"]');
-  if (!input || input.dataset.dateGuard === '1') return;
-  input.dataset.dateGuard = '1';
-  
-  // Minimal styling - main layout handled by CSS to prevent shifts
-  try {
-    input.style.setProperty('color', '#000', 'important');
-    input.style.setProperty('background', '#fff', 'important');
-    input.style.setProperty('opacity', '1', 'important');
-    // Width and padding are now handled by CSS to prevent layout shift
-  } catch(_) {}
-  
-  const todayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  function parseLocalDate(str){
-    if (!str) return null;
-    let s = str.trim();
-    // Remove commas & ordinal suffixes (1st/2nd/3rd/4th...)
-    s = s.replace(/,/g,'').replace(/\b(\d{1,2})(st|nd|rd|th)\b/i,'$1');
-    // Remove leading weekday (full or 3‑letter) if present
-    s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
-    // YYYY-MM-DD
-    let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return new Date(+m[1],+m[2]-1,+m[3]);
-    // MM/DD/YYYY or M-D-YYYY
-    m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    if (m){ const a=+m[1], b=+m[2], y=+m[3]; const day=a>12?a:b, mon=a>12?b:a; return new Date(y,mon-1,day);} 
-    // Full MonthName Day Year
-    m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
-    if (m){ return new Date(+m[3], MONTHS.findIndex(M=>M.toLowerCase()===m[1].toLowerCase()), +m[2]); }
-    // Abbrev MonthName Day Year
-    m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
-    if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
-    const d=new Date(s); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
-  }
-  function formatDisplay(d){
-    const month = MONTHS[d.getMonth()].slice(0,3); // Abbrev month
-    const day = d.getDate();
-    const yr = d.getFullYear();
-    const weekday = WEEKDAYS[d.getDay()].slice(0,3); // Abbrev weekday
-    return `${weekday}, ${month} ${day}, ${yr}`;
-  }
-  function enforce(){
-    const d=parseLocalDate(input.value);
-    if(!d){ input.setCustomValidity(''); return; }
-    if(d<todayStart()){ input.setCustomValidity('Please choose today or a future date.'); input.value=''; input.reportValidity?.(); }
-    else {
-      input.setCustomValidity('');
-      // Format immediately for user-friendly display
-      input.value = formatDisplay(d);
-    }
-  }
-  input.addEventListener('blur',enforce);
-  input.addEventListener('change',enforce);
-  input.addEventListener('input',()=>{ if(input.value.length>=6) enforce(); });
-  
-  // Watch for value changes from date picker components
-  let lastValue = input.value;
-  const observer = new MutationObserver(() => {
-    if (input.value !== lastValue) {
-      lastValue = input.value;
-      enforce();
-    }
-  });
-  observer.observe(input, { attributes: true, attributeFilter: ['value'] });
-  
-  // Also use a periodic check to catch any missed updates (guard against duplicates)
-  if (input.__bfDateGuardInt) clearInterval(input.__bfDateGuardInt);
-  input.__bfDateGuardInt = setInterval(() => {
-    if (input.value !== lastValue && input.value.length >= 6) {
-      lastValue = input.value;
-      enforce();
-    }
-  }, 500);
-  
-  // Remove the wrapper-based event handling that's causing issues
-  // const wrapper=input.closest('.vdpWithInput, .vdpComponent, .date-picker-field-survey');
-  // if(wrapper) wrapper.addEventListener('click',()=>{ startWatch(); setTimeout(enforce,50); });
-};// Small popup calendar → writes formatted string, fires input/change
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-(function initDatePicker(){
-  if(window.__pickupDatePicker) return;
-  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const WEEKDAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  function formatVerbose(d){ const wd=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; const mon=MONTHS[d.getMonth()].slice(0,3); return `${wd}, ${mon} ${d.getDate()}, ${d.getFullYear()}`; }
-  const pop=document.createElement('div'); pop.id='pickup-date-popover'; pop.setAttribute('role','dialog'); pop.setAttribute('aria-hidden','true'); document.body.appendChild(pop);
-  const state={open:false, month:new Date().getMonth(), year:new Date().getFullYear(), input:null};
-  function todayStart(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
-  function build(){
-    const first=new Date(state.year,state.month,1); const startDow=first.getDay();
-    const daysInMonth=new Date(state.year,state.month+1,0).getDate();
-    const prevDays=new Date(state.year,state.month,0).getDate();
-    let html=`<div class="dp-header"><button type="button" class="dp-nav" data-nav="-1" aria-label="Previous Month">‹</button><div>${MONTHS[state.month]} ${state.year}</div><button type="button" class="dp-nav" data-nav="1" aria-label="Next Month">›</button></div>`;
-    html+=`<div class="dp-weekdays">${WEEKDAYS_SHORT.map(w=>`<div>${w}</div>`).join('')}</div>`;
-    html+='<div class="dp-grid">';
-    // leading blanks from previous month (disabled)
-    for(let i=0;i<startDow;i++){ const d=prevDays-startDow+i+1; html+=`<div class="dp-day dp-disabled" aria-hidden="true">${d}</div>`; }
-    const today=todayStart();
-    for(let day=1; day<=daysInMonth; day++){
-      const current=new Date(state.year,state.month,day); current.setHours(0,0,0,0);
-      const disabled=current<today; const isToday=current.getTime()===today.getTime();
-      const classes=['dp-day']; if(disabled) classes.push('dp-disabled'); if(isToday) classes.push('dp-today');
-      html+=`<div class="${classes.join(' ')}" data-day="${day}" role="button" tabindex="${disabled?-1:0}" aria-disabled="${disabled}" aria-label="${MONTHS[state.month]} ${day}, ${state.year}">${day}</div>`;
-    }
-    html+='</div>';
-    pop.innerHTML=html;
-  }
-  function openFor(input){ state.input=input; const now=new Date(); state.month=now.getMonth(); state.year=now.getFullYear(); build(); position(); pop.style.display='block'; pop.setAttribute('aria-hidden','false'); state.open=true; setTimeout(()=>{ document.addEventListener('mousedown',outside,true); document.addEventListener('keydown',keyNav,true); },0); }
-  function close(){ if(!state.open) return; state.open=false; pop.style.display='none'; pop.setAttribute('aria-hidden','true'); document.removeEventListener('mousedown',outside,true); document.removeEventListener('keydown',keyNav,true); }
-  function position(){ if(!state.input) return; const r=state.input.getBoundingClientRect(); pop.style.top=window.scrollY + r.bottom + 6 + 'px'; pop.style.left=window.scrollX + r.left + 'px'; }
-  function outside(e){ if(pop.contains(e.target) || e.target===state.input) return; close(); }
-  function keyNav(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } }
-  pop.addEventListener('click',e=>{ const nav=e.target.getAttribute('data-nav'); if(nav){ state.month+= +nav; if(state.month<0){ state.month=11; state.year--; } else if(state.month>11){ state.month=0; state.year++; } build(); return; } const day=e.target.getAttribute('data-day'); if(day){ const sel=new Date(state.year,state.month,+day); if(sel<todayStart()) return; const formatted=formatVerbose(sel); state.input.value=formatted; state.input.setAttribute('value',formatted); state.input.dispatchEvent(new Event('input',{bubbles:true})); state.input.dispatchEvent(new Event('change',{bubbles:true})); close(); }});
-  window.addEventListener('resize',()=> position()); window.addEventListener('scroll',()=> position(), true);
-  function attach(rootDoc){ const input=rootDoc.querySelector('input[data-q="pickup_date"]'); if(!input || input.dataset.datePickerWired==='1') return; input.dataset.datePickerWired='1'; input.readOnly=true; input.addEventListener('focus',()=> openFor(input)); input.addEventListener('click',()=> openFor(input)); }
-  window.__pickupDatePicker={ openFor, close, attach };
-  // initial attach
-  attach(document);
-})();// Enhanced maps.js with dynamic config loading support
-window.BookingForm = window.BookingForm || {};
-
-// Enhanced Google Maps loader with async config support
-function loadGoogleMapsWithConfig(callback) {
-  // If maps already loaded, just callback
-  if (window.google?.maps?.places) return callback();
-
-  // If config not ready, wait for it
-  if (!window.BookingForm.configReady && window.CFG?.DEFER_MAPS) {
-    console.log('[Maps] Waiting for config to be ready...');
-    window.BookingForm.onConfigReady = window.BookingForm.onConfigReady || [];
-    window.BookingForm.onConfigReady.push(() => loadGoogleMapsWithConfig(callback));
-    return;
-  }
-
-  // Check if script already loading
-  if (document.querySelector('script[data-gmaps-loader]')) {
-    const poll = setInterval(() => { 
-      if (window.google?.maps?.places) { 
-        clearInterval(poll); 
-        callback(); 
-      } 
-    }, 150);
-    setTimeout(() => clearInterval(poll), 10000);
-    return;
-  }
-
-  // Get API key from config (with fallback)
-  const apiKey = window.CFG?.GMAPS_KEY || 
-                 (window.BookingForm.CONFIG && window.BookingForm.CONFIG.googleApiKey) ||
-                 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
-
-  console.log('[Maps] Loading Google Maps with API key:', apiKey.substring(0, 10) + '...');
-
-  // Create and load script
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
-  script.async = true;
-  script.defer = true;
-  script.setAttribute('data-gmaps-loader', '1');
-  script.onload = () => console.log('[Maps] Google Maps loaded successfully');
-  script.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
-  document.head.appendChild(script);
-
-  // Poll for readiness
-  const poll = setInterval(() => { 
-    if (window.google?.maps?.places) { 
-      clearInterval(poll); 
-      callback(); 
-    } 
-  }, 150);
-  setTimeout(() => clearInterval(poll), 10000);
-}
-
-// Export enhanced loader
-window.BookingForm.loadGoogleMapsWithConfig = loadGoogleMapsWithConfig;// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-// Section 3: Google Maps Loader (dynamic include + readiness poll)
-function loadGoogleMaps(callback){
-  if (window.google?.maps?.places) return callback();
-  
-  // Wait for configuration if not ready
-  if (!window.BookingForm.configReady) {
-    console.log('[Maps] Waiting for configuration...');
-    window.BookingForm.onConfigReady = window.BookingForm.onConfigReady || [];
-    window.BookingForm.onConfigReady.push(() => loadGoogleMaps(callback));
-    return;
-  }
-  
-  if (document.querySelector('script[data-gmaps-loader]')){
-    const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
-    setTimeout(()=>clearInterval(poll), window.BookingForm.CONFIG.mapsLoadTimeoutMs);
-    return;
-  }
-  
-  const apiKey = window.BookingForm.CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
-  console.log(`[Maps] Loading Google Maps with API key: ${apiKey.substring(0, 10)}...`);
-  
-  const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
-  s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
-  s.onload = () => console.log('[Maps] Google Maps loaded successfully');
-  s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
-  document.head.appendChild(s);
-  const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
-  setTimeout(()=>clearInterval(poll), window.BookingForm.CONFIG.mapsLoadTimeoutMs);
-}
-
-// Section 10: Maps Initialization + PAC Filter + Prediction Prioritizer
-window.BookingForm.initMapsAndFilters = function() {
-  loadGoogleMaps(() => {
-    // Build a bias function from config (rectangle OR circle). No geolocation used.
-    const biasBoundsFn = (() => {
-      const g = google.maps;
-
-      if (window.BookingForm.CONFIG.places.boundsRect) {
-        const { sw, ne } = window.BookingForm.CONFIG.places.boundsRect;
-        const rect = new g.LatLngBounds(new g.LatLng(sw.lat, sw.lng), new g.LatLng(ne.lat, ne.lng));
-        return () => rect;
-      }
-      if (window.BookingForm.CONFIG.places.biasCircle && Number(window.BookingForm.CONFIG.places.biasCircle.radiusMeters) > 0) {
-        const { lat, lng, radiusMeters } = window.BookingForm.CONFIG.places.biasCircle;
-        return () => {
-          const circle = new g.Circle({
-            center: new g.LatLng(lat, lng),
-            radius: Number(radiusMeters)
-          });
-          return circle.getBounds();
-        };
-      }
-      return () => null; // no bias
-    })();
-
-    // Set the bias bounds function in autocomplete module (if available)
-    if (window.BookingForm.setBiasBoundsFn) {
-      window.BookingForm.setBiasBoundsFn(biasBoundsFn);
-    }
-
-    // Wire autocomplete (if available)
-    if (window.BookingForm.wireAutocomplete) {
-      window.BookingForm.wireAutocomplete(document);
-    }
-
-    // Retry wiring in case inputs mount after maps load
-    (function retryWireAutocomplete(){
-      const start = Date.now();
-      const intv = setInterval(() => {
-        try { 
-          if (window.BookingForm.wireAutocomplete) {
-            window.BookingForm.wireAutocomplete(document); 
-          }
-        } catch(_) {}
-        const allWired = ['pickup_location','drop-off_location']
-          .every(q => document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired === '1');
-        if (allWired || Date.now() - start > 12000) clearInterval(intv);
-      }, 450);
-    })();
-    
-    // PAC Filter (hide vague localities/cities)
-    (function installPacFilter(){
-      if (window.__pacFilterObserver) return;
-
-      const F = window.BookingForm.CONFIG.places.filter || {};
-      const airports = (window.BookingForm.CONFIG.places.priorityKeywords?.airport || []).map(s => s.toLowerCase());
-      const hotels   = (window.BookingForm.CONFIG.places.priorityKeywords?.hotel   || []).map(s => s.toLowerCase());
-      const allowKw  = new Set([...airports, ...hotels, ...(F.allowKeywords || [])]);
-
-      const hasStreetNumber = txt => /\d/.test(txt); // simple and effective
-      const hasAllowKeyword = txt => {
-        const t = txt.toLowerCase();
-        for (const k of allowKw) if (k && t.includes(k)) return true;
-        return false;
-      };
-
-      function shouldKeep(text){
-        // Allow specific addresses or keyword-matching POIs (airports/hotels/etc.)
-        if (F.addressMustHaveNumber && hasStreetNumber(text)) return true;
-        if (hasAllowKeyword(text)) return true;
-        return false;
-      }
-
-      function process(container){
-        const items = Array.from(container.querySelectorAll('.pac-item'));
-        if (!items.length) return;
-
-        // Decide which items to keep by text
-        const keep = items.filter(el => shouldKeep(el.textContent || ''));
-
-        // Fail-open: if filtering would wipe out or reduce below minKeep, do nothing.
-        const minKeep = Number.isFinite(F.minKeep) ? F.minKeep : 2;
-        if (keep.length === 0 || keep.length < minKeep) return;
-
-        // Remove the rest
-        const setKeep = new Set(keep);
-        items.forEach(el => { if (!setKeep.has(el)) el.remove(); });
-      }
-
-      function attach(){
-        // Attach to any current and future PAC containers
-        document.querySelectorAll('.pac-container').forEach(c => {
-          if (c.dataset.pacFilterWired === '1') return;
-          const obs = new MutationObserver(() => process(c));
-          obs.observe(c, { childList: true, subtree: true });
-          c.dataset.pacFilterWired = '1';
-        });
-      }
-
-      // Initial + focus-driven attach (helps with SPAs / late mounts)
-      const hook = () => {
-        attach();
-        document.addEventListener('focusin', e => {
-          if (e.target?.matches?.('input[data-q="pickup_location"], input[data-q="drop-off_location"]')) {
-            setTimeout(attach, 0);
-          }
-        });
-      };
-
-      hook();
-      window.__pacFilterObserver = true;
-    })();
-
-    // Optional re-ranking if you provided PRIORITY_KEYWORDS
-    (function installPredictionPriority(){
-      if (!window.BookingForm.CONFIG.places.priorityKeywords || window.__predPriorityObserver) return;
-
-      const airports = (window.BookingForm.CONFIG.places.priorityKeywords.airport || []).map(s=>s.toLowerCase());
-      const hotels   = (window.BookingForm.CONFIG.places.priorityKeywords.hotel   || []).map(s=>s.toLowerCase());
-      const score = (text) => {
-        const t = (text || '').toLowerCase();
-        if (airports.some(k => t.includes(k))) return 3;
-        if (hotels.some(k   => t.includes(k))) return 2;
-        return 1;
-      };
-
-      function promote(c){
-        const items = [...c.querySelectorAll('.pac-item')];
-        if (items.length < 2) return;
-        const ranked = items.map((el,i)=>({el,i,s:score(el.textContent)}))
-                            .sort((a,b)=> (b.s-a.s) || (a.i-b.i));
-        let changed = ranked.some((r, i) => r.el !== items[i]);
-        if (!changed) return;
-        const frag = document.createDocumentFragment();
-        ranked.forEach(r => frag.appendChild(r.el));
-        c.appendChild(frag);
-      }
-
-      const attach = () => {
-        const c = document.querySelector('.pac-container');
-        if (!c){ setTimeout(attach, 250); return; }
-        const obs = new MutationObserver(() => promote(c));
-        obs.observe(c, { childList:true, subtree:false });
-        window.__predPriorityObserver = obs;
-      };
-      attach();
-    })();
-  });
-};
-
-// Expose loadGoogleMaps function for backwards compatibility
-window.BookingForm.loadGoogleMaps = loadGoogleMaps;// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-// Section 9 implementation from temp.js
-(function observeLateFields(){
-  if(window.__iconFieldObserver) return;
-  const targetAttrs=['pickup_location','drop-off_location','pickup_date','pickup_time','number_of_passengers','full_name','email','phone'];
-  const obs=new MutationObserver(muts=>{
-    for(const m of muts){
-      m.addedNodes && m.addedNodes.forEach(node=>{
-        if(!(node instanceof HTMLElement)) return;
-        const candidates = node.matches?.('input,select') ? [node] : [...node.querySelectorAll?.('input,select')||[]];
-        candidates.forEach(el=>{
-          const q=el.getAttribute('data-q');
-          if(q && targetAttrs.includes(q)){
-            // Re-run visual enhancement only for the specific element
-            window.BookingForm.enhanceVisual(document); // idempotent
-            window.BookingForm.enhanceNextButtonMobile(document);
-            // Ensure CTA is applied if submit button renders late
-            window.BookingForm.enhanceSubmitButton(document);
-            // If a location field appears after initial maps load, try wiring autocomplete immediately.
-            if ((q==='pickup_location' || q==='drop-off_location') && window.google?.maps?.places) {
-              try { window.BookingForm.wireAutocomplete(document); } catch(e){ /* noop */ }
-            }
-            if(q==='pickup_date'){
-              // Re-apply date guard for replaced/late field, preserve vertical metrics
-              try { window.BookingForm.attachPickupDateGuard(document); } catch(_) {}
-              try { window.__pickupDatePicker?.attach(document); } catch(_) {}
-            }
-            if(q==='pickup_time'){
-              try { window.BookingForm.attachPickupTimePicker(document, el); } catch(_){}
-            }
-            if(q==='number_of_passengers'){
-              try { window.__passengerSelect?.attach(document); } catch(_) {}
-            }
-          }
-        });
-        // Also check if a submit button was inserted
-        if(node.matches?.('.ghl-btn.ghl-submit-btn') || node.querySelector?.('.ghl-btn.ghl-submit-btn')){
-          window.BookingForm.enhanceSubmitButton(document);
-        }
-        // Also check if a NEXT button was inserted
-        if(node.matches?.('.ghl-btn.ghl-footer-next') || node.querySelector?.('.ghl-btn.ghl-footer-next')){
-          window.BookingForm.enhanceNextButtonMobile(document);
-        }
-      });
-    }
-  });
-  obs.observe(document.documentElement,{subtree:true,childList:true});
-  window.__iconFieldObserver=obs;
-})();
-
-// Expose observeLateFields function for external use
-window.BookingForm.observeLateFields = function(){
-  // The IIFE above handles the singleton pattern, so this is just for API consistency
-  return window.__iconFieldObserver;
-};// Section X: Passenger Count Select (1–15, then 16+) from temp.js
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-// Section X implementation from temp.js
-(function initPassengerSelect(){
-  if (window.__passengerSelect) return;
-
-  // Build a <select> to replace the input[data-q="number_of_passengers"]
-  function buildSelectFromInput(input){
-    const sel = document.createElement('select');
-
-    // carry core attributes so styling/validation behave the same
-    sel.name = input.name || 'number_of_passengers';
-    sel.setAttribute('data-q', 'number_of_passengers');
-    if (input.id) sel.id = input.id;
-    if (input.required) sel.required = true;
-    sel.className = input.className; // inherit any theme classes
-
-    // --- Placeholder (pulled from the original input, same source as other fields) ---
-    const phText = input.getAttribute('placeholder') || 'Number of Passengers';
-    const ph = document.createElement('option');
-    ph.value = '';
-    ph.textContent = phText;
-    ph.disabled = true;
-    ph.selected = true;
-    ph.hidden = true;
-    sel.appendChild(ph);
-
-    // --- 1..15 then 16+ ---
-    for (let i = 1; i <= 15; i++){
-      const opt = document.createElement('option');
-      opt.value = String(i);
-      opt.textContent = String(i);
-      sel.appendChild(opt);
-    }
-    const big = document.createElement('option');
-    big.value = '16+';
-    big.textContent = '16+';
-    sel.appendChild(big);
-
-    // Preserve an existing value if one was already set on the input
-    const cur = (input.value || '').trim();
-    if ((/^\d+$/.test(cur) && +cur >= 1 && +cur <= 15) || cur === '16+') {
-      sel.value = cur;
-    }
-
-    // Make the <select> look exactly like the other inputs (font, radius, shadow, etc.)
-    window.BookingForm.matchFieldLook(sel);
-    
-    // Copy the input's current box-shadow & border color, and reuse on focus.
-    (function unifyFocusStyles(select){
-      const ref = document.querySelector('.icon-field-wrapper input[data-q]') || document.querySelector('input[data-q]');
-      if (!ref) return;
-      const cs = getComputedStyle(ref);
-      const refShadow = cs.boxShadow;
-      const refBorder = cs.borderColor;
-
-      // Set baseline to match inputs
-      select.style.boxShadow = refShadow;
-      select.style.borderColor = refBorder;
-
-      // Reapply on focus to override theme focus rules
-      const apply = () => {
-        select.style.boxShadow = refShadow;
-        select.style.borderColor = refBorder;
-        select.style.backgroundColor = '#fff';
-      };
-      select.addEventListener('focus', apply);
-      select.addEventListener('blur', apply);
-    })(sel);
-
-    // Placeholder tint handling
-    window.BookingForm.applyPlaceholderClass(sel);
-    sel.addEventListener('change', () => {
-      sel.setAttribute('value', sel.value);
-      window.BookingForm.applyPlaceholderClass(sel);
-      sel.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-
-    return sel;
-  }
-
-  function attach(rootDoc){
-    const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
-    // If the select already exists, bail
-    const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
-    if (!input || selAlready) return;
-    if (input.dataset.paxSelectWired === '1') return;
-
-    // Build the select element
-    const selectEl = buildSelectFromInput(input);
-    
-    // Hide the original input but keep it for GoHighLevel survey submission
-    input.style.display = 'none';
-    input.style.visibility = 'hidden';
-    input.style.position = 'absolute';
-    input.style.left = '-9999px';
-    
-    // Ensure the input is marked as important for GHL survey
-    input.setAttribute('data-ghl-survey-field', 'true');
-    input.setAttribute('data-step-field', 'step1');
-    
-    // Insert select after the hidden input (don't replace it)
-    input.parentNode.insertBefore(selectEl, input.nextSibling);
-    
-    // Sync select changes back to the hidden input for GHL survey submission
-    selectEl.addEventListener('change', () => {
-      input.value = selectEl.value;
-      selectEl.setAttribute('value', selectEl.value);
-      window.BookingForm.applyPlaceholderClass(selectEl);
-      
-      // Trigger change event on hidden input for GHL survey
-      input.dispatchEvent(new Event('change', { bubbles: true }));
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      
-      // Additional GHL survey events that might be needed
-      try {
-        input.dispatchEvent(new Event('blur', { bubbles: true }));
-        input.dispatchEvent(new CustomEvent('ghl-field-update', { 
-          detail: { field: 'number_of_passengers', value: selectEl.value },
-          bubbles: true 
-        }));
-      } catch(e) {
-        console.warn('GHL survey event dispatch failed:', e);
-      }
-      
-      selectEl.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    
-    // Sync input changes back to the select (for URL parameter population)
-    input.addEventListener('change', () => {
-      if (input.value && input.value !== selectEl.value) {
-        selectEl.value = input.value;
-        selectEl.setAttribute('value', selectEl.value);
-        window.BookingForm.applyPlaceholderClass(selectEl);
-      }
-    });
-    
-    // Also sync any initial value from input to select
-    if (input.value) {
-      selectEl.value = input.value;
-      window.BookingForm.applyPlaceholderClass(selectEl);
-    }
-    
-    // Store references for external access and survey step transitions
-    input._syncedSelect = selectEl;
-    selectEl._syncedInput = input;
-    
-    selectEl.dataset.paxSelectWired = '1';
-    input.dataset.paxSelectWired = '1';
-
-    // Monitor for GHL survey step transitions
-    const monitorSurveySteps = () => {
-      // Watch for survey navigation buttons
-      const nextButtons = document.querySelectorAll('[data-action="next"], .survey-next, .btn-next, button[type="submit"]');
-      const prevButtons = document.querySelectorAll('[data-action="prev"], .survey-prev, .btn-prev');
-      
-      [...nextButtons, ...prevButtons].forEach(btn => {
-        if (!btn.dataset.passengerMonitor) {
-          btn.addEventListener('click', () => {
-            // Ensure passenger field is synced before step transition
-            if (selectEl.value && input.value !== selectEl.value) {
-              input.value = selectEl.value;
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          });
-          btn.dataset.passengerMonitor = 'true';
-        }
-      });
-      
-      // Watch for survey form submissions
-      const forms = document.querySelectorAll('form, .survey-form, .ghl-form');
-      forms.forEach(form => {
-        if (!form.dataset.passengerMonitor) {
-          form.addEventListener('submit', (e) => {
-            // Final sync before submission
-            if (selectEl.value && input.value !== selectEl.value) {
-              input.value = selectEl.value;
-            }
-          });
-          form.dataset.passengerMonitor = 'true';
-        }
-      });
-    };
-    
-    // Run monitoring immediately and after DOM changes
-    monitorSurveySteps();
-    setTimeout(monitorSurveySteps, 1000); // Delay for dynamic button creation
-    
-    // Use MutationObserver to catch dynamically added survey elements
-    if (window.MutationObserver) {
-      const observer = new MutationObserver((mutations) => {
-        let shouldMonitor = false;
-        mutations.forEach(mutation => {
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === 1 && (
-              node.matches && (
-                node.matches('button, .btn, .survey-next, .survey-prev') ||
-                node.querySelector && node.querySelector('button, .btn, .survey-next, .survey-prev')
-              )
-            )) {
-              shouldMonitor = true;
-            }
-          });
-        });
-        if (shouldMonitor) {
-          setTimeout(monitorSurveySteps, 100);
-        }
-      });
-      
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // Store observer for cleanup
-      selectEl._surveyObserver = observer;
-    }
-
-    // Re-run icon wrapper just in case
-    try { window.BookingForm.enhanceVisual(document); } catch(_) {}
-  }
-
-  window.__passengerSelect = { attach };
-
-  // initial attach
-  try { attach(document); } catch(_) {}
-})();
-
-// Expose attach function for external use
-window.BookingForm.initPassengerSelect = function(root = document) {
-  if (window.__passengerSelect && window.__passengerSelect.attach) {
-    window.__passengerSelect.attach(root);
-  }
-};// src/booking/js/booking.js
-
-// IMPORTANT: Load async config loader FIRST before other modules
-import './async-config-loader.js';
-
-// Include all modules by importing them (they'll be bundled)
-import './config.js';
-import './styles.js';
-import './utils.js';
-import './visuals.js';
-import './date-guard.js';
-import './date-picker.js';
-import './time-picker.js';
-import './passengers.js';
-import './validation-step1.js';
-import './validation-step2.js';
-import './maps.js';
-import './autocomplete.js';
-import './observer.js';
-
-// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-// Section 8: Initial Enhancement Invocation
-// Helper functions for styling selects to match inputs
-function matchFieldLook(target){
-  const ref =
-    document.querySelector('.icon-field-wrapper input[data-q]') ||
-    document.querySelector('input[data-q]');
-  if (!ref) return;
-
-  const cs = getComputedStyle(ref);
-  const props = [
-    'fontFamily','fontSize','fontWeight','lineHeight','letterSpacing',
-    'color','backgroundColor','border','borderTop','borderRight','borderBottom','borderLeft',
-    'borderRadius','boxShadow','outline','height','minHeight'
-  ];
-  props.forEach(p => { try { target.style[p] = cs[p]; } catch(_){} });
-
-  // Keep room for the leading icon, and a normal right padding
-  target.style.paddingLeft = '2.3rem';
-  target.style.paddingRight = '18px';
-  target.style.webkitAppearance = 'none';
-  target.style.appearance = 'none';
-}
-
-function applyPlaceholderClass(select){
-  const isEmpty = !select.value;
-  select.classList.toggle('is-placeholder', isEmpty);
-}
-
-// Expose helper functions
-window.BookingForm.matchFieldLook = matchFieldLook;
-window.BookingForm.applyPlaceholderClass = applyPlaceholderClass;
-
-window.BookingForm.initNow = function(root = document) {
-  // Section 1 & 2: Inject essential styles first
-  window.BookingForm.injectBaselineStyles();
-  window.BookingForm.injectValidationStyles();
-};
-
-// Section 8: Form Enhancement Function (called after config is loaded)
-window.BookingForm.enhance = function() {
-  console.log('[BookingForm] Starting form enhancement...');
-    
-    // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
-    // Adjust order only if dependencies change (icons don't depend on others).
-    
-    window.BookingForm.attachPickupDateGuard(document);
-    window.BookingForm.attachPickupTimePicker(document);
-    window.BookingForm.enhanceVisual(document);
-    window.BookingForm.enhanceNextButtonMobile(document);
-    window.BookingForm.enhanceSubmitButton(document);
-    window.BookingForm.initSurveyTransitions(document);
-    
-    // Install validation for both steps
-    window.BookingForm.installStepOneNextValidation();
-    window.BookingForm.installStepTwoSubmitValidation();
-    
-    // Secondary run to catch late-rendered inputs
-    setTimeout(()=>{
-      window.BookingForm.enhanceVisual(document);
-    },400);
-
-    // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
-    window.BookingForm.initMapsAndFilters();
-
-    // Watch for late-rendered/replaced fields (GHL)
-    window.BookingForm.observeLateFields();
-
-    // Section 11: Populate URL parameters after components are initialized
-    setTimeout(() => {
-      try {
-      const qs = new URLSearchParams(location.search);
-      window.BookingForm.cacheIncomingParams(qs);
-      
-      // Populate form fields from URL parameters with better field selection
-      window.BookingForm.PARAM_ALLOWLIST.forEach(paramName => {
-        const paramValue = window.BookingForm.getParam(qs, paramName);
-        if (paramValue) {
-          // Try multiple selectors to find the field
-          let field = document.querySelector(`[data-q="${paramName}"]`) || 
-                     document.querySelector(`[name="${paramName}"]`);
-          
-          // For number_of_passengers, prefer the original input over the select
-          if (paramName === 'number_of_passengers') {
-            const input = document.querySelector(`input[data-q="${paramName}"], input[name="${paramName}"]`);
-            const select = document.querySelector(`select[data-q="${paramName}"], select[name="${paramName}"]`);
-            
-            if (input && select) {
-              // Populate both the hidden input and the visible select for GHL survey
-              input.value = paramValue;
-              select.value = paramValue;
-              select.setAttribute('value', paramValue);
-              
-              // Mark as survey field for GHL
-              input.setAttribute('data-ghl-survey-field', 'true');
-              input.setAttribute('data-survey-populated', 'true');
-              
-              // Apply placeholder styling
-              if (window.BookingForm.applyPlaceholderClass) {
-                window.BookingForm.applyPlaceholderClass(select);
-              }
-              
-              // Trigger comprehensive events for GHL survey
-              const events = ['change', 'input', 'blur'];
-              events.forEach(eventType => {
-                input.dispatchEvent(new Event(eventType, { bubbles: true }));
-                select.dispatchEvent(new Event(eventType, { bubbles: true }));
-              });
-              
-              // Custom GHL survey event
-              try {
-                input.dispatchEvent(new CustomEvent('ghl-survey-field-populated', { 
-                  detail: { field: paramName, value: paramValue, step: 'step1' },
-                  bubbles: true 
-                }));
-              } catch(e) {
-                console.warn('GHL survey custom event failed:', e);
-              }
-            } else if (input) {
-              input.value = paramValue;
-              input.setAttribute('data-ghl-survey-field', 'true');
-              input.setAttribute('data-survey-populated', 'true');
-              
-              // If there's a synced select, update it too
-              if (input._syncedSelect) {
-                input._syncedSelect.value = paramValue;
-                input._syncedSelect.setAttribute('value', paramValue);
-                if (window.BookingForm.applyPlaceholderClass) {
-                  window.BookingForm.applyPlaceholderClass(input._syncedSelect);
-                }
-              }
-              
-              const events = ['change', 'input', 'blur'];
-              events.forEach(eventType => {
-                input.dispatchEvent(new Event(eventType, { bubbles: true }));
-              });
-              
-            } else if (select) {
-              // If only select exists, populate it and sync to hidden input if present
-              select.value = paramValue;
-              select.setAttribute('value', paramValue);
-              
-              if (window.BookingForm.applyPlaceholderClass) {
-                window.BookingForm.applyPlaceholderClass(select);
-              }
-              
-              if (select._syncedInput) {
-                select._syncedInput.value = paramValue;
-                select._syncedInput.setAttribute('data-ghl-survey-field', 'true');
-                select._syncedInput.setAttribute('data-survey-populated', 'true');
-                
-                const events = ['change', 'input', 'blur'];
-                events.forEach(eventType => {
-                  select._syncedInput.dispatchEvent(new Event(eventType, { bubbles: true }));
-                });
-              }
-              
-              select.dispatchEvent(new Event('change', { bubbles: true }));
-              select.dispatchEvent(new Event('input', { bubbles: true }));
-            } else {
-              console.warn(`GHL Survey: No passenger field found for ${paramName}`);
-            }
-          } else if (field) {
-            field.value = paramValue;
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-          } else {
-            console.warn(`Field not found for parameter: ${paramName}`);
-          }
-        }
-      });
-    } catch (e) {
-      console.warn('URL parameter population failed:', e);
-    }
-  }, 800); // Longer delay to ensure passenger select is created
-  
-  console.log('[BookingForm] Form enhancement complete');
-};
-
-// Note: Form enhancement is now called by async-config-loader.js after config loads
-// The old DOM ready initialization is replaced by the config-driven approach// All style injectors (idempotent)
+};// All style injectors (idempotent)
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -1757,7 +683,371 @@ window.BookingForm.injectCtaStyles = function() {
 // Initialize styles immediately
 window.BookingForm.injectBaselineStyles();
 window.BookingForm.injectValidationStyles();
-window.BookingForm.injectCtaStyles();// Time picker - using IIFE singleton pattern from temp.js
+window.BookingForm.injectCtaStyles();// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.PARAM_ALLOWLIST = [
+  'pickup_location','dropoff_location','pickup_date','pickup_time','number_of_passengers',
+  'first_name','last_name','email','phone'
+];
+
+window.BookingForm.cacheIncomingParams = function(qs){
+  window.BookingForm.PARAM_ALLOWLIST.forEach(k=>{
+    if (qs.has(k)) { try { sessionStorage.setItem('lead:'+k, qs.get(k)||''); } catch {} }
+  });
+};
+
+window.BookingForm.getParam = function(qs, name){
+  const v = qs.get(name);
+  if (v && String(v).trim()) return v;
+  try { return sessionStorage.getItem('lead:'+name) || ''; } catch { return ''; }
+};// Section 7: Icon Injection / Visual Enhancement from temp.js
+
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+// Enhanced layout for date and time fields on desktop (custom from your temp.js)
+function enhanceDateTimeLayout(rootDoc) {
+  if (!rootDoc) return;
+  
+  // Find date and time input wrappers
+  const dateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_date"])') ||
+                     rootDoc.querySelector('input[data-q="pickup_date"]')?.closest('.icon-field-wrapper');
+  const timeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_time"])') ||
+                     rootDoc.querySelector('input[data-q="pickup_time"]')?.closest('.icon-field-wrapper');
+  
+  if (!dateWrapper || !timeWrapper) return;
+  
+  // Check if they're siblings and not already in a flex container
+  if (dateWrapper.nextElementSibling === timeWrapper && !dateWrapper.parentElement.classList.contains('bf-datetime-container')) {
+    // Create flex container
+    const container = document.createElement('div');
+    container.className = 'bf-datetime-container';
+    container.style.cssText = 'display: flex; gap: 12px; align-items: flex-start;';
+    
+    // Insert container before date wrapper
+    dateWrapper.parentElement.insertBefore(container, dateWrapper);
+    
+    // Move both wrappers into container and set flex properties
+    dateWrapper.style.cssText = 'flex: 2; min-width: 0;'; // Date gets more space
+    timeWrapper.style.cssText = 'flex: 1; min-width: 0;'; // Time gets less space
+    
+    container.appendChild(dateWrapper);
+    container.appendChild(timeWrapper);
+  }
+}
+
+// Section 7 implementation from temp.js
+function enhanceVisual(rootDoc){
+  if(!rootDoc) return;
+  const ICONS={
+    'pickup_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    'pickup_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
+    'pickup_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
+    'number_of_passengers':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`,
+    'full_name':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/></svg>`,
+    'email':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z'/><polyline points='22,6 12,13 2,6'/></svg>`,
+    'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
+  };
+  function wrap(el, svg, key){
+    if(!el) return;
+    // Find or create wrapper
+    let wrapDiv = el.closest('.icon-field-wrapper');
+    if(!wrapDiv){
+      wrapDiv=document.createElement('div');
+      wrapDiv.className='icon-field-wrapper';
+      el.parentNode.insertBefore(wrapDiv, el);
+    }
+    // Ensure an input-row exists (icon aligns to this row only)
+    let row = wrapDiv.querySelector(':scope > .icon-input-row');
+    if(!row){
+      row=document.createElement('div');
+      row.className='icon-input-row';
+      // place at top so any error message can appear below
+      wrapDiv.insertBefore(row, wrapDiv.firstChild);
+    }
+    // Move input into the row if not already
+    if(el.parentElement !== row){
+      row.appendChild(el);
+    }
+    // Create or move the icon into the row
+    let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
+    if(!span){
+      span=document.createElement('span');
+      span.className='field-icon';
+      span.setAttribute('aria-hidden','true');
+      if(key) span.setAttribute('data-for', key);
+      span.innerHTML=svg;
+    } else {
+      // Ensure attributes match latest key
+      if(key) span.setAttribute('data-for', key);
+    }
+    if(span.parentElement !== row){
+      row.appendChild(span);
+    }
+    el.dataset.iconized='1';
+  }
+  Object.entries(ICONS).forEach(([k,svg])=>{
+    [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+    [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+  });
+}
+
+// Enhance Step 1 NEXT button on mobile by appending a "NEXT" label next to the arrow
+function enhanceNextButtonMobile(rootDoc){
+  if(!rootDoc) rootDoc = document;
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-footer-next');
+  btns.forEach(btn => {
+    let labelSpan = btn.querySelector('.bf-next-label');
+    if(isMobile){
+      // Ensure alignment class exists only on mobile
+      btn.classList.add('bf-next');
+      // Add or move label to the first position
+      if(!labelSpan){
+        labelSpan = document.createElement('span');
+        labelSpan.className = 'bf-next-label';
+        labelSpan.textContent = 'NEXT';
+        btn.insertBefore(labelSpan, btn.firstChild);
+      } else if (btn.firstElementChild !== labelSpan) {
+        btn.insertBefore(labelSpan, btn.firstChild);
+      }
+    } else {
+      // Desktop: remove our alignment class and custom label to avoid side effects
+      btn.classList.remove('bf-next');
+      if(labelSpan) labelSpan.remove();
+    }
+  });
+}
+
+// Toggle NEXT label on viewport changes
+try {
+  const mq = window.matchMedia('(max-width: 768px)');
+  const reapply = ()=> enhanceNextButtonMobile(document);
+  if(mq.addEventListener){ mq.addEventListener('change', reapply); }
+  else if(mq.addListener){ mq.addListener(reapply); }
+  window.addEventListener('resize', reapply, { passive: true });
+} catch(_) {}
+
+// Initialize survey step transitions (disabled to prevent navigation issues)
+// Remove the disabled approach since it causes navigation issues
+// (Survey transitions are handled by GoHighLevel's platform)
+function initSurveyTransitions() {
+  // Intentionally disabled to prevent navigation issues
+}
+
+// Enhance the Step 2 submit button with CTA text + white arrow + loading state
+function enhanceSubmitButton(rootDoc){
+  if(!rootDoc) rootDoc = document;
+  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-submit-btn');
+  btns.forEach(btn => {
+    if(btn.dataset.bfCtaWired === '1') return;
+    // Replace text with our CTA while preserving the button element and its listeners
+    const label = 'GET YOUR QUOTE!';
+    btn.classList.add('bf-cta');
+    btn.innerHTML = `<span class="bf-cta-text">${label}</span>`+
+      `<span class="bf-arrow" aria-hidden="true">`+
+      `<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`+
+      `<line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
+      `<line x1="12" y1="5" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
+      `<line x1="12" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
+      `</svg>`+
+      `</span>`;
+    
+    // Add loading state functionality with fullscreen overlay approach
+    btn.addEventListener('click', function(e) {
+      // Check if overlay already exists
+      if (document.querySelector('.bf-loading-overlay')) {
+        return; // Loading overlay already exists
+      }
+      
+      // Create fullscreen loading overlay immediately
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.className = 'bf-loading-overlay';
+      loadingOverlay.innerHTML = `
+        <div class="bf-loading-content">
+          <div class="bf-loading-spinner-container">
+            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
+              <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+            </svg>
+          </div>
+          <span class="bf-loading-text">Processing Your Request...</span>
+        </div>
+      `;
+      
+      // Make it fullscreen with subtle styling
+      loadingOverlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 999999 !important;
+        backdrop-filter: blur(5px) !important;
+        font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      `;
+      
+      document.body.appendChild(loadingOverlay);
+      
+      // Check for validation errors after a brief delay
+      setTimeout(() => {
+        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid').length > 0;
+        const formElement = btn.closest('form');
+        const isFormValid = formElement ? formElement.checkValidity() : true;
+        
+        if (hasErrors || !isFormValid) {
+          // Remove loading overlay if validation fails
+          loadingOverlay.remove();
+        } else {
+          // Keep overlay visible during submission and redirect
+        }
+      }, 100);
+      
+    });
+    
+    btn.dataset.bfCtaWired = '1';
+  });
+}
+
+// Expose functions on global namespace
+window.BookingForm.enhanceVisual = enhanceVisual;
+window.BookingForm.enhanceDateTimeLayout = enhanceDateTimeLayout;
+window.BookingForm.enhanceNextButtonMobile = enhanceNextButtonMobile;
+window.BookingForm.enhanceSubmitButton = enhanceSubmitButton;
+window.BookingForm.initSurveyTransitions = initSurveyTransitions;// Prevent past dates + normalize display format
+
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.attachPickupDateGuard = function(rootDoc){
+  const input = rootDoc.querySelector('input[data-q="pickup_date"]');
+  if (!input || input.dataset.dateGuard === '1') return;
+  input.dataset.dateGuard = '1';
+  
+  // Minimal styling - main layout handled by CSS to prevent shifts
+  try {
+    input.style.setProperty('color', '#000', 'important');
+    input.style.setProperty('background', '#fff', 'important');
+    input.style.setProperty('opacity', '1', 'important');
+    // Width and padding are now handled by CSS to prevent layout shift
+  } catch(_) {}
+  
+  const todayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  function parseLocalDate(str){
+    if (!str) return null;
+    let s = str.trim();
+    // Remove commas & ordinal suffixes (1st/2nd/3rd/4th...)
+    s = s.replace(/,/g,'').replace(/\b(\d{1,2})(st|nd|rd|th)\b/i,'$1');
+    // Remove leading weekday (full or 3‑letter) if present
+    s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
+    // YYYY-MM-DD
+    let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return new Date(+m[1],+m[2]-1,+m[3]);
+    // MM/DD/YYYY or M-D-YYYY
+    m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m){ const a=+m[1], b=+m[2], y=+m[3]; const day=a>12?a:b, mon=a>12?b:a; return new Date(y,mon-1,day);} 
+    // Full MonthName Day Year
+    m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
+    if (m){ return new Date(+m[3], MONTHS.findIndex(M=>M.toLowerCase()===m[1].toLowerCase()), +m[2]); }
+    // Abbrev MonthName Day Year
+    m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
+    if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
+    const d=new Date(s); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  }
+  function formatDisplay(d){
+    const month = MONTHS[d.getMonth()].slice(0,3); // Abbrev month
+    const day = d.getDate();
+    const yr = d.getFullYear();
+    const weekday = WEEKDAYS[d.getDay()].slice(0,3); // Abbrev weekday
+    return `${weekday}, ${month} ${day}, ${yr}`;
+  }
+  function enforce(){
+    const d=parseLocalDate(input.value);
+    if(!d){ input.setCustomValidity(''); return; }
+    if(d<todayStart()){ input.setCustomValidity('Please choose today or a future date.'); input.value=''; input.reportValidity?.(); }
+    else {
+      input.setCustomValidity('');
+      // Format immediately for user-friendly display
+      input.value = formatDisplay(d);
+    }
+  }
+  input.addEventListener('blur',enforce);
+  input.addEventListener('change',enforce);
+  input.addEventListener('input',()=>{ if(input.value.length>=6) enforce(); });
+  
+  // Watch for value changes from date picker components
+  let lastValue = input.value;
+  const observer = new MutationObserver(() => {
+    if (input.value !== lastValue) {
+      lastValue = input.value;
+      enforce();
+    }
+  });
+  observer.observe(input, { attributes: true, attributeFilter: ['value'] });
+  
+  // Also use a periodic check to catch any missed updates (guard against duplicates)
+  if (input.__bfDateGuardInt) clearInterval(input.__bfDateGuardInt);
+  input.__bfDateGuardInt = setInterval(() => {
+    if (input.value !== lastValue && input.value.length >= 6) {
+      lastValue = input.value;
+      enforce();
+    }
+  }, 500);
+  
+  // Remove the wrapper-based event handling that's causing issues
+  // const wrapper=input.closest('.vdpWithInput, .vdpComponent, .date-picker-field-survey');
+  // if(wrapper) wrapper.addEventListener('click',()=>{ startWatch(); setTimeout(enforce,50); });
+};// Small popup calendar → writes formatted string, fires input/change
+
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+(function initDatePicker(){
+  if(window.__pickupDatePicker) return;
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEKDAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function formatVerbose(d){ const wd=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; const mon=MONTHS[d.getMonth()].slice(0,3); return `${wd}, ${mon} ${d.getDate()}, ${d.getFullYear()}`; }
+  const pop=document.createElement('div'); pop.id='pickup-date-popover'; pop.setAttribute('role','dialog'); pop.setAttribute('aria-hidden','true'); document.body.appendChild(pop);
+  const state={open:false, month:new Date().getMonth(), year:new Date().getFullYear(), input:null};
+  function todayStart(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+  function build(){
+    const first=new Date(state.year,state.month,1); const startDow=first.getDay();
+    const daysInMonth=new Date(state.year,state.month+1,0).getDate();
+    const prevDays=new Date(state.year,state.month,0).getDate();
+    let html=`<div class="dp-header"><button type="button" class="dp-nav" data-nav="-1" aria-label="Previous Month">‹</button><div>${MONTHS[state.month]} ${state.year}</div><button type="button" class="dp-nav" data-nav="1" aria-label="Next Month">›</button></div>`;
+    html+=`<div class="dp-weekdays">${WEEKDAYS_SHORT.map(w=>`<div>${w}</div>`).join('')}</div>`;
+    html+='<div class="dp-grid">';
+    // leading blanks from previous month (disabled)
+    for(let i=0;i<startDow;i++){ const d=prevDays-startDow+i+1; html+=`<div class="dp-day dp-disabled" aria-hidden="true">${d}</div>`; }
+    const today=todayStart();
+    for(let day=1; day<=daysInMonth; day++){
+      const current=new Date(state.year,state.month,day); current.setHours(0,0,0,0);
+      const disabled=current<today; const isToday=current.getTime()===today.getTime();
+      const classes=['dp-day']; if(disabled) classes.push('dp-disabled'); if(isToday) classes.push('dp-today');
+      html+=`<div class="${classes.join(' ')}" data-day="${day}" role="button" tabindex="${disabled?-1:0}" aria-disabled="${disabled}" aria-label="${MONTHS[state.month]} ${day}, ${state.year}">${day}</div>`;
+    }
+    html+='</div>';
+    pop.innerHTML=html;
+  }
+  function openFor(input){ state.input=input; const now=new Date(); state.month=now.getMonth(); state.year=now.getFullYear(); build(); position(); pop.style.display='block'; pop.setAttribute('aria-hidden','false'); state.open=true; setTimeout(()=>{ document.addEventListener('mousedown',outside,true); document.addEventListener('keydown',keyNav,true); },0); }
+  function close(){ if(!state.open) return; state.open=false; pop.style.display='none'; pop.setAttribute('aria-hidden','true'); document.removeEventListener('mousedown',outside,true); document.removeEventListener('keydown',keyNav,true); }
+  function position(){ if(!state.input) return; const r=state.input.getBoundingClientRect(); pop.style.top=window.scrollY + r.bottom + 6 + 'px'; pop.style.left=window.scrollX + r.left + 'px'; }
+  function outside(e){ if(pop.contains(e.target) || e.target===state.input) return; close(); }
+  function keyNav(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } }
+  pop.addEventListener('click',e=>{ const nav=e.target.getAttribute('data-nav'); if(nav){ state.month+= +nav; if(state.month<0){ state.month=11; state.year--; } else if(state.month>11){ state.month=0; state.year++; } build(); return; } const day=e.target.getAttribute('data-day'); if(day){ const sel=new Date(state.year,state.month,+day); if(sel<todayStart()) return; const formatted=formatVerbose(sel); state.input.value=formatted; state.input.setAttribute('value',formatted); state.input.dispatchEvent(new Event('input',{bubbles:true})); state.input.dispatchEvent(new Event('change',{bubbles:true})); close(); }});
+  window.addEventListener('resize',()=> position()); window.addEventListener('scroll',()=> position(), true);
+  function attach(rootDoc){ const input=rootDoc.querySelector('input[data-q="pickup_date"]'); if(!input || input.dataset.datePickerWired==='1') return; input.dataset.datePickerWired='1'; input.readOnly=true; input.addEventListener('focus',()=> openFor(input)); input.addEventListener('click',()=> openFor(input)); }
+  window.__pickupDatePicker={ openFor, close, attach };
+  // initial attach
+  attach(document);
+})();// Time picker - using IIFE singleton pattern from temp.js
 window.BookingForm = window.BookingForm || {};
 
 (function initSingletonTimePicker(){
@@ -1860,24 +1150,242 @@ window.BookingForm.attachPickupTimePicker = function(rootDoc, specificEl){
     }
     window.__singletonTimePicker.openFor(input);
   });
-};// Global namespace for booking form
+};// Section X: Passenger Count Select (1–15, then 16+) from temp.js
+
+// Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
 
-window.BookingForm.PARAM_ALLOWLIST = [
-  'pickup_location','dropoff_location','pickup_date','pickup_time','number_of_passengers',
-  'first_name','last_name','email','phone'
-];
+// Section X implementation from temp.js
+(function initPassengerSelect(){
+  if (window.__passengerSelect) return;
 
-window.BookingForm.cacheIncomingParams = function(qs){
-  window.BookingForm.PARAM_ALLOWLIST.forEach(k=>{
-    if (qs.has(k)) { try { sessionStorage.setItem('lead:'+k, qs.get(k)||''); } catch {} }
-  });
-};
+  // Build a <select> to replace the input[data-q="number_of_passengers"]
+  function buildSelectFromInput(input){
+    const sel = document.createElement('select');
 
-window.BookingForm.getParam = function(qs, name){
-  const v = qs.get(name);
-  if (v && String(v).trim()) return v;
-  try { return sessionStorage.getItem('lead:'+name) || ''; } catch { return ''; }
+    // carry core attributes so styling/validation behave the same
+    sel.name = input.name || 'number_of_passengers';
+    sel.setAttribute('data-q', 'number_of_passengers');
+    if (input.id) sel.id = input.id;
+    if (input.required) sel.required = true;
+    sel.className = input.className; // inherit any theme classes
+
+    // --- Placeholder (pulled from the original input, same source as other fields) ---
+    const phText = input.getAttribute('placeholder') || 'Number of Passengers';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = phText;
+    ph.disabled = true;
+    ph.selected = true;
+    ph.hidden = true;
+    sel.appendChild(ph);
+
+    // --- 1..15 then 16+ ---
+    for (let i = 1; i <= 15; i++){
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = String(i);
+      sel.appendChild(opt);
+    }
+    const big = document.createElement('option');
+    big.value = '16+';
+    big.textContent = '16+';
+    sel.appendChild(big);
+
+    // Preserve an existing value if one was already set on the input
+    const cur = (input.value || '').trim();
+    if ((/^\d+$/.test(cur) && +cur >= 1 && +cur <= 15) || cur === '16+') {
+      sel.value = cur;
+    }
+
+    // Make the <select> look exactly like the other inputs (font, radius, shadow, etc.)
+    window.BookingForm.matchFieldLook(sel);
+    
+    // Copy the input's current box-shadow & border color, and reuse on focus.
+    (function unifyFocusStyles(select){
+      const ref = document.querySelector('.icon-field-wrapper input[data-q]') || document.querySelector('input[data-q]');
+      if (!ref) return;
+      const cs = getComputedStyle(ref);
+      const refShadow = cs.boxShadow;
+      const refBorder = cs.borderColor;
+
+      // Set baseline to match inputs
+      select.style.boxShadow = refShadow;
+      select.style.borderColor = refBorder;
+
+      // Reapply on focus to override theme focus rules
+      const apply = () => {
+        select.style.boxShadow = refShadow;
+        select.style.borderColor = refBorder;
+        select.style.backgroundColor = '#fff';
+      };
+      select.addEventListener('focus', apply);
+      select.addEventListener('blur', apply);
+    })(sel);
+
+    // Placeholder tint handling
+    window.BookingForm.applyPlaceholderClass(sel);
+    sel.addEventListener('change', () => {
+      sel.setAttribute('value', sel.value);
+      window.BookingForm.applyPlaceholderClass(sel);
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    return sel;
+  }
+
+  function attach(rootDoc){
+    const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
+    // If the select already exists, bail
+    const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
+    if (!input || selAlready) return;
+    if (input.dataset.paxSelectWired === '1') return;
+
+    // Build the select element
+    const selectEl = buildSelectFromInput(input);
+    
+    // Hide the original input but keep it for GoHighLevel survey submission
+    input.style.display = 'none';
+    input.style.visibility = 'hidden';
+    input.style.position = 'absolute';
+    input.style.left = '-9999px';
+    
+    // Ensure the input is marked as important for GHL survey
+    input.setAttribute('data-ghl-survey-field', 'true');
+    input.setAttribute('data-step-field', 'step1');
+    
+    // Insert select after the hidden input (don't replace it)
+    input.parentNode.insertBefore(selectEl, input.nextSibling);
+    
+    // Sync select changes back to the hidden input for GHL survey submission
+    selectEl.addEventListener('change', () => {
+      input.value = selectEl.value;
+      selectEl.setAttribute('value', selectEl.value);
+      window.BookingForm.applyPlaceholderClass(selectEl);
+      
+      // Trigger change event on hidden input for GHL survey
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      // Additional GHL survey events that might be needed
+      try {
+        input.dispatchEvent(new Event('blur', { bubbles: true }));
+        input.dispatchEvent(new CustomEvent('ghl-field-update', { 
+          detail: { field: 'number_of_passengers', value: selectEl.value },
+          bubbles: true 
+        }));
+      } catch(e) {
+        console.warn('GHL survey event dispatch failed:', e);
+      }
+      
+      selectEl.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    
+    // Sync input changes back to the select (for URL parameter population)
+    input.addEventListener('change', () => {
+      if (input.value && input.value !== selectEl.value) {
+        selectEl.value = input.value;
+        selectEl.setAttribute('value', selectEl.value);
+        window.BookingForm.applyPlaceholderClass(selectEl);
+      }
+    });
+    
+    // Also sync any initial value from input to select
+    if (input.value) {
+      selectEl.value = input.value;
+      window.BookingForm.applyPlaceholderClass(selectEl);
+    }
+    
+    // Store references for external access and survey step transitions
+    input._syncedSelect = selectEl;
+    selectEl._syncedInput = input;
+    
+    selectEl.dataset.paxSelectWired = '1';
+    input.dataset.paxSelectWired = '1';
+
+    // Monitor for GHL survey step transitions
+    const monitorSurveySteps = () => {
+      // Watch for survey navigation buttons
+      const nextButtons = document.querySelectorAll('[data-action="next"], .survey-next, .btn-next, button[type="submit"]');
+      const prevButtons = document.querySelectorAll('[data-action="prev"], .survey-prev, .btn-prev');
+      
+      [...nextButtons, ...prevButtons].forEach(btn => {
+        if (!btn.dataset.passengerMonitor) {
+          btn.addEventListener('click', () => {
+            // Ensure passenger field is synced before step transition
+            if (selectEl.value && input.value !== selectEl.value) {
+              input.value = selectEl.value;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          });
+          btn.dataset.passengerMonitor = 'true';
+        }
+      });
+      
+      // Watch for survey form submissions
+      const forms = document.querySelectorAll('form, .survey-form, .ghl-form');
+      forms.forEach(form => {
+        if (!form.dataset.passengerMonitor) {
+          form.addEventListener('submit', (e) => {
+            // Final sync before submission
+            if (selectEl.value && input.value !== selectEl.value) {
+              input.value = selectEl.value;
+            }
+          });
+          form.dataset.passengerMonitor = 'true';
+        }
+      });
+    };
+    
+    // Run monitoring immediately and after DOM changes
+    monitorSurveySteps();
+    setTimeout(monitorSurveySteps, 1000); // Delay for dynamic button creation
+    
+    // Use MutationObserver to catch dynamically added survey elements
+    if (window.MutationObserver) {
+      const observer = new MutationObserver((mutations) => {
+        let shouldMonitor = false;
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1 && (
+              node.matches && (
+                node.matches('button, .btn, .survey-next, .survey-prev') ||
+                node.querySelector && node.querySelector('button, .btn, .survey-next, .survey-prev')
+              )
+            )) {
+              shouldMonitor = true;
+            }
+          });
+        });
+        if (shouldMonitor) {
+          setTimeout(monitorSurveySteps, 100);
+        }
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // Store observer for cleanup
+      selectEl._surveyObserver = observer;
+    }
+
+    // Re-run icon wrapper just in case
+    try { window.BookingForm.enhanceVisual(document); } catch(_) {}
+  }
+
+  window.__passengerSelect = { attach };
+
+  // initial attach
+  try { attach(document); } catch(_) {}
+})();
+
+// Expose attach function for external use
+window.BookingForm.initPassengerSelect = function(root = document) {
+  if (window.__passengerSelect && window.__passengerSelect.attach) {
+    window.__passengerSelect.attach(root);
+  }
 };// Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
 // Adds inline messages and fade-out animation before advancing
 
@@ -2236,223 +1744,388 @@ window.BookingForm.installStepTwoSubmitValidation = function(){
   }, true);
 
   window.__stepTwoSubmitValidation = true;
-};// Section 7: Icon Injection / Visual Enhancement from temp.js
+};// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
 
-// Enhanced layout for date and time fields on desktop (custom from your temp.js)
-function enhanceDateTimeLayout(rootDoc) {
-  if (!rootDoc) return;
+// Section 3: Google Maps Loader (dynamic include + readiness poll)
+function loadGoogleMaps(callback){
+  if (window.google?.maps?.places) return callback();
   
-  // Find date and time input wrappers
-  const dateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_date"])') ||
-                     rootDoc.querySelector('input[data-q="pickup_date"]')?.closest('.icon-field-wrapper');
-  const timeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_time"])') ||
-                     rootDoc.querySelector('input[data-q="pickup_time"]')?.closest('.icon-field-wrapper');
-  
-  if (!dateWrapper || !timeWrapper) return;
-  
-  // Check if they're siblings and not already in a flex container
-  if (dateWrapper.nextElementSibling === timeWrapper && !dateWrapper.parentElement.classList.contains('bf-datetime-container')) {
-    // Create flex container
-    const container = document.createElement('div');
-    container.className = 'bf-datetime-container';
-    container.style.cssText = 'display: flex; gap: 12px; align-items: flex-start;';
-    
-    // Insert container before date wrapper
-    dateWrapper.parentElement.insertBefore(container, dateWrapper);
-    
-    // Move both wrappers into container and set flex properties
-    dateWrapper.style.cssText = 'flex: 2; min-width: 0;'; // Date gets more space
-    timeWrapper.style.cssText = 'flex: 1; min-width: 0;'; // Time gets less space
-    
-    container.appendChild(dateWrapper);
-    container.appendChild(timeWrapper);
+  // Wait for configuration if not ready
+  if (!window.BookingForm.configReady) {
+    console.log('[Maps] Waiting for configuration...');
+    window.BookingForm.onConfigReady = window.BookingForm.onConfigReady || [];
+    window.BookingForm.onConfigReady.push(() => loadGoogleMaps(callback));
+    return;
   }
-}
-
-// Section 7 implementation from temp.js
-function enhanceVisual(rootDoc){
-  if(!rootDoc) return;
-  const ICONS={
-    'pickup_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
-    'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
-    'pickup_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
-    'pickup_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
-    'number_of_passengers':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`,
-    'full_name':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/></svg>`,
-    'email':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z'/><polyline points='22,6 12,13 2,6'/></svg>`,
-    'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
-  };
-  function wrap(el, svg, key){
-    if(!el) return;
-    // Find or create wrapper
-    let wrapDiv = el.closest('.icon-field-wrapper');
-    if(!wrapDiv){
-      wrapDiv=document.createElement('div');
-      wrapDiv.className='icon-field-wrapper';
-      el.parentNode.insertBefore(wrapDiv, el);
-    }
-    // Ensure an input-row exists (icon aligns to this row only)
-    let row = wrapDiv.querySelector(':scope > .icon-input-row');
-    if(!row){
-      row=document.createElement('div');
-      row.className='icon-input-row';
-      // place at top so any error message can appear below
-      wrapDiv.insertBefore(row, wrapDiv.firstChild);
-    }
-    // Move input into the row if not already
-    if(el.parentElement !== row){
-      row.appendChild(el);
-    }
-    // Create or move the icon into the row
-    let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
-    if(!span){
-      span=document.createElement('span');
-      span.className='field-icon';
-      span.setAttribute('aria-hidden','true');
-      if(key) span.setAttribute('data-for', key);
-      span.innerHTML=svg;
-    } else {
-      // Ensure attributes match latest key
-      if(key) span.setAttribute('data-for', key);
-    }
-    if(span.parentElement !== row){
-      row.appendChild(span);
-    }
-    el.dataset.iconized='1';
+  
+  if (document.querySelector('script[data-gmaps-loader]')){
+    const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+    setTimeout(()=>clearInterval(poll), window.BookingForm.CONFIG.mapsLoadTimeoutMs);
+    return;
   }
-  Object.entries(ICONS).forEach(([k,svg])=>{
-    [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-    [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
-  });
+  
+  const apiKey = window.BookingForm.CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
+  console.log(`[Maps] Loading Google Maps with API key: ${apiKey.substring(0, 10)}...`);
+  
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
+  s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
+  s.onload = () => console.log('[Maps] Google Maps loaded successfully');
+  s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
+  document.head.appendChild(s);
+  const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+  setTimeout(()=>clearInterval(poll), window.BookingForm.CONFIG.mapsLoadTimeoutMs);
 }
 
-// Enhance Step 1 NEXT button on mobile by appending a "NEXT" label next to the arrow
-function enhanceNextButtonMobile(rootDoc){
-  if(!rootDoc) rootDoc = document;
-  const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-footer-next');
-  btns.forEach(btn => {
-    let labelSpan = btn.querySelector('.bf-next-label');
-    if(isMobile){
-      // Ensure alignment class exists only on mobile
-      btn.classList.add('bf-next');
-      // Add or move label to the first position
-      if(!labelSpan){
-        labelSpan = document.createElement('span');
-        labelSpan.className = 'bf-next-label';
-        labelSpan.textContent = 'NEXT';
-        btn.insertBefore(labelSpan, btn.firstChild);
-      } else if (btn.firstElementChild !== labelSpan) {
-        btn.insertBefore(labelSpan, btn.firstChild);
+// Section 10: Maps Initialization + PAC Filter + Prediction Prioritizer
+window.BookingForm.initMapsAndFilters = function() {
+  loadGoogleMaps(() => {
+    // Build a bias function from config (rectangle OR circle). No geolocation used.
+    const biasBoundsFn = (() => {
+      const g = google.maps;
+
+      if (window.BookingForm.CONFIG.places.boundsRect) {
+        const { sw, ne } = window.BookingForm.CONFIG.places.boundsRect;
+        const rect = new g.LatLngBounds(new g.LatLng(sw.lat, sw.lng), new g.LatLng(ne.lat, ne.lng));
+        return () => rect;
       }
-    } else {
-      // Desktop: remove our alignment class and custom label to avoid side effects
-      btn.classList.remove('bf-next');
-      if(labelSpan) labelSpan.remove();
+      if (window.BookingForm.CONFIG.places.biasCircle && Number(window.BookingForm.CONFIG.places.biasCircle.radiusMeters) > 0) {
+        const { lat, lng, radiusMeters } = window.BookingForm.CONFIG.places.biasCircle;
+        return () => {
+          const circle = new g.Circle({
+            center: new g.LatLng(lat, lng),
+            radius: Number(radiusMeters)
+          });
+          return circle.getBounds();
+        };
+      }
+      return () => null; // no bias
+    })();
+
+    // Set the bias bounds function in autocomplete module (if available)
+    if (window.BookingForm.setBiasBoundsFn) {
+      window.BookingForm.setBiasBoundsFn(biasBoundsFn);
     }
-  });
-}
 
-// Toggle NEXT label on viewport changes
-try {
-  const mq = window.matchMedia('(max-width: 768px)');
-  const reapply = ()=> enhanceNextButtonMobile(document);
-  if(mq.addEventListener){ mq.addEventListener('change', reapply); }
-  else if(mq.addListener){ mq.addListener(reapply); }
-  window.addEventListener('resize', reapply, { passive: true });
-} catch(_) {}
+    // Wire autocomplete (if available)
+    if (window.BookingForm.wireAutocomplete) {
+      window.BookingForm.wireAutocomplete(document);
+    }
 
-// Initialize survey step transitions (disabled to prevent navigation issues)
-// Remove the disabled approach since it causes navigation issues
-// (Survey transitions are handled by GoHighLevel's platform)
-function initSurveyTransitions() {
-  // Intentionally disabled to prevent navigation issues
-}
-
-// Enhance the Step 2 submit button with CTA text + white arrow + loading state
-function enhanceSubmitButton(rootDoc){
-  if(!rootDoc) rootDoc = document;
-  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-submit-btn');
-  btns.forEach(btn => {
-    if(btn.dataset.bfCtaWired === '1') return;
-    // Replace text with our CTA while preserving the button element and its listeners
-    const label = 'GET YOUR QUOTE!';
-    btn.classList.add('bf-cta');
-    btn.innerHTML = `<span class="bf-cta-text">${label}</span>`+
-      `<span class="bf-arrow" aria-hidden="true">`+
-      `<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`+
-      `<line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `<line x1="12" y1="5" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `<line x1="12" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `</svg>`+
-      `</span>`;
+    // Retry wiring in case inputs mount after maps load
+    (function retryWireAutocomplete(){
+      const start = Date.now();
+      const intv = setInterval(() => {
+        try { 
+          if (window.BookingForm.wireAutocomplete) {
+            window.BookingForm.wireAutocomplete(document); 
+          }
+        } catch(_) {}
+        const allWired = ['pickup_location','drop-off_location']
+          .every(q => document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired === '1');
+        if (allWired || Date.now() - start > 12000) clearInterval(intv);
+      }, 450);
+    })();
     
-    // Add loading state functionality with fullscreen overlay approach
-    btn.addEventListener('click', function(e) {
-      // Check if overlay already exists
-      if (document.querySelector('.bf-loading-overlay')) {
-        return; // Loading overlay already exists
+    // PAC Filter (hide vague localities/cities)
+    (function installPacFilter(){
+      if (window.__pacFilterObserver) return;
+
+      const F = window.BookingForm.CONFIG.places.filter || {};
+      const airports = (window.BookingForm.CONFIG.places.priorityKeywords?.airport || []).map(s => s.toLowerCase());
+      const hotels   = (window.BookingForm.CONFIG.places.priorityKeywords?.hotel   || []).map(s => s.toLowerCase());
+      const allowKw  = new Set([...airports, ...hotels, ...(F.allowKeywords || [])]);
+
+      const hasStreetNumber = txt => /\d/.test(txt); // simple and effective
+      const hasAllowKeyword = txt => {
+        const t = txt.toLowerCase();
+        for (const k of allowKw) if (k && t.includes(k)) return true;
+        return false;
+      };
+
+      function shouldKeep(text){
+        // Allow specific addresses or keyword-matching POIs (airports/hotels/etc.)
+        if (F.addressMustHaveNumber && hasStreetNumber(text)) return true;
+        if (hasAllowKeyword(text)) return true;
+        return false;
       }
-      
-      // Create fullscreen loading overlay immediately
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.className = 'bf-loading-overlay';
-      loadingOverlay.innerHTML = `
-        <div class="bf-loading-content">
-          <div class="bf-loading-spinner-container">
-            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
-              <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-            </svg>
-          </div>
-          <span class="bf-loading-text">Processing Your Request...</span>
-        </div>
-      `;
-      
-      // Make it fullscreen with subtle styling
-      loadingOverlay.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0, 0, 0, 0.7) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        z-index: 999999 !important;
-        backdrop-filter: blur(5px) !important;
-        font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-      `;
-      
-      document.body.appendChild(loadingOverlay);
-      
-      // Check for validation errors after a brief delay
-      setTimeout(() => {
-        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid').length > 0;
-        const formElement = btn.closest('form');
-        const isFormValid = formElement ? formElement.checkValidity() : true;
-        
-        if (hasErrors || !isFormValid) {
-          // Remove loading overlay if validation fails
-          loadingOverlay.remove();
-        } else {
-          // Keep overlay visible during submission and redirect
+
+      function process(container){
+        const items = Array.from(container.querySelectorAll('.pac-item'));
+        if (!items.length) return;
+
+        // Decide which items to keep by text
+        const keep = items.filter(el => shouldKeep(el.textContent || ''));
+
+        // Fail-open: if filtering would wipe out or reduce below minKeep, do nothing.
+        const minKeep = Number.isFinite(F.minKeep) ? F.minKeep : 2;
+        if (keep.length === 0 || keep.length < minKeep) return;
+
+        // Remove the rest
+        const setKeep = new Set(keep);
+        items.forEach(el => { if (!setKeep.has(el)) el.remove(); });
+      }
+
+      function attach(){
+        // Attach to any current and future PAC containers
+        document.querySelectorAll('.pac-container').forEach(c => {
+          if (c.dataset.pacFilterWired === '1') return;
+          const obs = new MutationObserver(() => process(c));
+          obs.observe(c, { childList: true, subtree: true });
+          c.dataset.pacFilterWired = '1';
+        });
+      }
+
+      // Initial + focus-driven attach (helps with SPAs / late mounts)
+      const hook = () => {
+        attach();
+        document.addEventListener('focusin', e => {
+          if (e.target?.matches?.('input[data-q="pickup_location"], input[data-q="drop-off_location"]')) {
+            setTimeout(attach, 0);
+          }
+        });
+      };
+
+      hook();
+      window.__pacFilterObserver = true;
+    })();
+
+    // Optional re-ranking if you provided PRIORITY_KEYWORDS
+    (function installPredictionPriority(){
+      if (!window.BookingForm.CONFIG.places.priorityKeywords || window.__predPriorityObserver) return;
+
+      const airports = (window.BookingForm.CONFIG.places.priorityKeywords.airport || []).map(s=>s.toLowerCase());
+      const hotels   = (window.BookingForm.CONFIG.places.priorityKeywords.hotel   || []).map(s=>s.toLowerCase());
+      const score = (text) => {
+        const t = (text || '').toLowerCase();
+        if (airports.some(k => t.includes(k))) return 3;
+        if (hotels.some(k   => t.includes(k))) return 2;
+        return 1;
+      };
+
+      function promote(c){
+        const items = [...c.querySelectorAll('.pac-item')];
+        if (items.length < 2) return;
+        const ranked = items.map((el,i)=>({el,i,s:score(el.textContent)}))
+                            .sort((a,b)=> (b.s-a.s) || (a.i-b.i));
+        let changed = ranked.some((r, i) => r.el !== items[i]);
+        if (!changed) return;
+        const frag = document.createDocumentFragment();
+        ranked.forEach(r => frag.appendChild(r.el));
+        c.appendChild(frag);
+      }
+
+      const attach = () => {
+        const c = document.querySelector('.pac-container');
+        if (!c){ setTimeout(attach, 250); return; }
+        const obs = new MutationObserver(() => promote(c));
+        obs.observe(c, { childList:true, subtree:false });
+        window.__predPriorityObserver = obs;
+      };
+      attach();
+    })();
+  });
+};
+
+// Expose loadGoogleMaps function for backwards compatibility
+window.BookingForm.loadGoogleMaps = loadGoogleMaps;// Google Places Autocomplete + Airport Code Normalization (Section 6)
+
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+// Section 6 implementation from temp.js
+function normalizeSafely(el, obs){
+  if (obs) obs.disconnect();
+  el.classList.remove('pac-target-input','disabled','is-disabled');
+  el.removeAttribute('readonly');
+  if (el.getAttribute('aria-disabled') === 'true') el.removeAttribute('aria-disabled');
+  if (el.getAttribute('autocomplete') !== 'on') el.setAttribute('autocomplete','on');
+  if (el.style.opacity) el.style.opacity='';
+  if (obs) obs.observe(el,{attributes:true,attributeFilter:['class','readonly','aria-disabled','autocomplete','style'],attributeOldValue:true});
+}
+
+let biasBoundsFn = null;
+
+function wireAutocomplete(rootDoc){
+  if (!window.google?.maps?.places) return;
+
+  const sels = ['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
+
+  for (const sel of sels){
+    const els = [...rootDoc.querySelectorAll(sel)];
+    for (const el of els){
+      if (!el || el.dataset.placesWired === '1') continue;
+
+      const cs = getComputedStyle(el);
+      if (el.type === 'hidden' || cs.display === 'none' || cs.visibility === 'hidden') continue;
+
+      el.dataset.placesWired = '1';
+
+      const acOpts = {
+        fields: window.BookingForm.CONFIG.places.fields,
+        types:  window.BookingForm.getAutocompleteTypesFromConfig()
+      };
+
+      const b = biasBoundsFn?.();
+      if (b) { acOpts.bounds = b; acOpts.strictBounds = true; }
+
+      if (window.BookingForm.CONFIG.countries?.length) {
+        acOpts.componentRestrictions = { country: window.BookingForm.CONFIG.countries };
+      }
+
+      let ac;
+      try {
+        ac = new google.maps.places.Autocomplete(el, acOpts);
+      } catch (err) {
+        console.error('[Maps] Autocomplete init failed:', err);
+        continue;
+      }
+
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place?.place_id || !place.geometry) return;
+
+        const isAirport = (place.types || []).includes('airport');
+        const AIRPORT_CODES = window.BookingForm.CONFIG.places.airportCodes;
+        let display = '';
+        if (isAirport && place.name){
+          const code = AIRPORT_CODES[place.name];
+          display = code ? `${place.name} (${code})` : place.name;
+        } else if (place.name){
+          display = place.name;
+        } else if (place.formatted_address){
+          display = place.formatted_address;
         }
-      }, 100);
-      
-    });
-    
-    btn.dataset.bfCtaWired = '1';
-  });
+
+        setTimeout(() => {
+          el.value = display;
+          el.setAttribute('value', display);
+          el.dispatchEvent(new Event('input', { bubbles:true }));
+          el.dispatchEvent(new Event('change', { bubbles:true }));
+          document.documentElement.classList.add('pac-hide');
+          setTimeout(() => document.documentElement.classList.remove('pac-hide'), 700);
+          try { el.blur(); } catch(_) {}
+          try { el.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true })); } catch(_) {}
+          (document.querySelector('input[data-q="drop-off_location"]')
+            || document.querySelector('input[data-q="pickup_date"]')
+            || document.querySelector('input[data-q="pickup_time"]'))?.focus();
+          const hide = () => document.querySelectorAll('.pac-container').forEach(pc => pc.style.display='none');
+          [0,30,80,160,300].forEach(d => setTimeout(hide, d));
+        }, 0);
+      });
+
+      el.addEventListener('focus', () => {
+        try { const nb = biasBoundsFn?.(); if (nb) ac.setBounds(nb); } catch(_) {}
+      }, { once:true });
+
+      let obs;
+      obs = new MutationObserver(() => normalizeSafely(el, obs));
+      normalizeSafely(el, obs);
+    }
+  }
 }
 
-// Expose functions on global namespace
-window.BookingForm.enhanceVisual = enhanceVisual;
-window.BookingForm.enhanceDateTimeLayout = enhanceDateTimeLayout;
-window.BookingForm.enhanceNextButtonMobile = enhanceNextButtonMobile;
-window.BookingForm.enhanceSubmitButton = enhanceSubmitButton;
-window.BookingForm.initSurveyTransitions = initSurveyTransitions;
+// Expose wireAutocomplete function and biasBoundsFn for external setup
+window.BookingForm.wireAutocomplete = wireAutocomplete;
+window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
+
+// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+// Section 9 implementation from temp.js
+(function observeLateFields(){
+  if(window.__iconFieldObserver) return;
+  const targetAttrs=['pickup_location','drop-off_location','pickup_date','pickup_time','number_of_passengers','full_name','email','phone'];
+  const obs=new MutationObserver(muts=>{
+    for(const m of muts){
+      m.addedNodes && m.addedNodes.forEach(node=>{
+        if(!(node instanceof HTMLElement)) return;
+        const candidates = node.matches?.('input,select') ? [node] : [...node.querySelectorAll?.('input,select')||[]];
+        candidates.forEach(el=>{
+          const q=el.getAttribute('data-q');
+          if(q && targetAttrs.includes(q)){
+            // Re-run visual enhancement only for the specific element
+            window.BookingForm.enhanceVisual(document); // idempotent
+            window.BookingForm.enhanceNextButtonMobile(document);
+            // Ensure CTA is applied if submit button renders late
+            window.BookingForm.enhanceSubmitButton(document);
+            // If a location field appears after initial maps load, try wiring autocomplete immediately.
+            if ((q==='pickup_location' || q==='drop-off_location') && window.google?.maps?.places) {
+              try { window.BookingForm.wireAutocomplete(document); } catch(e){ /* noop */ }
+            }
+            if(q==='pickup_date'){
+              // Re-apply date guard for replaced/late field, preserve vertical metrics
+              try { window.BookingForm.attachPickupDateGuard(document); } catch(_) {}
+              try { window.__pickupDatePicker?.attach(document); } catch(_) {}
+            }
+            if(q==='pickup_time'){
+              try { window.BookingForm.attachPickupTimePicker(document, el); } catch(_){}
+            }
+            if(q==='number_of_passengers'){
+              try { window.__passengerSelect?.attach(document); } catch(_) {}
+            }
+          }
+        });
+        // Also check if a submit button was inserted
+        if(node.matches?.('.ghl-btn.ghl-submit-btn') || node.querySelector?.('.ghl-btn.ghl-submit-btn')){
+          window.BookingForm.enhanceSubmitButton(document);
+        }
+        // Also check if a NEXT button was inserted
+        if(node.matches?.('.ghl-btn.ghl-footer-next') || node.querySelector?.('.ghl-btn.ghl-footer-next')){
+          window.BookingForm.enhanceNextButtonMobile(document);
+        }
+      });
+    }
+  });
+  obs.observe(document.documentElement,{subtree:true,childList:true});
+  window.__iconFieldObserver=obs;
+})();
+
+// Expose observeLateFields function for external use
+window.BookingForm.observeLateFields = function(){
+  // The IIFE above handles the singleton pattern, so this is just for API consistency
+  return window.__iconFieldObserver;
+};
+// Essential initialization code
+window.BookingForm.initNow = function(root = document) {
+  // Section 1 & 2: Inject essential styles first
+  window.BookingForm.injectBaselineStyles();
+  window.BookingForm.injectValidationStyles();
+};
+
+// Section 8: Form Enhancement Function (called after config is loaded)
+window.BookingForm.enhance = function() {
+  console.log('[BookingForm] Starting form enhancement...');
+    
+    // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
+    // Adjust order only if dependencies change (icons don't depend on others).
+    
+    window.BookingForm.attachPickupDateGuard(document);
+    window.BookingForm.attachPickupTimePicker(document);
+    window.BookingForm.enhanceVisual(document);
+    window.BookingForm.enhanceNextButtonMobile(document);
+    window.BookingForm.enhanceSubmitButton(document);
+    window.BookingForm.initSurveyTransitions(document);
+    
+    // Install validation for both steps
+    window.BookingForm.installStepOneNextValidation();
+    window.BookingForm.installStepTwoSubmitValidation();
+    
+    // Secondary run to catch late-rendered inputs
+    setTimeout(()=>{
+      window.BookingForm.enhanceVisual(document);
+    },400);
+
+    // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
+    window.BookingForm.initMapsAndFilters();
+
+    // Watch for late-rendered/replaced fields (GHL)
+    window.BookingForm.observeLateFields();
+
+    console.log('[BookingForm] Form enhancement complete');
+};
+
+// Note: Form enhancement is called by async-config-loader.js after config loads
