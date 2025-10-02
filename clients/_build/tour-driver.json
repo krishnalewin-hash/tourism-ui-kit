@@ -1,6 +1,6 @@
 {
-  "START_OVER_URL": "https://tourdriver.com/booking",
-  "TRANSFER_PAYMENT_URL": "https://tourdriver.com/book",
+  "START_OVER_URL": "https://tourismbizacademy.com/airport-transfers",
+  "TRANSFER_PAYMENT_URL": "https://tourismbizacademy.com/book",
   "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
     "COUNTRIES": [
@@ -165,6 +165,74 @@
       "zoom": 9
     }
   },
+  "TOUR_CATALOG": [
+    {
+      "slug": "blue-hole-dunn-river-falls",
+      "name": "Blue Hole & Dunn's River Falls Adventure",
+      "type": "Adventure Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Blue+Hole+Adventure",
+      "excerpt": "Experience Jamaica's iconic Blue Hole and climb the world-famous Dunn's River Falls in one amazing day tour.",
+      "fromPrice": 75,
+      "duration": "8 hours",
+      "location": "Ocho Rios",
+      "group": "Small group"
+    },
+    {
+      "slug": "mystic-mountain-adventure",
+      "name": "Mystic Mountain Sky Explorer & Bobsled",
+      "type": "Adventure Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Mystic+Mountain",
+      "excerpt": "Soar through the rainforest canopy and race down the mountain on Jamaica's famous bobsled ride.",
+      "fromPrice": 65,
+      "duration": "6 hours",
+      "location": "Ocho Rios",
+      "group": "All ages"
+    },
+    {
+      "slug": "white-river-tubing",
+      "name": "White River Tubing Adventure",
+      "type": "Adventure Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=River+Tubing",
+      "excerpt": "Float down the crystal-clear White River on inner tubes through tropical rainforest scenery.",
+      "fromPrice": 45,
+      "duration": "4 hours",
+      "location": "Ocho Rios",
+      "group": "Ages 8+"
+    },
+    {
+      "slug": "dolphin-cove-swim",
+      "name": "Dolphin Cove Swimming Experience",
+      "type": "Marine Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Dolphin+Swim",
+      "excerpt": "Swim and interact with friendly dolphins in their natural habitat at Dolphin Cove.",
+      "fromPrice": 95,
+      "duration": "5 hours",
+      "location": "Ocho Rios",
+      "group": "All ages"
+    },
+    {
+      "slug": "catamaran-snorkel-cruise",
+      "name": "Catamaran Snorkel & Sunset Cruise",
+      "type": "Marine Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Catamaran+Cruise",
+      "excerpt": "Sail the Caribbean waters, snorkel coral reefs, and enjoy a spectacular sunset with drinks included.",
+      "fromPrice": 85,
+      "duration": "6 hours",
+      "location": "Ocho Rios",
+      "group": "Adults only"
+    },
+    {
+      "slug": "bob-marley-nine-mile",
+      "name": "Bob Marley Nine Mile Pilgrimage",
+      "type": "Cultural Tours",
+      "image": "https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Bob+Marley+Tour",
+      "excerpt": "Visit the birthplace and final resting place of reggae legend Bob Marley in the hills of Nine Mile.",
+      "fromPrice": 70,
+      "duration": "7 hours",
+      "location": "St. Ann",
+      "group": "All ages"
+    }
+  ],
   "TRANSFER_CATALOG": {
     "MBJ_AREA": {
       "label": "Montego Bay Area",
@@ -221,7 +289,7 @@
   },
   "_meta": {
     "client": "tour-driver",
-    "buildTime": "2025-10-02T12:41:22.938Z",
+    "buildTime": "2025-10-02T13:01:14.000Z",
     "version": "1.0.0",
     "source": "modular"
   }

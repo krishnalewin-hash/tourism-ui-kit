@@ -1,0 +1,132 @@
+{
+  "START_OVER_URL": "https://tourdriver.com/booking",
+  "TRANSFER_PAYMENT_URL": "https://tourdriver.com/book",
+  "FORM_CONFIG": {
+    "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+    "COUNTRIES": ["jm"],
+    "CURRENCY": "USD",
+    "PLACES": {
+      "FIELDS": ["place_id", "formatted_address", "geometry", "name", "types"],
+      "TYPES": ["establishment"],
+      "PRIORITY_KEYWORDS": {
+        "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
+        "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
+      }
+    },
+    "FIELD_MAPPING": {
+      "pickup_location": ["[data-q=\"pickup_location\"]", "[name=\"pickup_location\"]"],
+      "dropoff_location": ["[data-q=\"drop-off_location\"]", "[name=\"drop-off_location\"]", "[name=\"dropoff_location\"]"],
+      "pickup_date": ["[data-q=\"pickup_date\"]", "[name=\"pickup_date\"]"],
+      "pickup_time": ["[data-q=\"pickup_time\"]", "[name=\"pickup_time\"]"],
+      "passengers": ["select[data-q=\"number_of_passengers\"]", "[name=\"number_of_passengers\"]", "[data-q=\"number_of_passengers\"]"],
+      "first_name": ["[name=\"first_name\"]", "[data-q=\"full_name\"]"],
+      "last_name": ["[name=\"last_name\"]"],
+      "email": ["[name=\"email\"]"],
+      "phone": ["[name=\"phone\"]"]
+    }
+  },
+  "WINDOW_CFG": {
+    "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
+    "COUNTRIES": ["jm"],
+    "PLACES": {
+      "FIELDS": ["place_id","formatted_address","geometry","name","types"],
+      "TYPES": ["establishment"],
+      "PRIORITY_KEYWORDS": {
+        "airport": ["airport","international airport","terminal","mbj","kin","ocj","neg","ktp"],
+        "hotel": ["hotel","resort","inn","villa","guest house","guesthouse","lodgings","spa","apartments","suite","suites","bnb"]
+      }
+    }
+  },
+  "copy": {
+    "flight": "Flight tracking included",
+    "wifi": "Complimentary Wi-Fi",
+    "water": "Complimentary refreshments",
+    "cancel": "Free cancellation up to 24 hours",
+    "inclusive": "All taxes and fees included"
+  },
+  "TRANSFER_CATALOG": {
+    "MBJ_AREA": {
+      "label": "Montego Bay Area",
+      "shuttle": {
+        "name": "Shared Transfer: MBJ ↔ Montego Bay Hotels",
+        "url": "https://tourdriver.com/book/mbj-montego-bay-shared",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 15
+      },
+      "private": {
+        "name": "Private Transfer: MBJ ↔ Montego Bay Hotels",
+        "url": "https://tourdriver.com/book/mbj-montego-bay-private",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 45
+      }
+    },
+    "OCHO_RIOS": {
+      "label": "Ocho Rios",
+      "shuttle": {
+        "name": "Shared Transfer: MBJ ↔ Ocho Rios",
+        "url": "https://tourdriver.com/book/mbj-ocho-rios-shared",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 30
+      },
+      "private": {
+        "name": "Private Transfer: MBJ ↔ Ocho Rios",
+        "url": "https://tourdriver.com/book/mbj-ocho-rios-private",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 85
+      }
+    },
+    "NEGRIL": {
+      "label": "Negril",
+      "shuttle": {
+        "name": "Shared Transfer: MBJ ↔ Negril",
+        "url": "https://tourdriver.com/book/mbj-negril-shared",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 35
+      },
+      "private": {
+        "name": "Private Transfer: MBJ ↔ Negril",
+        "url": "https://tourdriver.com/book/mbj-negril-private",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
+        "fromPrice": 110
+      }
+    }
+  },
+  "PRICING_RATES": {
+    "BASE_RATES": {
+      "SEDAN": 120,
+      "SUV": 150,
+      "MINIVAN": 180
+    },
+    "DISTANCE_BANDS": [
+      {"maxKm": 15, "multiplier": 1.0},
+      {"maxKm": 30, "multiplier": 1.2},
+      {"maxKm": 50, "multiplier": 1.4},
+      {"maxKm": 100, "multiplier": 1.8},
+      {"maxKm": 999, "multiplier": 2.2}
+    ],
+    "REMOTE_AREAS": {
+      "THRESHOLD_KM": 75,
+      "SURCHARGE_USD": 25
+    }
+  },
+  "QUOTE_RESULTS_CONFIG": {
+    "bands": [
+      { "maxMi": 9, "pricePP": 120 },
+      { "maxMi": 19, "pricePP": 144 },
+      { "maxMi": 31, "pricePP": 168 },
+      { "maxMi": 62, "pricePP": 216 },
+      { "maxMi": 999, "pricePP": 264 }
+    ],
+    "minPricePP": 120,
+    "defaultPassengers": 1,
+    "remote": {
+      "keywords": [
+        "tryall","round hill","dublin castle","anchovy","greenwood",
+        "bluefields","sheffield","orange bay","rhodes hall",
+        "falmouth","martha brae","rio bueno"
+      ],
+      "surchargePP": 25
+    },
+    "map": { "zoom": 9 }
+  }
+}

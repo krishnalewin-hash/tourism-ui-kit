@@ -1,6 +1,6 @@
 {
-  "START_OVER_URL": "https://tourdriver.com/booking",
-  "TRANSFER_PAYMENT_URL": "https://tourdriver.com/book",
+  "START_OVER_URL": "https://tourismbizacademy.com/airport-transfers",
+  "TRANSFER_PAYMENT_URL": "https://tourismbizacademy.com/book",
   "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
     "COUNTRIES": ["jm"],
