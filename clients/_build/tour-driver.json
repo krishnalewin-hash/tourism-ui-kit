@@ -1,5 +1,6 @@
 {
   "START_OVER_URL": "https://tourdriver.com/booking",
+  "TRANSFER_PAYMENT_URL": "https://tourdriver.com/book",
   "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
     "COUNTRIES": [
@@ -220,7 +221,7 @@
   },
   "_meta": {
     "client": "tour-driver",
-    "buildTime": "2025-10-02T11:49:56.307Z",
+    "buildTime": "2025-10-02T12:41:22.938Z",
     "version": "1.0.0",
     "source": "modular"
   }

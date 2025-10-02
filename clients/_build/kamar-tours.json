@@ -1,5 +1,6 @@
 {
   "START_OVER_URL": "https://kamartours.com/booking",
+  "TRANSFER_PAYMENT_URL": "https://kamartours.com/book",
   "SHARED_CONFIG": {
     "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
     "COUNTRIES": [
@@ -180,7 +181,7 @@
   },
   "_meta": {
     "client": "kamar-tours",
-    "buildTime": "2025-10-02T11:49:56.305Z",
+    "buildTime": "2025-10-02T12:41:22.935Z",
     "version": "1.0.0",
     "source": "modular"
   }
