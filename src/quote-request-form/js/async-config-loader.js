@@ -26,12 +26,12 @@ async function loadClientConfiguration() {
   console.log(`[ConfigLoader] Base URL: ${base}`);
 
   try {
-    // Try to load built configuration first
+    // Try to load core configuration first
     let configUrl;
     if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
-      configUrl = `${base}/clients/_build/${client}.json`;
+      configUrl = `${base}/clients/${client}/core/config.json`;
     } else {
-      configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
+      configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}/core/config.json`;
     }
 
     console.log(`[ConfigLoader] Fetching: ${configUrl}`);
@@ -51,16 +51,16 @@ async function loadClientConfiguration() {
         PLACES: clientConfig.FORM_CONFIG?.PLACES,
         FIELD_MAPPING: clientConfig.FORM_CONFIG?.FIELD_MAPPING,
         configLoaded: true,
-        loadedFrom: 'built-config'
+        loadedFrom: 'core-config'
       };
 
-      console.log(`[ConfigLoader] Successfully loaded ${client} configuration from built config`);
+      console.log(`[ConfigLoader] Successfully loaded ${client} configuration from core config`);
       return window.CFG;
     } else {
-      console.log(`[ConfigLoader] Built config returned ${response.status}: ${response.statusText}`);
+      console.log(`[ConfigLoader] Core config returned ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
-    console.log(`[ConfigLoader] Built config fetch failed: ${error.message}`);
+    console.log(`[ConfigLoader] Core config fetch failed: ${error.message}`);
   }
 
   // Fallback: Try legacy single file

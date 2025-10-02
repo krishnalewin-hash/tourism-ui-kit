@@ -25,12 +25,12 @@
     try {
       console.log(`[BookingForm] Loading config for client: ${client}`);
       
-      // Try built config first
+      // Try core config first
       let configUrl;
       if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
-        configUrl = `${base}/clients/_build/${client}.json`;
+        configUrl = `${base}/clients/${client}/core/config.json`;
       } else {
-        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
+        configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}/core/config.json`;
       }
 
       const response = await fetch(configUrl);
