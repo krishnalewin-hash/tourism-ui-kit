@@ -5,13 +5,13 @@
       "shuttle": {
         "name": "Shared Transfer: MBJ ↔ Montego Bay Hotels",
         "url": "https://tourdriver.com/book/mbj-montego-bay-shared",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 15
       },
       "private": {
         "name": "Private Transfer: MBJ ↔ Montego Bay Hotels",
         "url": "https://tourdriver.com/book/mbj-montego-bay-private",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 45
       }
     },
@@ -20,13 +20,13 @@
       "shuttle": {
         "name": "Shared Transfer: MBJ ↔ Ocho Rios",
         "url": "https://tourdriver.com/book/mbj-ocho-rios-shared",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 30
       },
       "private": {
         "name": "Private Transfer: MBJ ↔ Ocho Rios",
         "url": "https://tourdriver.com/book/mbj-ocho-rios-private",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 85
       }
     },
@@ -35,13 +35,13 @@
       "shuttle": {
         "name": "Shared Transfer: MBJ ↔ Negril",
         "url": "https://tourdriver.com/book/mbj-negril-shared",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 35
       },
       "private": {
         "name": "Private Transfer: MBJ ↔ Negril",
         "url": "https://tourdriver.com/book/mbj-negril-private",
-        "img": "/demo/images/tour-image.jpeg",
+        "img": "https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Tour+Image",
         "fromPrice": 110
       }
     }
