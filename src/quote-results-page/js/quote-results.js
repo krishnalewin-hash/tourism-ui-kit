@@ -322,7 +322,7 @@ function injectStyles() {
     
     console.log(`[quote-calc] Creating Google Maps script tag`);
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=geometry`;
     script.setAttribute("data-qc-gmaps", "1");
     script.onload = () => {
       console.log(`[quote-calc] Google Maps script loaded successfully`);
@@ -428,6 +428,8 @@ function injectStyles() {
         const mapNode = document.getElementById("qc-map");
         if (mapNode && google.maps.DirectionsService) {
           console.log(`[quote-calc] Attempting to add interactive route map`);
+          console.log(`[quote-calc] Map container:`, mapNode);
+          console.log(`[quote-calc] Pickup: "${pickup}", Dropoff: "${dropoff}"`);
           
           const ds = new google.maps.DirectionsService();
           ds.route({
@@ -435,21 +437,32 @@ function injectStyles() {
             destination: dropoff,
             travelMode: google.maps.TravelMode.DRIVING
           }, (res, directionsStatus) => {
+            console.log(`[quote-calc] Directions API response:`, directionsStatus);
+            
             if (directionsStatus === "OK") {
               // Success! Show the interactive route
-              const map = new google.maps.Map(mapNode, { zoom: CONFIG.map.zoom || 9 });
-              const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+              console.log(`[quote-calc] Directions API successful, rendering map`);
+              const map = new google.maps.Map(mapNode, { 
+                zoom: CONFIG.map.zoom || 9,
+                center: res.routes[0].legs[0].start_location
+              });
+              const directionsRenderer = new google.maps.DirectionsRenderer({ 
+                map: map,
+                draggable: false
+              });
               directionsRenderer.setDirections(res);
               mapNode.classList.remove("qc-shimmer");
               console.log(`[quote-calc] Interactive route map displayed successfully`);
             } else {
               // Directions failed, but we still have the quote! Show a simple message
               console.warn(`[quote-calc] Directions API failed (${directionsStatus}), but quote is still available`);
+              console.warn(`[quote-calc] This is likely due to API permissions. Check Google Cloud Console.`);
               mapNode.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
                   <div>
                     <p style="margin:0;font-size:16px;margin-bottom:8px;">📍 Route Map Unavailable</p>
                     <p style="margin:0;font-size:14px;">Distance calculated: ${Math.round(miles*10)/10} miles</p>
+                    <p style="margin:0;font-size:12px;margin-top:8px;color:#9ca3af;">Directions API: ${directionsStatus}</p>
                   </div>
                 </div>
               `;
@@ -459,15 +472,21 @@ function injectStyles() {
         } else {
           // No Directions API available, show simple placeholder
           console.log(`[quote-calc] Directions API not available, showing distance only`);
-          mapNode.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
-              <div>
-                <p style="margin:0;font-size:18px;margin-bottom:8px;">📏 ${Math.round(miles*10)/10} miles</p>
-                <p style="margin:0;font-size:14px;">Estimated ${fmtMin(seconds)}</p>
+          console.log(`[quote-calc] MapNode exists:`, !!mapNode);
+          console.log(`[quote-calc] DirectionsService exists:`, !!google.maps.DirectionsService);
+          
+          if (mapNode) {
+            mapNode.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f9fafb;color:#6b7280;text-align:center;padding:20px;">
+                <div>
+                  <p style="margin:0;font-size:18px;margin-bottom:8px;">📏 ${Math.round(miles*10)/10} miles</p>
+                  <p style="margin:0;font-size:14px;">Estimated ${fmtMin(seconds)}</p>
+                  <p style="margin:0;font-size:12px;margin-top:8px;color:#9ca3af;">Maps API not fully loaded</p>
+                </div>
               </div>
-            </div>
-          `;
-          mapNode.classList.remove("qc-shimmer");
+            `;
+            mapNode.classList.remove("qc-shimmer");
+          }
         }
       });
     });

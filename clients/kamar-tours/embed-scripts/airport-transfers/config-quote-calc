@@ -9,7 +9,7 @@
     <!-- Mount point for the quote calculator -->
     <div id="quote-calc"></div>
 
-    <!-- Configuration with debugging enabled -->
+    <!-- Configuration with enhanced debugging for map display -->
     <script>
         window.CFG = {
             client: 'kamar-tours',
@@ -29,7 +29,15 @@
                     hasDistanceMatrix: !!window.google?.maps?.DistanceMatrixService,
                     hasDirections: !!window.google?.maps?.DirectionsService
                 });
-            }, 2000);
+                
+                // Check if map container exists
+                const mapNode = document.getElementById('qc-map');
+                console.log('[DEBUG] Map container found:', !!mapNode);
+                if (mapNode) {
+                    console.log('[DEBUG] Map container content:', mapNode.innerHTML);
+                    console.log('[DEBUG] Map container classes:', mapNode.className);
+                }
+            }, 3000);
         });
     </script>
 
