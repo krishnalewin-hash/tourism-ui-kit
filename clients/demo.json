@@ -1,10 +1,10 @@
 {
   "START_OVER_URL": "/airport-transfers",
   "SHARED_CONFIG": {
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA"
+    "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI"
   },
   "FORM_CONFIG": {
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
+    "GMAPS_KEY": "AIzaSyDomK0QVxMj2SzgbwIkUdlBZ2nyYxRJSOI",
     "COUNTRIES": ["jm"],
     "CURRENCY": "USD",
     "PLACES": {
