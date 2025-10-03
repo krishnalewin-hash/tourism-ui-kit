@@ -16,6 +16,17 @@
     "TOUR_DATA_URL": "https://your-tour-data-api.example.com"
   },
   "FORM_CONFIG": {
+    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
+    "COUNTRIES": ["jm"],
+    "CURRENCY": "USD",
+    "PLACES": {
+      "FIELDS": ["place_id", "formatted_address", "geometry", "name", "types"],
+      "TYPES": ["establishment"],
+      "PRIORITY_KEYWORDS": {
+        "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],
+        "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
+      }
+    },
     "FIELD_MAPPING": {
       "pickup_location": ["[data-q=\"pickup_location\"]", "[name=\"pickup_location\"]"],
       "dropoff_location": ["[data-q=\"drop-off_location\"]", "[name=\"drop-off_location\"]", "[name=\"dropoff_location\"]"],
