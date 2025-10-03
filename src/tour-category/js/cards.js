@@ -262,16 +262,24 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
   let fetchedVersion = null;
 
   try {
+    console.log('[Tours] Fetching from:', requestUrl);
     const res = await fetchWithTimeout(requestUrl, { timeout: 12000, cache:'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     fetchedTours = Array.isArray(json.tours) ? json.tours : [];
     fetchedVersion = json.version || computeVersionFromTours(fetchedTours);
+    console.log('[Tours] Fetched tours count:', fetchedTours.length);
+    console.log('[Tours] Filter config:', FILTER);
   } catch (e) {
     console.error('Fetch error', e);
   }
 
-  const rows = fetchedTours.filter(match);
+  // Apply client-side filter only if server didn't already filter
+  const rows = (FILTER?.mode && FILTER?.value && FILTER.mode !== 'all') 
+    ? fetchedTours  // Server already filtered, don't filter again
+    : fetchedTours.filter(match); // Server didn't filter, apply client filter
+  
+  console.log('[Tours] Final filtered count:', rows.length);
   const cacheVersion = cached?.version || null;
   const shouldRepaint = !paintedFromCache || !cacheVersion || (fetchedVersion && fetchedVersion !== cacheVersion);
 
