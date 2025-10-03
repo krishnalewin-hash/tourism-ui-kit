@@ -248,6 +248,12 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
 
   /* ---------- Build a URL that asks the server to filter ---------- */
   const urlParams = new URLSearchParams();
+  
+  // Add client parameter if specified
+  if (window.CFG?.CLIENT) {
+    urlParams.set('client', window.CFG.CLIENT);
+  }
+  
   if (FILTER?.mode && FILTER?.value) {
     urlParams.set('mode', FILTER.mode);
     urlParams.set('value', FILTER.value);
