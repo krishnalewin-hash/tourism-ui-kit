@@ -105,6 +105,8 @@ select[data-q='number_of_passengers'] {
     min-height: 56px !important;
     height: auto !important;
     color: #222 !important;
+    font-size: 20px !important;
+    font-weight: 300 !important;
 }
 
 /* Select elements get pointer cursor */
