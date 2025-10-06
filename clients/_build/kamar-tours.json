@@ -1,56 +1,108 @@
-{{{
+{{{{
 
   "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",
 
-  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",  "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",  "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",
+  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",  "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",
 
   "SHARED_CONFIG": {
 
-    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",
+    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",  "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",  "START_OVER_URL": "https://kamartoursjamaica.com/airport-transfers",
 
-    "COUNTRIES": [
+    "COUNTRIES": ["jm"],
 
-      "jm"  "SHARED_CONFIG": {  "SHARED_CONFIG": {
-
-    ],
-
-    "CURRENCY": "USD",    "GMAPS_KEY": "AIzaSyAjWBhYu0mXKqLNg4L1h5gFqK6XTJ8VaD4",    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
+    "CURRENCY": "USD",  "SHARED_CONFIG": {
 
     "REGION": "jm",
 
-    "PLACES": {    "COUNTRIES": [    "COUNTRIES": [
+    "PLACES": {    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",  "TRANSFER_PAYMENT_URL": "https://kamartoursjamaica.com/payments",
 
-      "FIELDS": [
+      "FIELDS": ["place_id", "formatted_address", "geometry", "name", "types"],
 
-        "place_id",      "jm"      "jm"
-
-        "formatted_address",
-
-        "geometry",    ],    ],
-
-        "name",
-
-        "types"    "CURRENCY": "USD",    "CURRENCY": "USD",
-
-      ],
-
-      "TYPES": [    "REGION": "jm",    "PLACES": {
-
-        "establishment"
-
-      ],    "PLACES": {      "FIELDS": [
+      "TYPES": ["establishment"],    "COUNTRIES": [
 
       "PRIORITY_KEYWORDS": {
 
-        "airport": [      "FIELDS": [        "place_id",
+        "airport": ["airport", "international airport", "terminal", "mbj", "kin", "ocj", "neg", "ktp"],      "jm"  "SHARED_CONFIG": {  "SHARED_CONFIG": {
 
-          "airport",
+        "hotel": ["hotel", "resort", "inn", "villa", "guest house", "guesthouse", "lodgings", "spa", "apartments", "suite", "suites", "bnb"]
 
-          "international airport",        "place_id",        "formatted_address",
+      }    ],
 
-          "terminal",
+    },
 
-          "mbj",        "formatted_address",        "geometry",
+    "TOUR_DATA_URL": "https://your-tour-data-api.example.com"    "CURRENCY": "USD",    "GMAPS_KEY": "AIzaSyAjWBhYu0mXKqLNg4L1h5gFqK6XTJ8VaD4",    "GMAPS_KEY": "AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA",
+
+  },
+
+  "FORM_CONFIG": {    "REGION": "jm",
+
+    "FIELD_MAPPING": {
+
+      "pickup_location": ["[data-q=\"pickup_location\"]", "[name=\"pickup_location\"]"],    "PLACES": {    "COUNTRIES": [    "COUNTRIES": [
+
+      "dropoff_location": ["[data-q=\"drop-off_location\"]", "[name=\"drop-off_location\"]", "[name=\"dropoff_location\"]"],
+
+      "pickup_date": ["[data-q=\"pickup_date\"]", "[name=\"pickup_date\"]"],      "FIELDS": [
+
+      "pickup_time": ["[data-q=\"pickup_time\"]", "[name=\"pickup_time\"]"],
+
+      "passengers": ["select[data-q=\"number_of_passengers\"]", "[name=\"number_of_passengers\"]", "[data-q=\"number_of_passengers\"]"],        "place_id",      "jm"      "jm"
+
+      "first_name": ["[name=\"first_name\"]", "[data-q=\"full_name\"]"],
+
+      "last_name": ["[name=\"last_name\"]"],        "formatted_address",
+
+      "email": ["[name=\"email\"]"],
+
+      "phone": ["[name=\"phone\"]"]        "geometry",    ],    ],
+
+    }
+
+  },        "name",
+
+  "QUOTE_RESULTS_CONFIG": {
+
+    "bands": [        "types"    "CURRENCY": "USD",    "CURRENCY": "USD",
+
+      {"maxMi": 10, "pricePP": 30},
+
+      {"maxMi": 20, "pricePP": 45},      ],
+
+      {"maxMi": 40, "pricePP": 60},
+
+      {"maxMi": 999, "pricePP": 80}      "TYPES": [    "REGION": "jm",    "PLACES": {
+
+    ],
+
+    "minPricePP": 30,        "establishment"
+
+    "defaultPassengers": 1,
+
+    "remote": {      ],    "PLACES": {      "FIELDS": [
+
+      "keywords": ["tryall", "round hill", "dublin castle", "anchovy", "greenwood", "bluefields", "sheffield", "orange bay", "rhodes hall"],
+
+      "surchargePP": 10      "PRIORITY_KEYWORDS": {
+
+    },
+
+    "map": {"zoom": 9}        "airport": [      "FIELDS": [        "place_id",
+
+  },
+
+  "_meta": {          "airport",
+
+    "client": "kamar-tours",
+
+    "buildTime": "2025-10-06T21:30:00.000Z",          "international airport",        "place_id",        "formatted_address",
+
+    "version": "1.0.0",
+
+    "source": "manual"          "terminal",
+
+  }
+
+}          "mbj",        "formatted_address",        "geometry",
 
           "kin",
 
