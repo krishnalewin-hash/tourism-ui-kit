@@ -22,6 +22,11 @@ const CONFIG = {
   time: { start: '00:00', end: '23:59', stepMinutes: 15, format12: true }
 };
 
+// Debug logging
+console.log('[QuoteForm] window.CFG:', window.CFG);
+console.log('[QuoteForm] CONFIG.googleApiKey:', CONFIG.googleApiKey ? CONFIG.googleApiKey.substring(0, 20) + '...' : 'EMPTY');
+console.log('[QuoteForm] CONFIG.countries:', CONFIG.countries);
+
 // Auto-load client config if CLIENT is specified but GMAPS_KEY is missing
 (function autoLoadClientConfig() {
   if (window.CFG?.CLIENT && !window.CFG.GMAPS_KEY) {
@@ -58,6 +63,7 @@ const CONFIG = {
   ===================================================== */
   
   function loadGoogleMaps(callback){
+    console.log('[QuoteForm] loadGoogleMaps called, API key:', CONFIG.googleApiKey ? CONFIG.googleApiKey.substring(0, 20) + '...' : 'EMPTY');
     if (window.google?.maps?.places) return callback();
     if (document.querySelector('script[data-gmaps-loader]')){
       const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
@@ -65,9 +71,12 @@ const CONFIG = {
       return;
     }
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(CONFIG.googleApiKey)}&libraries=places`;
+    const mapsUrl = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(CONFIG.googleApiKey)}&libraries=places`;
+    console.log('[QuoteForm] Loading Google Maps from:', mapsUrl);
+    s.src = mapsUrl;
     s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
     s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
+    s.onload = () => console.log('[Maps] Google Maps script loaded successfully');
     document.head.appendChild(s);
     const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
     setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
