@@ -69,6 +69,34 @@ const CONFIG = {
   time: { start: '00:00', end: '23:59', stepMinutes: 15, format12: true }
 };
 
+// Auto-load client config if CLIENT is specified but GMAPS_KEY is missing
+(function autoLoadClientConfig() {
+  if (window.CFG?.CLIENT && !window.CFG.GMAPS_KEY) {
+    const client = window.CFG.CLIENT;
+    const configUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/clients/_build/${client}.json`;
+    
+    fetch(configUrl)
+      .then(response => response.json())
+      .then(config => {
+        if (config.SHARED_CONFIG) {
+          // Merge shared config into window.CFG
+          window.CFG.GMAPS_KEY = config.SHARED_CONFIG.GMAPS_KEY;
+          window.CFG.COUNTRIES = config.SHARED_CONFIG.COUNTRIES;
+          window.CFG.REGION = config.SHARED_CONFIG.REGION || 'jm';
+          console.log('[QuoteForm] Auto-loaded client config for:', client);
+          
+          // Reinitialize Google Maps with the loaded config
+          if (window.google?.maps?.places) {
+            try { wireAutocomplete(document); } catch(_) {}
+          }
+        }
+      })
+      .catch(error => {
+        console.warn('[QuoteForm] Could not auto-load client config:', error);
+      });
+  }
+})();
+
   /* ===== Section 3: Google Maps Loader (dynamic include + readiness poll)
     Purpose: Loads Places library if not already present; polls until available.
     Remove if you always load Google Maps via a static <script> tag before this file.
