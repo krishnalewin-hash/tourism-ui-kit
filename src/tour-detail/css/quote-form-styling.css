@@ -1,5 +1,10 @@
 /* ===== Tourism UI Kit - Quote Form Styling ===== */
 
+/* IMMEDIATE: Hide drop-off location to prevent flash */
+input[data-q='drop-off_location'] {
+    display: none !important;
+}
+
 /* Form Enhancement Styles */
 .ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text {
     font-size: 20px !important;
@@ -22,6 +27,17 @@
     position: relative;
     display: block;
     width: 100%;
+}
+
+/* Hide drop-off location icon wrapper immediately to prevent flash */
+.icon-field-wrapper .field-icon[data-icon='map-pin']:nth-of-type(2) {
+    display: none !important;
+}
+
+/* Alternative: Hide based on position if drop-off is always second */
+.form-field-wrapper:nth-of-type(2) .icon-field-wrapper,
+.form-field-wrapper:nth-child(2) .icon-field-wrapper {
+    display: none !important;
 }
 
 .icon-field-wrapper .field-icon {
@@ -233,7 +249,7 @@ select[data-q='number_of_passengers'][value=""] {
 
 .icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q],
 .icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q] {
-    padding-left: 2.3rem !important;
+    padding-left: 2.1rem !important;
 }
 
 /* ---------- Mobile NEXT Button ---------- */
