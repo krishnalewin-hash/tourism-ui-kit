@@ -1161,6 +1161,7 @@ autofillHiddenDropOff(document);
   
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
+    attachPickupTimePicker(document);
     enhanceVisual(document);
     if (window.__passengerSelect && window.__passengerSelect.attach) {
       window.__passengerSelect.attach(document);
@@ -1216,6 +1217,11 @@ autofillHiddenDropOff(document);
             if(q === 'pickup_date'){
               try { attachPickupDateGuard(document); } catch(_) {}
               try { window.__pickupDatePicker?.attach(document); } catch(_) {}
+            }
+
+            // Late time field: time picker attachment  
+            if(q === 'pickup_time'){
+              try { attachPickupTimePicker(document, el); } catch(_) {}
             }
 
             // Late passenger field: dropdown select

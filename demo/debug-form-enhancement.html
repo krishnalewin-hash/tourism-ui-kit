@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Enhancement Debug Test</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .debug {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Form Enhancement Debug Test</h1>
+    
+    <div class="debug">
+        <h3>Debug Info:</h3>
+        <div id="debug-info">Loading...</div>
+    </div>
+
+    <form>
+        <div class="form-group">
+            <label for="pickup_time">Pickup Time (should show popup on click)</label>
+            <input type="text" id="pickup_time" data-q="pickup_time" placeholder="Select time" required>
+        </div>
+
+        <div class="form-group">
+            <label for="number_of_passengers">Number of Passengers (should convert to dropdown)</label>
+            <input type="number" id="number_of_passengers" data-q="number_of_passengers" placeholder="Number of passengers" required>
+        </div>
+
+        <div class="form-group">
+            <label for="pickup_date">Pickup Date (should show calendar popup)</label>
+            <input type="text" id="pickup_date" data-q="pickup_date" placeholder="Select date" required>
+        </div>
+
+        <button type="button" onclick="runTests()">🧪 Run Debug Tests</button>
+    </form>
+
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/quote-form-styling.css">
+
+    <!-- JavaScript Enhancement -->
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/quote-form-styling.js"></script>
+
+    <!-- Client Configuration -->
+    <script>
+    window.CFG = {
+        CLIENT: 'kamar-tours'
+    };
+
+    // Debug function
+    function updateDebugInfo() {
+        const debugInfo = document.getElementById('debug-info');
+        const timeInput = document.querySelector('input[data-q="pickup_time"]');
+        const passengerInput = document.querySelector('input[data-q="number_of_passengers"]');
+        const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
+        const dateInput = document.querySelector('input[data-q="pickup_date"]');
+        
+        debugInfo.innerHTML = `
+            <strong>Time Picker:</strong><br>
+            - Time input found: ${!!timeInput}<br>
+            - Time input wired: ${timeInput?.dataset.timeSpinnerWired}<br>
+            - Singleton picker exists: ${!!window.__singletonTimePicker}<br>
+            - Time popover element: ${!!document.getElementById('pickup-time-popover')}<br><br>
+            
+            <strong>Passenger Select:</strong><br>
+            - Original input found: ${!!passengerInput}<br>
+            - Passenger select found: ${!!passengerSelect}<br>
+            - Original input wired: ${passengerInput?.dataset.paxSelectWired}<br>
+            - Passenger select object: ${!!window.__passengerSelect}<br><br>
+            
+            <strong>Date Picker:</strong><br>
+            - Date input found: ${!!dateInput}<br>
+            - Date input wired: ${dateInput?.dataset.datePickerWired}<br>
+            - Date picker exists: ${!!window.__pickupDatePicker}<br>
+            - Date popover element: ${!!document.getElementById('pickup-date-popover')}<br><br>
+            
+            <strong>Configuration:</strong><br>
+            - window.CFG: ${JSON.stringify(window.CFG, null, 2)}<br>
+        `;
+    }
+
+    function runTests() {
+        console.log('🧪 Running debug tests...');
+        
+        // Test time picker
+        console.log('Time picker test:', {
+            singleton: !!window.__singletonTimePicker,
+            popover: !!document.getElementById('pickup-time-popover'),
+            input: !!document.querySelector('input[data-q="pickup_time"]')
+        });
+        
+        // Test passenger select
+        console.log('Passenger select test:', {
+            passengerObj: !!window.__passengerSelect,
+            originalInput: !!document.querySelector('input[data-q="number_of_passengers"]'),
+            select: !!document.querySelector('select[data-q="number_of_passengers"]')
+        });
+        
+        // Try to manually trigger time picker
+        const timeInput = document.querySelector('input[data-q="pickup_time"]');
+        if (timeInput && window.__singletonTimePicker) {
+            console.log('🕐 Manually triggering time picker...');
+            window.__singletonTimePicker.openFor(timeInput);
+        }
+        
+        updateDebugInfo();
+    }
+
+    // Update debug info when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(updateDebugInfo, 1000);
+        setTimeout(updateDebugInfo, 3000); // Check again after 3 seconds
+    });
+    </script>
+</body>
+</html>
