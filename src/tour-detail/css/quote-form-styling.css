@@ -126,11 +126,18 @@ select[data-q],
 
 /* Baseline placeholder styling for all form fields */
 input[data-q]::placeholder,
-select[data-q]::placeholder {
+select[data-q]::placeholder,
+input[data-q]::-webkit-input-placeholder,
+select[data-q]::-webkit-input-placeholder,
+input[data-q]::-moz-placeholder,
+select[data-q]::-moz-placeholder,
+input[data-q]:-ms-input-placeholder,
+select[data-q]:-ms-input-placeholder {
     font-size: 20px !important;
     color: #8C8C8C !important;
     transform: none !important;
     transition: none !important;
+    opacity: 1 !important;
 }
 
 input[data-q]:focus::placeholder,
@@ -138,11 +145,24 @@ input[data-q].input-error::placeholder,
 input[data-q][aria-invalid='true']::placeholder,
 select[data-q]:focus::placeholder,
 select[data-q].input-error::placeholder,
-select[data-q][aria-invalid='true']::placeholder {
+select[data-q][aria-invalid='true']::placeholder,
+input[data-q]:focus::-webkit-input-placeholder,
+input[data-q].input-error::-webkit-input-placeholder,
+input[data-q][aria-invalid='true']::-webkit-input-placeholder,
+select[data-q]:focus::-webkit-input-placeholder,
+select[data-q].input-error::-webkit-input-placeholder,
+select[data-q][aria-invalid='true']::-webkit-input-placeholder,
+input[data-q]:focus::-moz-placeholder,
+input[data-q].input-error::-moz-placeholder,
+input[data-q][aria-invalid='true']::-moz-placeholder,
+select[data-q]:focus::-moz-placeholder,
+select[data-q].input-error::-moz-placeholder,
+select[data-q][aria-invalid='true']::-moz-placeholder {
     font-size: 20px !important;
     color: #8C8C8C !important;
     transform: none !important;
     transition: none !important;
+    opacity: 1 !important;
 }
 
 /* Passenger select hover/focus states */
@@ -163,6 +183,18 @@ select[data-q='number_of_passengers']:active {
 select[data-q='number_of_passengers']:invalid,
 select[data-q='number_of_passengers'][value=""] {
     color: #8C8C8C !important;
+}
+
+/* Force placeholder color override for all form fields */
+.icon-field-wrapper input[data-q]::placeholder,
+.icon-field-wrapper select[data-q]::placeholder,
+.form-field-wrapper input[data-q]::placeholder,
+.form-field-wrapper select[data-q]::placeholder,
+.hl-app input[data-q]::placeholder,
+.hl-app select[data-q]::placeholder,
+.hl-app .form-control::placeholder {
+    color: #8C8C8C !important;
+    opacity: 1 !important;
 }
 
 /* ---------- Validation Styles ---------- */
