@@ -93,6 +93,7 @@ input[data-q='pickup_time'],
 input[data-q='pickup_date'],
 input[data-q='number_of_passengers'],
 select[data-q='number_of_passengers'] {
+    --placeholder-color: #8C8C8C;
     display: inline-block !important;
     width: 100% !important;
     min-width: 200px !important;
@@ -134,7 +135,7 @@ select[data-q]::-moz-placeholder,
 input[data-q]:-ms-input-placeholder,
 select[data-q]:-ms-input-placeholder {
     font-size: 20px !important;
-    color: #8C8C8C !important;
+    color: var(--placeholder-color, #8C8C8C) !important;
     transform: none !important;
     transition: none !important;
     opacity: 1 !important;
@@ -195,6 +196,20 @@ select[data-q='number_of_passengers'][value=""] {
 .hl-app .form-control::placeholder {
     color: #8C8C8C !important;
     opacity: 1 !important;
+}
+
+/* Ultra-specific override for passenger select placeholder */
+.ghl-question .fields-container .form-field-wrapper .icon-field-wrapper select[data-q='number_of_passengers']::placeholder,
+.ghl-question .fields-container .form-field-wrapper .icon-field-wrapper select[data-q='number_of_passengers']::-webkit-input-placeholder,
+.ghl-question .fields-container .form-field-wrapper .icon-field-wrapper select[data-q='number_of_passengers']::-moz-placeholder,
+.ghl-question .fields-container .form-field-wrapper .icon-field-wrapper select[data-q='number_of_passengers']:-ms-input-placeholder,
+.ghl-app .ghl-question .form-field-wrapper select[data-q='number_of_passengers']::placeholder,
+.hl-app .form-control[data-q='number_of_passengers']::placeholder,
+body .hl-app select[data-q='number_of_passengers']::placeholder,
+html body .hl-app .form-control[data-q='number_of_passengers']::placeholder {
+    color: #8C8C8C !important;
+    opacity: 1 !important;
+    font-size: 20px !important;
 }
 
 /* ---------- Validation Styles ---------- */
