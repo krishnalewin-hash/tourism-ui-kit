@@ -193,30 +193,6 @@ select[data-q='number_of_passengers'][value=""] {
     animation: bf-shake 400ms ease-in-out;
 }
 
-/* Equalize border radius for step-1 inputs */
-.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],
-.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],
-.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],
-.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],
-.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],
-input[data-q='pickup_location'],
-input[data-q='drop-off_location'],
-input[data-q='pickup_date'],
-input[data-q='pickup_time'],
-input[data-q='number_of_passengers'],
-input[data-q='pickup_location'][aria-invalid='true'],
-input[data-q='drop-off_location'][aria-invalid='true'],
-input[data-q='pickup_date'][aria-invalid='true'],
-input[data-q='pickup_time'][aria-invalid='true'],
-input[data-q='number_of_passengers'][aria-invalid='true'],
-input[data-q='pickup_location'].input-error,
-input[data-q='drop-off_location'].input-error,
-input[data-q='pickup_date'].input-error,
-input[data-q='pickup_time'].input-error,
-input[data-q='number_of_passengers'].input-error {
-    border-radius: 4px !important;
-}
-
 /* ---------- Animation Styles ---------- */
 .bf-fade-anim {
     transition: opacity 220ms ease, transform 220ms ease;
