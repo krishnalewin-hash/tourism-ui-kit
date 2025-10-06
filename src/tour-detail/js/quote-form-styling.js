@@ -733,6 +733,7 @@ const CONFIG = {
         color: #222 !important;
         border-radius: 4px !important;
         font-family: 'Poppins', sans-serif !important;
+        font-size: 16px !important;
       `;
 
       // Placeholder styling

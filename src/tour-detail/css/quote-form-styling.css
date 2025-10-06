@@ -105,6 +105,9 @@ select[data-q='number_of_passengers'] {
     min-height: 56px !important;
     height: auto !important;
     color: #222 !important;
+    border-radius: 4px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 16px !important;
 }
 
 /* Unified text color across all data-q inputs/selects */
@@ -113,6 +116,25 @@ select[data-q],
 .icon-field-wrapper input, 
 .icon-field-wrapper select {
     color: #222 !important;
+}
+
+/* Baseline placeholder styling for all form fields */
+input[data-q]::placeholder,
+select[data-q]::placeholder {
+    font-size: 20px !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+input[data-q]:focus::placeholder,
+input[data-q].input-error::placeholder,
+input[data-q][aria-invalid='true']::placeholder,
+select[data-q]:focus::placeholder,
+select[data-q].input-error::placeholder,
+select[data-q][aria-invalid='true']::placeholder {
+    font-size: 20px !important;
+    transform: none !important;
+    transition: none !important;
 }
 
 /* Passenger select specific styling */
