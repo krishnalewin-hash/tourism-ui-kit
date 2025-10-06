@@ -85,6 +85,26 @@
     display: none !important;
 }
 
+/* Default hide drop-off location to prevent flash - will be shown by JavaScript when needed */
+.icon-field-wrapper:has(input[data-q='drop-off_location']),
+.form-field-wrapper:has(input[data-q='drop-off_location']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location']) {
+    display: none !important;
+}
+
+/* Override: Show drop-off when explicitly visible */
+.icon-field-wrapper:has(input[data-q='drop-off_location'][style*='display: block']),
+.icon-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline']),
+.icon-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline-block']),
+.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: block']),
+.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline']),
+.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline-block']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: block']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: inline-block']) {
+    display: block !important;
+}
+
 /* ---------- Baseline Field Styling ---------- */
 input[data-q],
 input[data-q='pickup_location'],
