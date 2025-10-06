@@ -717,11 +717,8 @@ const CONFIG = {
         sel.value = cur;
       }
 
-      // Apply minimal styling (let CSS handle most styling)
-      sel.style.cssText = `
-        cursor: pointer !important;
-      `;
-
+      // Let CSS handle all styling
+      
       sel.addEventListener('change', () => {
         sel.setAttribute('value', sel.value);
         sel.dispatchEvent(new Event('input', { bubbles: true }));

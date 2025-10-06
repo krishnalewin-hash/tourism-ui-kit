@@ -110,6 +110,11 @@ select[data-q='number_of_passengers'] {
     font-size: 16px !important;
 }
 
+/* Select elements get pointer cursor */
+select[data-q='number_of_passengers'] {
+    cursor: pointer !important;
+}
+
 /* Unified text color across all data-q inputs/selects */
 input[data-q], 
 select[data-q], 
@@ -135,13 +140,6 @@ select[data-q][aria-invalid='true']::placeholder {
     font-size: 20px !important;
     transform: none !important;
     transition: none !important;
-}
-
-/* Passenger select specific styling */
-select[data-q='number_of_passengers'] {
-    border-radius: 4px !important;
-    font-family: 'Poppins', sans-serif !important;
-    cursor: pointer;
 }
 
 /* Passenger select hover/focus states */
