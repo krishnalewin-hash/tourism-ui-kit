@@ -117,7 +117,7 @@ input[data-q],
 select[data-q], 
 .icon-field-wrapper input, 
 .icon-field-wrapper select {
-    color: #222 !important;
+    color: #8C8C8C !important;
 }
 
 /* Baseline placeholder styling for all form fields */
@@ -372,6 +372,21 @@ select[data-q='number_of_passengers'][value=""] {
 /* ---------- Booking Form Base Styles ---------- */
 body, button, textarea {
     font-family: 'Poppins', sans-serif !important;
+}
+
+/* Override HighLevel form control styling */
+.hl-app .form-control {
+    font-size: 20px !important;
+    font-family: 'Poppins', sans-serif !important;
+    border-radius: 10px !important;
+}
+
+.hl-app .form-control::placeholder,
+.hl-app .form-control::-webkit-input-placeholder,
+.hl-app .form-control::-moz-placeholder,
+.hl-app .form-control:-ms-input-placeholder {
+    color: #8C8C8C !important;
+    opacity: 1 !important;
 }
 
 /* ---------- Google Places Autocomplete Styling ---------- */
