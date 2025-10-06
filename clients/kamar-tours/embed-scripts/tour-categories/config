@@ -7,10 +7,10 @@
 window.CFG = {
   DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
   CLIENT: 'kamar-tours',
-  FILTER: { mode: 'type', value: 'Carnival & Cultural Events' },
+  FILTER: { mode: 'type', value: 'ATV, Adventure' },  // Updated to actual category
   LIST_SELECTOR: '#tour-list'
 };
 </script>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tour-category-cards@v1.0.0/cards.css">
-<script defer src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tour-category-cards@v1.0.0/cards.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-category/css/cards.css">
+<script defer src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-category/js/cards.js"></script>
