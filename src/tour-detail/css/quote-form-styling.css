@@ -58,10 +58,30 @@
     display: none !important;
 }
 
+/* Hide form field wrapper when pickup location is hidden */
+.form-field-wrapper:has(input[data-q='pickup_location'][type='hidden']),
+.form-field-wrapper:has(input[data-q='pickup_location'][style*='display: none']),
+.form-field-wrapper:has(input[data-q='pickup_location'][style*='display:none']),
+.col-12.form-field-wrapper:has(input[data-q='pickup_location'][type='hidden']),
+.col-12.form-field-wrapper:has(input[data-q='pickup_location'][style*='display: none']),
+.col-12.form-field-wrapper:has(input[data-q='pickup_location'][style*='display:none']) {
+    display: none !important;
+}
+
 /* Hide icon wrapper when drop-off is hidden */
 .icon-field-wrapper:has(input[data-q='drop-off_location'][type='hidden']),
 .icon-field-wrapper:has(input[data-q='drop-off_location'][style*='display: none']),
 .icon-field-wrapper:has(input[data-q='drop-off_location'][style*='display:none']) {
+    display: none !important;
+}
+
+/* Hide form field wrapper when drop-off location is hidden */
+.form-field-wrapper:has(input[data-q='drop-off_location'][type='hidden']),
+.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: none']),
+.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display:none']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][type='hidden']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display: none']),
+.col-12.form-field-wrapper:has(input[data-q='drop-off_location'][style*='display:none']) {
     display: none !important;
 }
 
