@@ -19,8 +19,8 @@
       return window.CFG;
     }
 
-    const client = window.CFG?.client || 'tour-driver';
-    const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+    const client = window.CFG?.CLIENT || 'tour-driver';
+    const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
     
     try {
       console.log(`[BookingForm] Loading config for client: ${client}`);
@@ -58,7 +58,7 @@
     // Fallback to defaults
     window.CFG = window.CFG || {};
     if (!window.CFG.GMAPS_KEY) {
-      window.CFG.GMAPS_KEY = 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA'; // Demo fallback
+      window.CFG.GMAPS_KEY = 'AIzaSyBdVl-cGl0fhXhhD_x5RCJxWQQyzVF0z8g'; // Demo fallback
       console.warn('[BookingForm] Using fallback API key');
     }
     

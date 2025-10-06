@@ -12,8 +12,8 @@ class FormEnhancer {
     
     try {
       // Load client configuration
-      const client = window.CFG?.client || 'tour-driver';
-      const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+      const client = window.CFG?.CLIENT || 'tour-driver';
+      const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
       
       const configResponse = await fetch(`https://cdn.jsdelivr.net/gh/${base}/clients/${client}.json`);
       this.config = await configResponse.json();
@@ -200,7 +200,7 @@ class FormEnhancer {
       const saved = JSON.parse(sessionStorage.getItem('transfer:last') || '{}');
       saved[fieldName] = value;
       saved.timestamp = Date.now();
-      saved.client = window.CFG?.client || 'tour-driver';
+      saved.client = window.CFG?.CLIENT || 'tour-driver';
       sessionStorage.setItem('transfer:last', JSON.stringify(saved));
     } catch (error) {
       console.warn('Failed to save form data:', error);

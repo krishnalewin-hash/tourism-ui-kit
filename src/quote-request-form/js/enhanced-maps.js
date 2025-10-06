@@ -29,7 +29,7 @@ function loadGoogleMapsWithConfig(callback) {
   // Get API key from config (with fallback)
   const apiKey = window.CFG?.GMAPS_KEY || 
                  (window.BookingForm.CONFIG && window.BookingForm.CONFIG.googleApiKey) ||
-                 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
+                 'AIzaSyBdVl-cGl0fhXhhD_x5RCJxWQQyzVF0z8g';
 
   console.log('[Maps] Loading Google Maps with API key:', apiKey.substring(0, 10) + '...');
 

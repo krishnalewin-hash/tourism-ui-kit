@@ -14,13 +14,13 @@ async function loadClientConfiguration() {
   }
 
   // Determine client from various sources
-  const client = window.CFG?.client || 
-                new URLSearchParams(location.search).get('client') || 
-                sessionStorage.getItem('client') || 
-                'tour-driver';
+    const client = window.CFG?.CLIENT || 
+    new URLSearchParams(location.search).get('client') || 
+    sessionStorage.getItem('client') || 
+    'demo';
 
   // Determine base URL for configs
-  const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+  const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
 
   console.log(`[ConfigLoader] Loading configuration for client: ${client}`);
   console.log(`[ConfigLoader] Base URL: ${base}`);
@@ -104,7 +104,7 @@ async function loadClientConfiguration() {
   
   window.CFG = {
     ...window.CFG,
-    GMAPS_KEY: window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA', // Demo fallback
+    GMAPS_KEY: window.CFG?.GMAPS_KEY || 'AIzaSyBdVl-cGl0fhXhhD_x5RCJxWQQyzVF0z8g', // Demo fallback
     COUNTRIES: window.CFG?.COUNTRIES || ['jm'],
     CURRENCY: window.CFG?.CURRENCY || 'USD',
     PLACES: {

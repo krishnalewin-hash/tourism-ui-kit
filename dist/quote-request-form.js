@@ -104,7 +104,7 @@ async function loadClientConfiguration() {
   
   window.CFG = {
     ...window.CFG,
-    GMAPS_KEY: window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA', // Demo fallback
+    GMAPS_KEY: window.CFG?.GMAPS_KEY || 'AIzaSyBdVl-cGl0fhXhhD_x5RCJxWQQyzVF0z8g', // Demo fallback
     COUNTRIES: window.CFG?.COUNTRIES || ['jm'],
     CURRENCY: window.CFG?.CURRENCY || 'USD',
     PLACES: {
@@ -1767,7 +1767,7 @@ function loadGoogleMaps(callback){
     return;
   }
   
-  const apiKey = window.BookingForm.CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || 'AIzaSyD4gsEcGYTjqAILBU0z3ZNqEwyODGymXjA';
+  const apiKey = window.BookingForm.CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || 'AIzaSyBdVl-cGl0fhXhhD_x5RCJxWQQyzVF0z8g';
   console.log(`[Maps] Loading Google Maps with API key: ${apiKey.substring(0, 10)}...`);
   
   const s = document.createElement('script');

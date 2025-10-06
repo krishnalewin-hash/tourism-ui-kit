@@ -70,11 +70,11 @@ function injectStyles() {
   async function loadClientConfig() {
     try {
       // Determine client from various sources
-  const client = window.CFG?.client || 
-                new URLSearchParams(location.search).get('client') || 
-                sessionStorage.getItem('client') || 
-                'tour-driver';      // Determine base URL for client configs
-      const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+  const client = window.CFG?.CLIENT || 
+    new URLSearchParams(location.search).get('client') || 
+    sessionStorage.getItem('client') || 
+    'demo';      // Determine base URL for client configs
+      const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
       
       console.log(`[quote-calc] Loading client config: ${client}`);
       console.log(`[quote-calc] Base URL: ${base}`);

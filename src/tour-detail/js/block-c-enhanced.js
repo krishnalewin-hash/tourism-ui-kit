@@ -148,7 +148,7 @@
   // ---------- Fetch client catalog as fallback ----------
   async function fetchClientCatalog() {
     try {
-      const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+      const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
       let catalogUrl;
       
       if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
