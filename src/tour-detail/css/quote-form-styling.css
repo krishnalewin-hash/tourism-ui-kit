@@ -91,7 +91,8 @@ input[data-q='pickup_location'],
 input[data-q='drop-off_location'],
 input[data-q='pickup_time'],
 input[data-q='pickup_date'],
-input[data-q='number_of_passengers'] {
+input[data-q='number_of_passengers'],
+select[data-q='number_of_passengers'] {
     display: inline-block !important;
     width: 100% !important;
     min-width: 200px !important;
@@ -110,6 +111,19 @@ select[data-q],
 .icon-field-wrapper input, 
 .icon-field-wrapper select {
     color: #222 !important;
+}
+
+/* Passenger select specific styling */
+select[data-q='number_of_passengers'] {
+    border-radius: 4px !important;
+    font-family: 'Poppins', sans-serif !important;
+    cursor: pointer;
+}
+
+/* Placeholder styling for passenger select */
+select[data-q='number_of_passengers']:invalid,
+select[data-q='number_of_passengers'][value=""] {
+    color: #8C8C8C !important;
 }
 
 /* ---------- Validation Styles ---------- */

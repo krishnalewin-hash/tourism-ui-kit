@@ -1,6 +1,53 @@
+<script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ===== Section 1: Global Configuration
+  /* ===== Section 1: Minimal Inline Styles (baseline field & icon styling)
+    Purpose: Ensure consistent padding, icon positioning, and field box metrics.
+    Safe to remove if your global stylesheet already applies equivalent styles.
+  ===================================================== */
+  // Minimal baseline styles (keep date stable; no layout experiments)
+  (function injectMinimalStyles(){
+    if(document.getElementById('booking-form-minimal-styles')) return;
+  const css = `/* Core icon wrapper + input padding */\n.icon-field-wrapper{position:relative;display:block;width:100%;}\n.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}\n.icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n.icon-field-wrapper > input[data-iconized='1'][data-q],.icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.3rem !important;}\n/* Hide icon wrapper when input is hidden */\n.icon-field-wrapper:has(input[data-q='pickup_location'][type='hidden']),\n.icon-field-wrapper:has(input[data-q='pickup_location'][style*='display: none']),\n.icon-field-wrapper:has(input[data-q='pickup_location'][style*='display:none']) {\n  display: none !important;\n}\n/* Baseline field styling (added for pickup/drop-off/time) */\ninput[data-q],input[data-q='pickup_location'],input[data-q='drop-off_location'],input[data-q='pickup_time']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\ninput[data-q='pickup_date']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\n/* Unified text color across all data-q inputs/selects */\ninput[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}\n/* Larger Google Places Autocomplete dropdown (single-line) */\n.pac-container{font-size:16px !important; line-height:1.35 !important;}\n.pac-item{padding:10px 14px !important; font-size:15px !important;}\n.pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}\n.pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}\n/* Date picker popover */\n#pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}\n#pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}\n#pickup-date-popover button.dp-nav{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}\n#pickup-date-popover button.dp-nav:hover{background:#f2f2f2;}\n#pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}\n#pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}\n#pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}\n#pickup-date-popover .dp-day:hover{background:#eee;}\n#pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}\n#pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}\n#pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}\n`;
+    const s=document.createElement('style'); s.id='booking-form-minimal-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // Inject validation styles (error state + shake + inline message)
+  (function injectValidationStyles(){
+    if(document.getElementById('booking-form-validation-styles')) return;
+  const css = `/* Validation visuals */\n.input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important;}\n/* Wrapper may shake but shouldn't show red border */\n.icon-field-wrapper.input-error{border-radius:6px;}\n.field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}\n@keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}\n.shake{animation:bf-shake 400ms ease-in-out;}\n\n/* Equalize border radius for step-1 inputs (normal + error states) */\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],\ninput[data-q='pickup_location'],\ninput[data-q='drop-off_location'],\ninput[data-q='pickup_date'],\ninput[data-q='pickup_time'],\ninput[data-q='number_of_passengers'],\ninput[data-q='pickup_location'][aria-invalid='true'],\ninput[data-q='drop-off_location'][aria-invalid='true'],\ninput[data-q='pickup_date'][aria-invalid='true'],\ninput[data-q='pickup_time'][aria-invalid='true'],\ninput[data-q='number_of_passengers'][aria-invalid='true'],\ninput[data-q='pickup_location'].input-error,\ninput[data-q='drop-off_location'].input-error,\ninput[data-q='pickup_date'].input-error,\ninput[data-q='pickup_time'].input-error,\ninput[data-q='number_of_passengers'].input-error {\n  border-radius: 4px !important;\n}\n`;
+    const s=document.createElement('style'); s.id='booking-form-validation-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // Inject fade styles for step transition (out/in)
+  (function injectFadeStyles(){
+    if(document.getElementById('booking-form-fade-styles')) return;
+    const css = `.bf-fade-anim{transition:opacity 220ms ease, transform 220ms ease; will-change: opacity, transform;}\n.bf-fade-out{opacity:0 !important; transform: translateY(-4px);}\n.bf-fade-in-init{opacity:0; transform: translateY(6px);}\n`;
+    const s=document.createElement('style'); s.id='booking-form-fade-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // Ensure icon is positioned relative to the input row, not the wrapper (so messages below don't shift it)
+  (function injectIconRowStyles(){
+    if(document.getElementById('booking-form-iconrow-styles')) return;
+  const css = `.icon-field-wrapper .icon-input-row{position:relative;}\n.icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q], .icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q]{padding-left:2.3rem !important;}`;
+    const s=document.createElement('style'); s.id='booking-form-iconrow-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // Mobile NEXT button label styles (adds text next to arrow on small screens only)
+  (function injectNextMobileStyles(){
+    if(document.getElementById('booking-form-next-mobile-styles')) return;
+  const css = `.ghl-btn.ghl-footer-next.bf-next{display:inline-flex;align-items:center;gap:8px;font-size:20px;white-space:nowrap;overflow:visible;}\n.ghl-btn.ghl-footer-next .bf-next-label{display:none !important;font-weight:500;font-size:20px;letter-spacing:.5px;}\n@media (max-width: 768px){\n  .ghl-btn.ghl-footer-next.bf-next{width:auto !important;min-width:unset !important;padding-left:14px !important;padding-right:14px !important;}\n  .ghl-btn.ghl-footer-next .bf-next-label{display:inline-block !important;}\n}\n`;
+    const s=document.createElement('style'); s.id='booking-form-next-mobile-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // Submit CTA styles: text + animated white arrow
+  (function injectSubmitCtaStyles(){
+    if(document.getElementById('booking-form-cta-styles')) return;
+    const css = `.ghl-btn.ghl-submit-btn.bf-cta{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;}\n.ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text{display:inline-block;}\n.ghl-btn.ghl-submit-btn.bf-cta .bf-arrow{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;transition:transform 220ms ease;will-change:transform;}\n.ghl-btn.ghl-submit-btn.bf-cta .bf-arrow svg{width:18px;height:18px;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n.ghl-btn.ghl-submit-btn.bf-cta:hover .bf-arrow, .ghl-btn.ghl-submit-btn.bf-cta:focus-visible .bf-arrow{transform:translateX(5px);}\n`;
+    const s=document.createElement('style'); s.id='booking-form-cta-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
+  /* ===== Section 2: Global Configuration
     Purpose: Centralized settings for API key, country restriction, time picker window, timeouts.
     Remove or trim properties only if the dependent feature (see comments) is removed.
   
@@ -671,146 +718,6 @@ const CONFIG = {
 
   // (Passenger number input left as native default; custom helpers removed by request)
 
-  /* ===== Section 6.5: Passenger Count Select (1–15, then 16+)
-    Purpose: Replace number_of_passengers input with a proper dropdown select
-    Remove if native number input is preferred
-  ===================================================== */
-  (function initPassengerSelect(){
-    if (window.__passengerSelect) return;
-
-    // Build a <select> to replace the input[data-q="number_of_passengers"]
-    function buildSelectFromInput(input){
-      const sel = document.createElement('select');
-
-      // carry core attributes so styling/validation behave the same
-      sel.name = input.name || 'number_of_passengers';
-      sel.setAttribute('data-q', 'number_of_passengers');
-      if (input.id) sel.id = input.id;
-      if (input.required) sel.required = true;
-      sel.className = input.className; // inherit any theme classes
-
-      // --- Placeholder (pulled from the original input, same source as other fields) ---
-      const phText = input.getAttribute('placeholder') || 'Number of Passengers';
-      const ph = document.createElement('option');
-      ph.value = '';
-      ph.textContent = phText;
-      ph.disabled = true;
-      ph.selected = true;
-      ph.hidden = true;
-      sel.appendChild(ph);
-
-      // --- 1..15 then 16+ ---
-      for (let i = 1; i <= 15; i++){
-        const opt = document.createElement('option');
-        opt.value = String(i);
-        opt.textContent = String(i);
-        sel.appendChild(opt);
-      }
-      const big = document.createElement('option');
-      big.value = '16+';
-      big.textContent = '16+';
-      sel.appendChild(big);
-
-      // Preserve an existing value if one was already set on the input
-      const cur = (input.value || '').trim();
-      if ((/^\d+$/.test(cur) && +cur >= 1 && +cur <= 15) || cur === '16+') {
-        sel.value = cur;
-      }
-
-      // Apply basic styling to match other inputs
-      sel.style.cssText = `
-        display: inline-block !important;
-        width: 100% !important;
-        min-width: 200px !important;
-        padding: 10px 18px 10px 2.25rem !important;
-        border: 1px solid #ccc !important;
-        background: #fff !important;
-        line-height: 1.4 !important;
-        box-sizing: border-box !important;
-        min-height: 40px !important;
-        color: #222 !important;
-        border-radius: 4px !important;
-        font-family: 'Poppins', sans-serif !important;
-      `;
-
-      // Placeholder styling
-      if (!sel.value) {
-        sel.style.color = '#8C8C8C !important';
-      }
-      
-      sel.addEventListener('change', () => {
-        sel.setAttribute('value', sel.value);
-        if (sel.value) {
-          sel.style.color = '#222 !important';
-        } else {
-          sel.style.color = '#8C8C8C !important';
-        }
-        sel.dispatchEvent(new Event('input', { bubbles: true }));
-      });
-
-      return sel;
-    }
-
-    function attachPassengerSelect(rootDoc){
-      const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
-      // If the select already exists, bail
-      const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
-      if (!input || selAlready) return;
-      if (input.dataset.paxSelectWired === '1') return;
-
-      // Build the select element
-      const selectEl = buildSelectFromInput(input);
-      
-      // Hide the original input but keep it for form submission
-      input.style.display = 'none';
-      input.style.visibility = 'hidden';
-      input.style.position = 'absolute';
-      input.style.left = '-9999px';
-      
-      // Insert select after the hidden input (don't replace it)
-      input.parentNode.insertBefore(selectEl, input.nextSibling);
-      
-      // Sync select changes back to the hidden input for form submission
-      selectEl.addEventListener('change', () => {
-        input.value = selectEl.value;
-        selectEl.setAttribute('value', selectEl.value);
-        
-        // Trigger change event on hidden input
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        selectEl.dispatchEvent(new Event('input', { bubbles: true }));
-      });
-      
-      // Sync input changes back to the select (for URL parameter population)
-      input.addEventListener('change', () => {
-        if (input.value && input.value !== selectEl.value) {
-          selectEl.value = input.value;
-          selectEl.setAttribute('value', selectEl.value);
-          if (selectEl.value) {
-            selectEl.style.color = '#222 !important';
-          } else {
-            selectEl.style.color = '#8C8C8C !important';
-          }
-        }
-      });
-      
-      // Also sync any initial value from input to select
-      if (input.value) {
-        selectEl.value = input.value;
-        selectEl.style.color = '#222 !important';
-      }
-      
-      selectEl.dataset.paxSelectWired = '1';
-      input.dataset.paxSelectWired = '1';
-    }
-
-    window.__passengerSelect = { attach: attachPassengerSelect };
-
-    // initial attach
-    try { attachPassengerSelect(document); } catch(_) {}
-  })();
-
   /* ===== Section 6: Autocomplete + Airport Code Normalization
     Purpose: Adds Google Places Autocomplete to pickup/drop-off fields; appends airport codes for clarity.
     Remove if free-text entry is acceptable. Also remove Section 10 airport data & prioritizer.
@@ -1152,20 +1059,10 @@ autofillHiddenDropOff(document);
   enhanceSubmitButton(document);
   applyPrefillBasic(document);
   
-  // Initialize passenger select dropdown
-  if (window.__passengerSelect && window.__passengerSelect.attach) {
-    window.__passengerSelect.attach(document);
-  }
-  
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
   // Secondary run to catch late-rendered inputs
-  setTimeout(()=>{
-    enhanceVisual(document);
-    if (window.__passengerSelect && window.__passengerSelect.attach) {
-      window.__passengerSelect.attach(document);
-    }
-  },400);
+  setTimeout(()=>enhanceVisual(document),400);
   
   /* ===== Section 9: Dynamic Field Observer (MutationObserver)
    Purpose: Detects new/re-rendered inputs (GHL dynamic forms) and re-applies enhancements.
@@ -1216,15 +1113,6 @@ autofillHiddenDropOff(document);
             if(q === 'pickup_date'){
               try { attachPickupDateGuard(document); } catch(_) {}
               try { window.__pickupDatePicker?.attach(document); } catch(_) {}
-            }
-
-            // Late passenger field: dropdown select
-            if(q === 'number_of_passengers'){
-              try { 
-                if (window.__passengerSelect && window.__passengerSelect.attach) {
-                  window.__passengerSelect.attach(document);
-                }
-              } catch(_) {}
             }
           }
         });
@@ -1381,3 +1269,4 @@ autofillHiddenDropOff(document);
     };
   });
 });
+</script>
