@@ -26,7 +26,8 @@ const CONFIG = {
 (function autoLoadClientConfig() {
   if (window.CFG?.CLIENT && !window.CFG.GMAPS_KEY) {
     const client = window.CFG.CLIENT;
-    const configUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/clients/_build/${client}.json`;
+    const base = window.CFG.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
+    const configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
     
     fetch(configUrl)
       .then(response => response.json())
