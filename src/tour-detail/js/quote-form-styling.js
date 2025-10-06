@@ -717,37 +717,13 @@ const CONFIG = {
         sel.value = cur;
       }
 
-      // Apply basic styling to match other inputs (based on styles.js reference)
+      // Apply minimal styling (let CSS handle most styling)
       sel.style.cssText = `
-        display: inline-block !important;
-        width: 100% !important;
-        min-width: 200px !important;
-        padding: 10px 18px 10px 2.25rem !important;
-        border: 2px solid #DDDDDDFF !important;
-        box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
-        background: #fff !important;
-        line-height: 1.4 !important;
-        box-sizing: border-box !important;
-        min-height: 56px !important;
-        height: auto !important;
-        color: #222 !important;
-        border-radius: 4px !important;
-        font-family: 'Poppins', sans-serif !important;
-        font-size: 16px !important;
+        cursor: pointer !important;
       `;
 
-      // Placeholder styling
-      if (!sel.value) {
-        sel.style.color = '#8C8C8C !important';
-      }
-      
       sel.addEventListener('change', () => {
         sel.setAttribute('value', sel.value);
-        if (sel.value) {
-          sel.style.color = '#222 !important';
-        } else {
-          sel.style.color = '#8C8C8C !important';
-        }
         sel.dispatchEvent(new Event('input', { bubbles: true }));
       });
 
@@ -790,18 +766,12 @@ const CONFIG = {
         if (input.value && input.value !== selectEl.value) {
           selectEl.value = input.value;
           selectEl.setAttribute('value', selectEl.value);
-          if (selectEl.value) {
-            selectEl.style.color = '#222 !important';
-          } else {
-            selectEl.style.color = '#8C8C8C !important';
-          }
         }
       });
       
       // Also sync any initial value from input to select
       if (input.value) {
         selectEl.value = input.value;
-        selectEl.style.color = '#222 !important';
       }
       
       selectEl.dataset.paxSelectWired = '1';
