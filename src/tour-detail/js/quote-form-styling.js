@@ -717,17 +717,19 @@ const CONFIG = {
         sel.value = cur;
       }
 
-      // Apply basic styling to match other inputs
+      // Apply basic styling to match other inputs (based on styles.js reference)
       sel.style.cssText = `
         display: inline-block !important;
         width: 100% !important;
         min-width: 200px !important;
         padding: 10px 18px 10px 2.25rem !important;
-        border: 1px solid #ccc !important;
+        border: 2px solid #DDDDDDFF !important;
+        box-shadow: 1px 1px 9px 0px #DCDCDCFF !important;
         background: #fff !important;
         line-height: 1.4 !important;
         box-sizing: border-box !important;
-        min-height: 40px !important;
+        min-height: 56px !important;
+        height: auto !important;
         color: #222 !important;
         border-radius: 4px !important;
         font-family: 'Poppins', sans-serif !important;
