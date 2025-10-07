@@ -141,8 +141,18 @@ function initStepOneValidation() {
             }
             // Ensure CTA is applied on step 2
             try { 
+              // Try multiple ways to access enhanceSubmitButton
               if (window.QuoteFormConfig?.enhanceSubmitButton) {
                 window.QuoteFormConfig.enhanceSubmitButton(document); 
+              } else if (typeof enhanceSubmitButton === 'function') {
+                enhanceSubmitButton(document);
+              } else {
+                // Last resort: try to find and call it later
+                setTimeout(() => {
+                  if (window.QuoteFormConfig?.enhanceSubmitButton) {
+                    window.QuoteFormConfig.enhanceSubmitButton(document);
+                  }
+                }, 100);
               }
             } catch(_) {}
           }
