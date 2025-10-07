@@ -6,6 +6,7 @@
       .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
         position: sticky !important;
         top: 24px;
+        align-self: flex-start !important;
       }
     `;
     document.head.appendChild(style);
@@ -15,7 +16,7 @@
     const rows = rootDoc.querySelectorAll('.icon-input-row');
     rows.forEach(row => {
       // Find all inputs/selects in the row
-      const fields = row.querySelectorAll('input[data-q], select[data-q]');
+  const fields = row.querySelectorAll('input[data-q], select[data-q]');
       fields.forEach(field => {
         let sibling = field.nextSibling;
         while (sibling) {
