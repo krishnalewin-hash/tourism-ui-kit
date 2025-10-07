@@ -1156,10 +1156,14 @@ function enhanceVisual(rootDoc){
       // Ensure attributes match latest key
       if(key) span.setAttribute('data-for', key);
     }
-    // Remove any trailing icon after the input/select
-    const nextSibling = el.nextSibling;
-    if(nextSibling && nextSibling.classList && nextSibling.classList.contains('field-icon')) {
-      nextSibling.remove();
+    // Remove any trailing .field-icon after the input/select (not just immediate sibling)
+    let sibling = el.nextSibling;
+    while (sibling) {
+      if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
+        sibling.remove();
+        // Do not break; remove all trailing icons
+      }
+      sibling = sibling.nextSibling;
     }
     el.dataset.iconized='1';
   }
