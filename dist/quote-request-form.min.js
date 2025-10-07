@@ -1,3 +1,22 @@
+  // Cleanup trailing icons after enhancement
+  function cleanupTrailingIcons() {
+    const rows = rootDoc.querySelectorAll('.icon-input-row');
+    rows.forEach(row => {
+      // Find all inputs/selects in the row
+      const fields = row.querySelectorAll('input[data-q], select[data-q]');
+      fields.forEach(field => {
+        let sibling = field.nextSibling;
+        while (sibling) {
+          if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
+            sibling.remove();
+          }
+          sibling = sibling.nextSibling;
+        }
+      });
+    });
+  }
+  // Run cleanup after enhancement
+  setTimeout(cleanupTrailingIcons, 0);
 // Async Client Configuration Loader
 // This module handles loading client-specific configurations before initializing the form
 
