@@ -5,9 +5,6 @@
 
 import { CONFIG } from './config.js';
 
-// Maps-dependent variables
-let jmBounds, AIRPORT_CODES, airportBounds;
-
 function normalizeSafely(el, obs) {
   if (obs) obs.disconnect();
   el.classList.remove('pac-target-input','disabled','is-disabled');
@@ -20,6 +17,11 @@ function normalizeSafely(el, obs) {
 
 function wireAutocomplete(rootDoc) {
   if(!window.google?.maps?.places) return;
+  
+  // Use globally set maps data from maps-initialization module
+  const jmBounds = window.jmBounds;
+  const AIRPORT_CODES = window.AIRPORT_CODES || {};
+  const airportBounds = window.airportBounds;
   
   const sels=['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
   for(const sel of sels) {
@@ -96,117 +98,6 @@ function wireAutocomplete(rootDoc) {
   }  
 }
 
-function initializeMapsData() {
-  const wantsJM =
-    (Array.isArray(CONFIG.countries) && CONFIG.countries.includes('jm')) ||
-    (CONFIG.region?.toLowerCase?.() === 'jm');
-    
-  if (wantsJM) {
-    // Jamaica bounds (broad) + airport specifics
-    jmBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(17.5, -78.8),
-      new google.maps.LatLng(18.8, -76.0)
-    );
-    const AIRPORTS = [
-      { name: 'Sangster International Airport', lat: 18.5037, lng: -77.9130 },
-      { name: 'Norman Manley International Airport', lat: 17.9371, lng: -76.7775 },
-      { name: 'Ian Fleming International Airport', lat: 18.4042, lng: -76.9697 },
-      { name: 'Negril Aerodrome', lat: 18.3416, lng: -78.3390 },
-      { name: 'Tinson Pen Aerodrome', lat: 17.9910, lng: -76.8180 }
-    ];
-    AIRPORT_CODES = {
-      'Sangster International Airport': 'MBJ',
-      'Norman Manley International Airport': 'KIN',
-      'Ian Fleming International Airport': 'OCJ',
-      'Negril Aerodrome': 'NEG',
-      'Tinson Pen Aerodrome': 'KTP'
-    };
-    airportBounds = function () {
-      const b = new google.maps.LatLngBounds();
-      AIRPORTS.forEach(a => b.extend(new google.maps.LatLng(a.lat, a.lng)));
-      return b;
-    };
-  } else {
-    jmBounds = null;
-    AIRPORT_CODES = {};
-    airportBounds = undefined;
-  }
-}
-
-function installPredictionFilterAndPriority() {
-  if (window.__pacFilterObserver) return;
-
-  const airportKeywords = ['airport','international airport','mbj','kin','ocj','neg','ktp','terminal','sangster','norman manley','ian fleming','negril aerodrome','tinson pen'];
-  const hotelKeywords   = ['hotel','resort','inn','villa','guest house','guesthouse','lodgings','spa','apartments','suite','suites','bnb','bed & breakfast','bed and breakfast','all-inclusive','marriott','hilton','hyatt','riu','sandals','iberostar','half moon','secrets','royalton'];
-
-  function score(text) {
-    const t = text.toLowerCase();
-    if (airportKeywords.some(k => t.includes(k))) return 3;
-    if (hotelKeywords.some(k => t.includes(k)))   return 2;
-    return 1; // addresses (with numbers) fall here; still allowed
-  }
-
-  // allow only: addresses (has a number) OR airport/hotel keywords
-  function isSpecificEnough(text) {
-    const t = text.toLowerCase();
-    const hasNumber = /\d/.test(t);
-    const isAirport = airportKeywords.some(k => t.includes(k));
-    const isHotel   = hotelKeywords.some(k => t.includes(k));
-    return hasNumber || isAirport || isHotel;
-  }
-
-  function process(container) {
-    const items = [...container.querySelectorAll('.pac-item')];
-    if (!items.length) return;
-
-    items.forEach(el => {
-      const txt = (el.textContent || '').trim();
-      if (!isSpecificEnough(txt)) el.remove(); // drop "Montego Bay"-type areas
-    });
-
-    const left = [...container.querySelectorAll('.pac-item')];
-    if (left.length < 2) return;
-
-    const scored = left.map((el, i) => ({ el, i, s: score(el.textContent || '') }));
-    const sorted = scored.sort((a, b) => (b.s - a.s) || (a.i - b.i));
-
-    let changed = false;
-    for (let i = 0; i < sorted.length; i++) {
-      if (sorted[i].el !== left[i]) { 
-        changed = true; 
-        break; 
-      }
-    }
-    if (!changed) return;
-
-    const frag = document.createDocumentFragment();
-    sorted.forEach(s => frag.appendChild(s.el));
-    container.appendChild(frag);
-  }
-
-  function attach() {
-    const hook = () => {
-      const containers = document.querySelectorAll('.pac-container');
-      if (!containers.length) { 
-        setTimeout(hook, 250); 
-        return; 
-      }
-
-      containers.forEach(c => {
-        if (c.dataset.pacWatched === '1') return;   // avoid duplicate observers
-        const obs = new MutationObserver(() => process(c));
-        obs.observe(c, { childList: true, subtree: true });
-        c.dataset.pacWatched = '1';
-      });
-
-      window.__pacFilterObserver = true;
-    };
-    hook();
-  }
-
-  attach();
-}
-
 function initAutocomplete(callback) {
   if (!window.google?.maps?.places) {
     console.warn('[Autocomplete] Google Maps not loaded');
@@ -215,26 +106,9 @@ function initAutocomplete(callback) {
   
   console.log('[Autocomplete] Initializing autocomplete system...');
   
-  // Initialize maps data
-  initializeMapsData();
-  
+  // Maps data is initialized by maps-initialization module
   // Wire autocomplete for existing fields
   wireAutocomplete(document);
-  
-  // Retry wiring in case inputs mount after maps load (GHL async rendering)
-  const start = Date.now();
-  const interval = setInterval(() => {
-    try { wireAutocomplete(document); } catch(_) {}
-    const allWired = ['pickup_location','drop-off_location'].every(q => 
-      document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired === '1'
-    );
-    if(allWired || Date.now() - start > 12000) { 
-      clearInterval(interval); 
-    }
-  }, 450);
-  
-  // Install prediction prioritizer
-  installPredictionFilterAndPriority();
   
   console.log('[Autocomplete] Autocomplete system initialized');
   
@@ -245,5 +119,8 @@ function initAutocomplete(callback) {
 window.QuoteFormConfig = window.QuoteFormConfig || {};
 window.QuoteFormConfig.initAutocomplete = initAutocomplete;
 window.QuoteFormConfig.wireAutocomplete = wireAutocomplete;
+
+// CRITICAL: Expose wireAutocomplete globally for maps initialization module
+window.wireAutocomplete = wireAutocomplete;
 
 export { initAutocomplete, wireAutocomplete };

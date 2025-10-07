@@ -7,6 +7,7 @@
 // Import all modules
 import { CONFIG } from './config.js';
 import { loadGoogleMaps } from './maps-loader.js';
+import { initializeMapsFeatures } from './maps-initialization.js';
 import { attachPickupDateGuard } from './date-guard.js';
 import { attachPickupTimePicker } from './time-picker.js';
 import { initDatePicker } from './date-picker.js';
@@ -71,13 +72,19 @@ function initializeQuoteFormStyling() {
       }
     }, 400);
     
-    // Google Maps integration - AFTER DOM setup
+    // Google Maps integration - AFTER DOM setup (EXACT Section 10 from original)
     loadGoogleMaps(() => {
       console.log('[QuoteFormStyle] Google Maps loaded, initializing location features...');
       try {
+        // Use the complete maps initialization from Section 10
+        initializeMapsFeatures();
+        
+        // Initialize basic autocomplete (now lightweight)
         initAutocomplete();
+        
         // Re-run prefill for Maps-based features (matches original applyPrefillMaps)
         initPrefill(document);
+        
         console.log('[QuoteFormStyle] Maps-dependent features initialized');
       } catch (error) {
         console.warn('[QuoteFormStyle] Maps integration error:', error);
