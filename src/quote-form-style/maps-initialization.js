@@ -135,36 +135,6 @@ function installPredictionFilterAndPriority() {
   console.log('[MapsInit] Prediction filter and prioritizer installed');
 }
 
-/* ===== Autocomplete Retry Logic =====
-   Purpose: Retry wiring autocomplete in case inputs mount after maps load (GHL async rendering)
-   Matches: Original retryWireAutocomplete function exactly
-========================================= */
-function setupAutocompleteRetry() {
-  const wireAutocomplete = window.wireAutocomplete;
-  if (typeof wireAutocomplete !== 'function') {
-    console.warn('[MapsInit] wireAutocomplete function not found globally');
-    return;
-  }
-
-  // Initial wiring
-  wireAutocomplete(document);
-  
-  // Retry wiring (EXACT logic from original)
-  (function retryWireAutocomplete() {
-    const start = Date.now();
-    const interval = setInterval(() => {
-      try { wireAutocomplete(document); } catch(_) {}
-      const allWired = ['pickup_location','drop-off_location'].every(q => 
-        document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired === '1'
-      );
-      if (allWired || Date.now() - start > 12000) { 
-        clearInterval(interval);
-        console.log('[MapsInit] Autocomplete retry completed:', { allWired, elapsed: Date.now() - start });
-      }
-    }, 450);
-  })();
-}
-
 /* ===== Debug Helper =====
    Purpose: Manual time popover repositioning helper (matches original)
 ========================= */
@@ -184,7 +154,7 @@ function installDebugHelper() {
 }
 
 /* ===== Main Maps Initialization =====
-   Purpose: Complete Section 10 initialization when Google Maps loads
+   Purpose: Complete Section 10 initialization when Google Maps loads (EXACT sequence from original)
    Called by: loadGoogleMaps callback in main.js
 ============================================= */
 function initializeMapsFeatures() {
@@ -196,16 +166,45 @@ function initializeMapsFeatures() {
   console.log('[MapsInit] Starting maps features initialization...');
   
   try {
-    // 1. Initialize geographic bounds and airport data
+    // 1. Initialize geographic bounds and airport data (EXACT from original)
     initializeMapsData();
     
-    // 2. Set up autocomplete with retry logic
-    setupAutocompleteRetry();
+    // 2. Wire autocomplete for existing fields (EXACT from original)
+    const wireAutocomplete = window.wireAutocomplete;
+    if (typeof wireAutocomplete !== 'function') {
+      console.warn('[MapsInit] wireAutocomplete function not found globally');
+      return;
+    }
+    wireAutocomplete(document);
     
-    // 3. Install prediction filter and prioritizer
+    // 3. Retry wiring in case inputs mount after maps load (EXACT from original)
+    (function retryWireAutocomplete() {
+      const start = Date.now();
+      const interval = setInterval(() => {
+        try { wireAutocomplete(document); } catch(_) {}
+        const allWired = ['pickup_location','drop-off_location'].every(q => 
+          document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired === '1'
+        );
+        if (allWired || Date.now() - start > 12000) { 
+          clearInterval(interval);
+          console.log('[MapsInit] Autocomplete retry completed:', { allWired, elapsed: Date.now() - start });
+        }
+      }, 450);
+    })();
+    
+    // 4. Apply Maps-based prefill (CRITICAL: was missing from our version)
+    const applyPrefillMaps = window.applyPrefillMaps;
+    if (typeof applyPrefillMaps === 'function') {
+      applyPrefillMaps(document);
+      console.log('[MapsInit] Maps-based prefill applied');
+    } else {
+      console.warn('[MapsInit] applyPrefillMaps function not found globally');
+    }
+    
+    // 5. Install prediction filter and prioritizer (EXACT from original)
     installPredictionFilterAndPriority();
     
-    // 4. Install debug helper
+    // 6. Install debug helper (EXACT from original)
     installDebugHelper();
     
     console.log('[MapsInit] All maps features initialized successfully');
@@ -220,7 +219,6 @@ export {
   initializeMapsFeatures,
   initializeMapsData,
   installPredictionFilterAndPriority,
-  setupAutocompleteRetry,
   installDebugHelper
 };
 

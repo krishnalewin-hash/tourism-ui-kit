@@ -165,4 +165,7 @@ window.QuoteFormConfig.applyPrefillBasic = applyPrefillBasic;
 window.QuoteFormConfig.applyPrefillMaps = applyPrefillMaps;
 window.QuoteFormConfig.autofillHiddenDropOff = autofillHiddenDropOff;
 
+// CRITICAL: Expose applyPrefillMaps globally for maps initialization module
+window.applyPrefillMaps = applyPrefillMaps;
+
 export { initPrefill, applyPrefillBasic, applyPrefillMaps, autofillHiddenDropOff };

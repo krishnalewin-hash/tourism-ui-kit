@@ -76,14 +76,11 @@ function initializeQuoteFormStyling() {
     loadGoogleMaps(() => {
       console.log('[QuoteFormStyle] Google Maps loaded, initializing location features...');
       try {
-        // Use the complete maps initialization from Section 10
+        // Use the complete maps initialization from Section 10 (includes applyPrefillMaps)
         initializeMapsFeatures();
         
         // Initialize basic autocomplete (now lightweight)
         initAutocomplete();
-        
-        // Re-run prefill for Maps-based features (matches original applyPrefillMaps)
-        initPrefill(document);
         
         console.log('[QuoteFormStyle] Maps-dependent features initialized');
       } catch (error) {
