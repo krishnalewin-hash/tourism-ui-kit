@@ -1,22 +1,26 @@
-  // Cleanup trailing icons after enhancement
-  function cleanupTrailingIcons() {
-    const rows = rootDoc.querySelectorAll('.icon-input-row');
-    rows.forEach(row => {
-      // Find all inputs/selects in the row
-      const fields = row.querySelectorAll('input[data-q], select[data-q]');
-      fields.forEach(field => {
-        let sibling = field.nextSibling;
-        while (sibling) {
-          if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
-            sibling.remove();
+  // MutationObserver to continuously remove trailing icons
+  function removeTrailingIconsLive() {
+    const observer = new MutationObserver(() => {
+      const rows = rootDoc.querySelectorAll('.icon-input-row');
+      rows.forEach(row => {
+        const fields = row.querySelectorAll('input[data-q], select[data-q]');
+        fields.forEach(field => {
+          let sibling = field.nextSibling;
+          while (sibling) {
+            if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
+              sibling.remove();
+            }
+            sibling = sibling.nextSibling;
           }
-          sibling = sibling.nextSibling;
-        }
+        });
       });
     });
+    observer.observe(rootDoc, { childList: true, subtree: true });
+    // Optionally disconnect after 10 seconds to avoid performance impact
+    setTimeout(() => observer.disconnect(), 10000);
   }
-  // Run cleanup after enhancement
-  setTimeout(cleanupTrailingIcons, 0);
+  // Start live trailing icon removal
+  removeTrailingIconsLive();
 // Async Client Configuration Loader
 // This module handles loading client-specific configurations before initializing the form
 
