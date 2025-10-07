@@ -26,13 +26,13 @@ console.log('[QuoteForm] CONFIG.googleApiKey:', CONFIG.googleApiKey ? CONFIG.goo
 console.log('[QuoteForm] CONFIG.countries:', CONFIG.countries);
 
 // Auto-load client config if CLIENT is specified but GMAPS_KEY is missing
-function autoLoadClientConfig() {
+(function autoLoadClientConfig() {
   if (window.CFG?.CLIENT && !window.CFG.GMAPS_KEY) {
     const client = window.CFG.CLIENT;
     const base = window.CFG.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
     const configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/_build/${client}.json`;
     
-    return fetch(configUrl)
+    fetch(configUrl)
       .then(response => response.json())
       .then(config => {
         if (config.SHARED_CONFIG) {
@@ -40,31 +40,27 @@ function autoLoadClientConfig() {
           window.CFG.GMAPS_KEY = config.SHARED_CONFIG.GMAPS_KEY;
           window.CFG.COUNTRIES = config.SHARED_CONFIG.COUNTRIES;
           window.CFG.REGION = config.SHARED_CONFIG.REGION || 'jm';
-          
-          // Update CONFIG object
-          CONFIG.googleApiKey = window.CFG.GMAPS_KEY;
-          CONFIG.countries = window.CFG.COUNTRIES;
-          CONFIG.region = window.CFG.REGION;
-          
           console.log('[QuoteForm] Auto-loaded client config for:', client);
           
-          return config;
+          // Reinitialize Google Maps with the loaded config
+          if (window.google?.maps?.places) {
+            try { 
+              // Reinitialize autocomplete if available
+              if (window.QuoteFormConfig?.wireAutocomplete) {
+                window.QuoteFormConfig.wireAutocomplete(document);
+              }
+            } catch(_) {}
+          }
         }
       })
       .catch(error => {
         console.warn('[QuoteForm] Could not auto-load client config:', error);
-        return null;
       });
   }
-  return Promise.resolve(null);
-}
-
-// Initialize auto-config loading
-autoLoadClientConfig();
+})();
 
 // Export configuration
 window.QuoteFormConfig = window.QuoteFormConfig || {};
 window.QuoteFormConfig.CONFIG = CONFIG;
-window.QuoteFormConfig.autoLoadClientConfig = autoLoadClientConfig;
 
-export { CONFIG, autoLoadClientConfig };
+export { CONFIG };
