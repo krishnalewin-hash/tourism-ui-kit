@@ -265,24 +265,16 @@ function applyTourPageBehavior() {
           background: white !important;
           border-radius: 8px !important;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-          padding: 20px !important;
+          padding: 10px !important;
           max-height: calc(100vh - 40px) !important;
           overflow-y: auto !important;
           margin-bottom: 20px !important;
         }
         
-        /* Ensure sticky works on the actual form container */
+        /* Form builder main container - no padding */
         .tour-page-sticky-form .hl_form-builder--main,
         body.tour-page-sticky-form .hl_form-builder--main {
-          position: sticky !important;
-          top: 20px !important;
-          z-index: 1000 !important;
-          background: white !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-          padding: 20px !important;
-          max-height: calc(100vh - 40px) !important;
-          overflow-y: auto !important;
+          padding: 0px !important;
         }
         
         @media (max-width: 768px) {
@@ -298,6 +290,15 @@ function applyTourPageBehavior() {
             top: auto !important;
             margin: 20px 0 !important;
           }
+        }
+        
+        /* Ensure passenger dropdown works with sticky form */
+        .tour-page-sticky-form .passenger-dropdown,
+        .tour-page-sticky-form .passenger-popup,
+        body.tour-page-sticky-form .passenger-dropdown,
+        body.tour-page-sticky-form .passenger-popup {
+          z-index: 10000 !important;
+          position: relative !important;
         }
       `;
       document.head.appendChild(style);
@@ -1035,24 +1036,16 @@ window.BookingForm.injectTourStyles = function() {
       background: white !important;
       border-radius: 8px !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-      padding: 20px !important;
+      padding: 10px !important;
       max-height: calc(100vh - 40px) !important;
       overflow-y: auto !important;
       margin-bottom: 20px !important;
     }
     
-    /* Ensure sticky works on the actual form container */
+    /* Ensure sticky works on the actual form container with no padding */
     .tour-page-sticky-form .hl_form-builder--main,
     body.tour-page-sticky-form .hl_form-builder--main {
-      position: sticky !important;
-      top: 20px !important;
-      z-index: 1000 !important;
-      background: white !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-      padding: 20px !important;
-      max-height: calc(100vh - 40px) !important;
-      overflow-y: auto !important;
+      padding: 0px !important;
     }
     
     /* Ensure form container has proper spacing on mobile */
@@ -1069,6 +1062,15 @@ window.BookingForm.injectTourStyles = function() {
         top: auto !important;
         margin: 20px 0 !important;
       }
+    }
+    
+    /* Ensure passenger dropdown works with sticky form */
+    .tour-page-sticky-form .passenger-dropdown,
+    .tour-page-sticky-form .passenger-popup,
+    body.tour-page-sticky-form .passenger-dropdown,
+    body.tour-page-sticky-form .passenger-popup {
+      z-index: 10000 !important;
+      position: relative !important;
     }
   `);
 };
