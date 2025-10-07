@@ -27,7 +27,7 @@ console.log('[QuoteFormStyle] Initializing modular form enhancement system...');
 
 // Main initialization function
 function initializeQuoteFormStyling() {
-  // Wait for DOM to be ready
+  // CRITICAL: Wait for DOM to be ready - matching original behavior
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeQuoteFormStyling);
     return;
@@ -36,35 +36,32 @@ function initializeQuoteFormStyling() {
   console.log('[QuoteFormStyle] DOM ready, initializing modules...');
 
   try {
-    // Core field enhancements
+    // EXACT initialization order from original working code:
+    // Section 8: Initial Enhancement Invocation
     attachPickupDateGuard(document);
     attachPickupTimePicker(document);
-    
-    // Visual enhancements (icons) - run early and often
-    enhanceVisual(document);
-    
-    // Custom UI components
-    initDatePicker();
-    initPassengerSelect();
-    
-    // Button enhancements
+    enhanceVisual(document);  // Icons run after date/time setup
     enhanceNextButtonMobile(document);
     enhanceSubmitButton(document);
+    initPrefill(document);    // Changed from applyPrefillBasic to match our module
+    
+    // Initialize passenger select dropdown (matches original)
+    initPassengerSelect();
+    
+    // Initialize custom date picker
+    initDatePicker();
     
     // Validation systems
     initStepOneValidation();
     initStepTwoValidation();
     
-    // Prefill functionality
-    initPrefill(document);
-    
     console.log('[QuoteFormStyle] Core modules initialized successfully');
     
-    // Secondary run to catch late-rendered inputs - FORCE ICONS
+    // Secondary run to catch late-rendered inputs (EXACT timing from original)
     setTimeout(() => {
       try {
         attachPickupTimePicker(document);
-        enhanceVisual(document); // Re-run visual enhancements
+        enhanceVisual(document);
         if (window.__passengerSelect?.attach) {
           window.__passengerSelect.attach(document);
         }
@@ -74,23 +71,12 @@ function initializeQuoteFormStyling() {
       }
     }, 400);
     
-    // AGGRESSIVE icon injection - try multiple times
-    setTimeout(() => {
-      enhanceVisual(document);
-      console.log('[QuoteFormStyle] Aggressive icon injection pass 1');
-    }, 800);
-    
-    setTimeout(() => {
-      enhanceVisual(document);
-      console.log('[QuoteFormStyle] Aggressive icon injection pass 2');
-    }, 1500);
-    
-    // Google Maps integration
+    // Google Maps integration - AFTER DOM setup
     loadGoogleMaps(() => {
       console.log('[QuoteFormStyle] Google Maps loaded, initializing location features...');
       try {
         initAutocomplete();
-        // Re-run prefill for Maps-based features
+        // Re-run prefill for Maps-based features (matches original applyPrefillMaps)
         initPrefill(document);
         console.log('[QuoteFormStyle] Maps-dependent features initialized');
       } catch (error) {
@@ -98,7 +84,7 @@ function initializeQuoteFormStyling() {
       }
     });
     
-    // Dynamic field observer
+    // Dynamic field observer - AFTER all other setup
     initFieldObserver();
     
     console.log('[QuoteFormStyle] All modules initialized');
