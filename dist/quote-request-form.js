@@ -2330,6 +2330,21 @@ window.BookingForm.loadGoogleMaps = loadGoogleMaps;// Google Places Autocomplete
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
+// Fix: Add missing matchFieldLook function to BookingForm
+window.BookingForm.matchFieldLook = function(field) {
+  if (!field) return;
+  // Try to match basic input styles for border, radius, shadow, font
+  var ref = document.querySelector('.icon-field-wrapper input[data-q]') || document.querySelector('input[data-q]');
+  if (!ref) return;
+  var cs = window.getComputedStyle(ref);
+  field.style.borderRadius = cs.borderRadius;
+  field.style.boxShadow = cs.boxShadow;
+  field.style.borderColor = cs.borderColor;
+  field.style.fontFamily = cs.fontFamily;
+  field.style.fontSize = cs.fontSize;
+  field.style.background = cs.background;
+  field.style.color = cs.color;
+};
 
 // Section 6 implementation from temp.js
 function normalizeSafely(el, obs){
