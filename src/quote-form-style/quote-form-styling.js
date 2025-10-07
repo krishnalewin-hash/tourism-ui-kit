@@ -40,6 +40,9 @@ function initializeQuoteFormStyling() {
     attachPickupDateGuard(document);
     attachPickupTimePicker(document);
     
+    // Visual enhancements (icons) - run early and often
+    enhanceVisual(document);
+    
     // Custom UI components
     initDatePicker();
     initPassengerSelect();
@@ -47,9 +50,6 @@ function initializeQuoteFormStyling() {
     // Button enhancements
     enhanceNextButtonMobile(document);
     enhanceSubmitButton(document);
-    
-    // Visual enhancements
-    enhanceVisual(document);
     
     // Validation systems
     initStepOneValidation();
@@ -60,11 +60,11 @@ function initializeQuoteFormStyling() {
     
     console.log('[QuoteFormStyle] Core modules initialized successfully');
     
-    // Secondary run to catch late-rendered inputs
+    // Secondary run to catch late-rendered inputs - FORCE ICONS
     setTimeout(() => {
       try {
         attachPickupTimePicker(document);
-        enhanceVisual(document);
+        enhanceVisual(document); // Re-run visual enhancements
         if (window.__passengerSelect?.attach) {
           window.__passengerSelect.attach(document);
         }
@@ -73,6 +73,17 @@ function initializeQuoteFormStyling() {
         console.warn('[QuoteFormStyle] Secondary initialization error:', error);
       }
     }, 400);
+    
+    // AGGRESSIVE icon injection - try multiple times
+    setTimeout(() => {
+      enhanceVisual(document);
+      console.log('[QuoteFormStyle] Aggressive icon injection pass 1');
+    }, 800);
+    
+    setTimeout(() => {
+      enhanceVisual(document);
+      console.log('[QuoteFormStyle] Aggressive icon injection pass 2');
+    }, 1500);
     
     // Google Maps integration
     loadGoogleMaps(() => {
