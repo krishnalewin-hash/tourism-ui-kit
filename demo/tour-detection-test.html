@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Detection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Tour Detection Test Page</h1>
+    
+    <div class="debug">
+        <h3>Debug Information:</h3>
+        <div id="debug-output"></div>
+    </div>
+    
+    <div class="debug">
+        <h3>Form Container:</h3>
+        <div id="_builder-form">
+            <div class="ghl-form-row">
+                <label>Pickup Location:</label>
+                <input name="pickup_location" placeholder="Enter pickup location">
+            </div>
+            <div class="ghl-form-row">
+                <label>Drop-off Location:</label>
+                <input name="dropoff_location" data-name="dropoff_location" placeholder="Enter drop-off location">
+            </div>
+            <div class="ghl-form-row">
+                <label>Date:</label>
+                <input name="pickup_date" type="date">
+            </div>
+            <button type="submit">Get Quote</button>
+        </div>
+    </div>
+
+    <!-- Tour detection test -->
+    <script>
+        window.CFG = {client: 'kamar-tours', formType: 'tour'};
+        
+        // Debug function
+        function updateDebug() {
+            const output = document.getElementById('debug-output');
+            output.innerHTML = `
+                <strong>Configuration:</strong><br>
+                window.CFG: ${JSON.stringify(window.CFG, null, 2)}<br><br>
+                
+                <strong>Body Classes:</strong><br>
+                ${document.body.className || 'No classes'}<br><br>
+                
+                <strong>Drop-off Field:</strong><br>
+                Visible: ${getComputedStyle(document.querySelector('[name="dropoff_location"]')).display !== 'none'}<br>
+                Value: "${document.querySelector('[name="dropoff_location"]').value}"<br><br>
+                
+                <strong>Form Position:</strong><br>
+                Position: ${getComputedStyle(document.querySelector('#_builder-form')).position}<br>
+                Top: ${getComputedStyle(document.querySelector('#_builder-form')).top}<br><br>
+                
+                <strong>Console Logs:</strong><br>
+                Check browser console for detailed logs
+            `;
+        }
+        
+        // Update debug info every second
+        setInterval(updateDebug, 1000);
+        
+        // Initial update
+        setTimeout(updateDebug, 100);
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/dist/quote-request-form.min.js"></script>
+    
+    <script>
+        // Force update debug after script loads
+        setTimeout(updateDebug, 2000);
+    </script>
+</body>
+</html>

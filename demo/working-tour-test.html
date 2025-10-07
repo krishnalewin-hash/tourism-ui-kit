@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Working Tour Form Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            min-height: 200vh; /* Make page tall to test sticky */
+        }
+        .status { 
+            position: fixed; 
+            top: 10px; 
+            right: 10px; 
+            background: #007bff; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-size: 12px;
+            z-index: 1000;
+        }
+        .content {
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">Loading...</div>
+    
+    <div class="content">
+        <h1>Blue Mountain Adventure Tour</h1>
+        <p>This is a tour detail page. The form should:</p>
+        <ul>
+            <li>Hide the drop-off field</li>
+            <li>Be sticky positioned</li>
+            <li>Auto-fill drop-off with "Blue Mountain Adventure Tour"</li>
+        </ul>
+        
+        <p>Scroll down to test sticky positioning...</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    </div>
+
+    <!-- This is your exact embed code -->
+    <script>window.CFG = {client: 'kamar-tours', formType: 'tour'};</script>
+    <script src="./dist/quote-request-form.min.js"></script>
+    
+    <!-- Status monitor -->
+    <script>
+        function updateStatus() {
+            const dropoffField = document.querySelector('[data-name="dropoff_location"], [name="dropoff_location"]');
+            const form = document.querySelector('#_builder-form');
+            const bodyClasses = document.body.className;
+            
+            let status = '';
+            
+            if (bodyClasses.includes('tour-page-hide-dropoff')) {
+                status += '✓ Hide class applied | ';
+            } else {
+                status += '✗ Hide class missing | ';
+            }
+            
+            if (bodyClasses.includes('tour-page-sticky-form')) {
+                status += '✓ Sticky class applied | ';
+            } else {
+                status += '✗ Sticky class missing | ';
+            }
+            
+            if (dropoffField) {
+                const isHidden = getComputedStyle(dropoffField).display === 'none';
+                if (isHidden) {
+                    status += '✓ Field hidden | ';
+                } else {
+                    status += '✗ Field visible | ';
+                }
+                
+                if (dropoffField.value) {
+                    status += '✓ Auto-filled';
+                } else {
+                    status += '✗ Not filled';
+                }
+            } else {
+                status += 'Field not found';
+            }
+            
+            document.getElementById('status').textContent = status;
+        }
+        
+        // Update status every 500ms
+        setInterval(updateStatus, 500);
+        setTimeout(updateStatus, 100);
+    </script>
+</body>
+</html>
