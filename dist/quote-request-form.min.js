@@ -196,18 +196,84 @@ function detectTourPageContext() {
 function applyTourPageBehavior() {
   console.log('[TourBehavior] Applying tour page enhancements...');
   
-  // Inject tour-specific styles (idempotent)
-  window.BookingForm.injectTourStyles();
-  
   // Apply CSS classes to body for tour-specific styling (idempotent)
   if (window.CFG.hideDropoff && !document.body.classList.contains('tour-page-hide-dropoff')) {
     document.body.classList.add('tour-page-hide-dropoff');
     console.log('[TourBehavior] ✓ Hide dropoff field enabled');
+    
+    // Inject critical CSS immediately without relying on inject function
+    if (!document.getElementById('tour-critical-styles')) {
+      const style = document.createElement('style');
+      style.id = 'tour-critical-styles';
+      style.textContent = `
+        .tour-page-hide-dropoff [data-name="dropoff_location"],
+        .tour-page-hide-dropoff [name="dropoff_location"],
+        body.tour-page-hide-dropoff [data-name="dropoff_location"],
+        body.tour-page-hide-dropoff [name="dropoff_location"] {
+          display: none !important;
+          visibility: hidden !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
+        .tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]),
+        body.tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
+        body.tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]) {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+      console.log('[TourBehavior] ✓ Critical tour styles injected immediately');
+    }
   }
   
   if (window.CFG.stickyForm && !document.body.classList.contains('tour-page-sticky-form')) {
     document.body.classList.add('tour-page-sticky-form');
     console.log('[TourBehavior] ✓ Sticky form positioning enabled');
+    
+    // Inject sticky CSS immediately
+    if (!document.getElementById('tour-sticky-styles')) {
+      const style = document.createElement('style');
+      style.id = 'tour-sticky-styles';
+      style.textContent = `
+        .tour-page-sticky-form #_builder-form,
+        body.tour-page-sticky-form #_builder-form {
+          position: sticky !important;
+          top: 20px !important;
+          z-index: 100 !important;
+          background: white !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+          padding: 20px !important;
+          max-height: calc(100vh - 40px) !important;
+          overflow-y: auto !important;
+        }
+        @media (max-width: 768px) {
+          .tour-page-sticky-form #_builder-form,
+          body.tour-page-sticky-form #_builder-form {
+            position: relative !important;
+            top: auto !important;
+            margin: 20px 0 !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      console.log('[TourBehavior] ✓ Sticky form styles injected immediately');
+    }
+  }
+  
+  // Also try to inject with the proper function if available (for completeness)
+  if (window.BookingForm.injectTourStyles) {
+    window.BookingForm.injectTourStyles();
+  } else {
+    // Defer until inject function is available
+    setTimeout(() => {
+      if (window.BookingForm.injectTourStyles) {
+        window.BookingForm.injectTourStyles();
+        console.log('[TourBehavior] ✓ Tour styles injected (deferred)');
+      }
+    }, 100);
   }
   
   // Set up auto-fill for drop-off field (with retry logic)
