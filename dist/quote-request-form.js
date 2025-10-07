@@ -206,6 +206,7 @@ function applyTourPageBehavior() {
       const style = document.createElement('style');
       style.id = 'tour-critical-styles';
       style.textContent = `
+        /* Hide drop-off input fields */
         .tour-page-hide-dropoff [data-name="dropoff_location"],
         .tour-page-hide-dropoff [name="dropoff_location"],
         body.tour-page-hide-dropoff [data-name="dropoff_location"],
@@ -216,11 +217,25 @@ function applyTourPageBehavior() {
           margin: 0 !important;
           padding: 0 !important;
         }
+        /* Hide parent containers */
         .tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
         .tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]),
         body.tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
         body.tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]) {
           display: none !important;
+        }
+        /* Hide specific div ID that contains drop-off field */
+        .tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2,
+        body.tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2 {
+          display: none !important;
+          visibility: hidden !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        /* Remove padding from survey form */
+        .survey-2xXWpyyoCV .hl_form-builder--main {
+          padding: 0px !important;
         }
       `;
       document.head.appendChild(style);
@@ -237,11 +252,31 @@ function applyTourPageBehavior() {
       const style = document.createElement('style');
       style.id = 'tour-sticky-styles';
       style.textContent = `
+        /* Sticky form - multiple selectors for maximum override */
         .tour-page-sticky-form #_builder-form,
-        body.tour-page-sticky-form #_builder-form {
+        body.tour-page-sticky-form #_builder-form,
+        .tour-page-sticky-form .hl_form-builder,
+        body.tour-page-sticky-form .hl_form-builder,
+        .tour-page-sticky-form .survey-2xXWpyyoCV,
+        body.tour-page-sticky-form .survey-2xXWpyyoCV {
           position: sticky !important;
           top: 20px !important;
-          z-index: 100 !important;
+          z-index: 1000 !important;
+          background: white !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+          padding: 20px !important;
+          max-height: calc(100vh - 40px) !important;
+          overflow-y: auto !important;
+          margin-bottom: 20px !important;
+        }
+        
+        /* Ensure sticky works on the actual form container */
+        .tour-page-sticky-form .hl_form-builder--main,
+        body.tour-page-sticky-form .hl_form-builder--main {
+          position: sticky !important;
+          top: 20px !important;
+          z-index: 1000 !important;
           background: white !important;
           border-radius: 8px !important;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
@@ -249,9 +284,16 @@ function applyTourPageBehavior() {
           max-height: calc(100vh - 40px) !important;
           overflow-y: auto !important;
         }
+        
         @media (max-width: 768px) {
           .tour-page-sticky-form #_builder-form,
-          body.tour-page-sticky-form #_builder-form {
+          body.tour-page-sticky-form #_builder-form,
+          .tour-page-sticky-form .hl_form-builder,
+          body.tour-page-sticky-form .hl_form-builder,
+          .tour-page-sticky-form .survey-2xXWpyyoCV,
+          body.tour-page-sticky-form .survey-2xXWpyyoCV,
+          .tour-page-sticky-form .hl_form-builder--main,
+          body.tour-page-sticky-form .hl_form-builder--main {
             position: relative !important;
             top: auto !important;
             margin: 20px 0 !important;
@@ -965,12 +1007,46 @@ window.BookingForm.injectTourStyles = function() {
       padding: 0 !important;
     }
     
-    /* Sticky form positioning for tour pages */
+    /* Hide specific div ID that contains drop-off field */
+    .tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2,
+    body.tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2 {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    /* Remove padding from survey form */
+    .survey-2xXWpyyoCV .hl_form-builder--main {
+      padding: 0px !important;
+    }
+    
+    /* Sticky form positioning for tour pages - multiple selectors */
     .tour-page-sticky-form #_builder-form,
-    body.tour-page-sticky-form #_builder-form {
+    body.tour-page-sticky-form #_builder-form,
+    .tour-page-sticky-form .hl_form-builder,
+    body.tour-page-sticky-form .hl_form-builder,
+    .tour-page-sticky-form .survey-2xXWpyyoCV,
+    body.tour-page-sticky-form .survey-2xXWpyyoCV {
       position: sticky !important;
       top: 20px !important;
-      z-index: 100 !important;
+      z-index: 1000 !important;
+      background: white !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+      padding: 20px !important;
+      max-height: calc(100vh - 40px) !important;
+      overflow-y: auto !important;
+      margin-bottom: 20px !important;
+    }
+    
+    /* Ensure sticky works on the actual form container */
+    .tour-page-sticky-form .hl_form-builder--main,
+    body.tour-page-sticky-form .hl_form-builder--main {
+      position: sticky !important;
+      top: 20px !important;
+      z-index: 1000 !important;
       background: white !important;
       border-radius: 8px !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
@@ -982,7 +1058,13 @@ window.BookingForm.injectTourStyles = function() {
     /* Ensure form container has proper spacing on mobile */
     @media (max-width: 768px) {
       .tour-page-sticky-form #_builder-form,
-      body.tour-page-sticky-form #_builder-form {
+      body.tour-page-sticky-form #_builder-form,
+      .tour-page-sticky-form .hl_form-builder,
+      body.tour-page-sticky-form .hl_form-builder,
+      .tour-page-sticky-form .survey-2xXWpyyoCV,
+      body.tour-page-sticky-form .survey-2xXWpyyoCV,
+      .tour-page-sticky-form .hl_form-builder--main,
+      body.tour-page-sticky-form .hl_form-builder--main {
         position: relative !important;
         top: auto !important;
         margin: 20px 0 !important;
