@@ -3,6 +3,16 @@
 
 window.BookingForm = window.BookingForm || {};
 
+// Add missing applyPlaceholderClass for passenger select styling
+window.BookingForm.applyPlaceholderClass = function(el) {
+  if (!el) return;
+  if (el.value === '' || el.value === null) {
+    el.classList.add('is-placeholder');
+  } else {
+    el.classList.remove('is-placeholder');
+  }
+};
+
 // Configuration loader with built-in fallbacks
 async function loadClientConfiguration() {
   console.log('[ConfigLoader] Starting configuration loading...');
@@ -1442,7 +1452,9 @@ window.BookingForm = window.BookingForm || {};
   window.__pickupDatePicker={ openFor, close, attach };
   // initial attach
   attach(document);
-})();// Time picker - using IIFE singleton pattern from temp.js
+})();
+
+// Time picker - using IIFE singleton pattern from temp.js
 window.BookingForm = window.BookingForm || {};
 
 (function initSingletonTimePicker(){
@@ -1545,7 +1557,9 @@ window.BookingForm.attachPickupTimePicker = function(rootDoc, specificEl){
     }
     window.__singletonTimePicker.openFor(input);
   });
-};// Section X: Passenger Count Select (1–15, then 16+) from temp.js
+};
+
+// Section X: Passenger Count Select (1–15, then 16+) from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -1781,7 +1795,9 @@ window.BookingForm.initPassengerSelect = function(root = document) {
   if (window.__passengerSelect && window.__passengerSelect.attach) {
     window.__passengerSelect.attach(root);
   }
-};// Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
+};
+
+// Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
 // Adds inline messages and fade-out animation before advancing
 
 // Global namespace for booking form
@@ -2021,7 +2037,9 @@ window.BookingForm.installStepOneNextValidation = function(){
   }, true);
 
   window.__stepOneNextValidation = true;
-};// Validates step 2 on SUBMIT (full_name, email, phone)
+};
+
+// Validates step 2 on SUBMIT (full_name, email, phone)
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2139,7 +2157,9 @@ window.BookingForm.installStepTwoSubmitValidation = function(){
   }, true);
 
   window.__stepTwoSubmitValidation = true;
-};// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
+};
+
+// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2326,7 +2346,9 @@ window.BookingForm.initMapsAndFilters = function() {
 };
 
 // Expose loadGoogleMaps function for backwards compatibility
-window.BookingForm.loadGoogleMaps = loadGoogleMaps;// Google Places Autocomplete + Airport Code Normalization (Section 6)
+window.BookingForm.loadGoogleMaps = loadGoogleMaps;
+
+// Google Places Autocomplete + Airport Code Normalization (Section 6)
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2425,7 +2447,9 @@ function wireAutocomplete(rootDoc){
 
 // Expose wireAutocomplete function and biasBoundsFn for external setup
 window.BookingForm.wireAutocomplete = wireAutocomplete;
-window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
+window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };
+
+// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
