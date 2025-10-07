@@ -4,6 +4,31 @@
    Usage: Single script include with automatic initialization
 ================================================= */
 
+// CRITICAL: Load CSS first before any JavaScript functionality
+function loadCSS() {
+  const cssPath = new URL('./quote-form-styling.css', import.meta.url).href;
+  
+  // Check if CSS is already loaded
+  if (document.querySelector(`link[href="${cssPath}"]`)) {
+    return Promise.resolve();
+  }
+  
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = cssPath;
+    link.onload = () => {
+      console.log('[QuoteFormStyle] CSS loaded successfully');
+      resolve();
+    };
+    link.onerror = () => {
+      console.error('[QuoteFormStyle] CSS load failed');
+      reject(new Error('CSS load failed'));
+    };
+    document.head.appendChild(link);
+  });
+}
+
 // Import all modules
 import { CONFIG } from './config.js';
 import { loadGoogleMaps } from './maps-loader.js';
@@ -27,7 +52,15 @@ import { initFieldObserver } from './observer.js';
 console.log('[QuoteFormStyle] Initializing modular form enhancement system...');
 
 // Main initialization function
-function initializeQuoteFormStyling() {
+async function initializeQuoteFormStyling() {
+  // CRITICAL: Load CSS first before any functionality
+  try {
+    await loadCSS();
+    console.log('[QuoteFormStyle] CSS loaded, proceeding with initialization...');
+  } catch (error) {
+    console.warn('[QuoteFormStyle] CSS load failed, proceeding anyway:', error);
+  }
+
   // CRITICAL: Wait for DOM to be ready - matching original behavior
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeQuoteFormStyling);

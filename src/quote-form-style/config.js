@@ -45,9 +45,9 @@ console.log('[QuoteForm] CONFIG.countries:', CONFIG.countries);
           // Reinitialize Google Maps with the loaded config
           if (window.google?.maps?.places) {
             try { 
-              // Reinitialize autocomplete if available
-              if (window.QuoteFormConfig?.wireAutocomplete) {
-                window.QuoteFormConfig.wireAutocomplete(document);
+              // Call wireAutocomplete directly (matches original)
+              if (window.wireAutocomplete) {
+                window.wireAutocomplete(document);
               }
             } catch(_) {}
           }
