@@ -1,3 +1,15 @@
+  // Inject sticky sidebar CSS for Tour Details pages
+  if (!document.getElementById('tour-sidebar-sticky')) {
+    const style = document.createElement('style');
+    style.id = 'tour-sidebar-sticky';
+    style.textContent = `
+      .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
+        position: sticky !important;
+        top: 24px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
   // Cleanup trailing icons after enhancement
   function cleanupTrailingIcons() {
     const rows = rootDoc.querySelectorAll('.icon-input-row');
