@@ -1144,19 +1144,22 @@ function enhanceVisual(rootDoc){
       row.appendChild(el);
     }
     // Create or move the icon into the row
-    let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
+    let span = row.querySelector(':scope > .field-icon');
     if(!span){
       span=document.createElement('span');
       span.className='field-icon';
       span.setAttribute('aria-hidden','true');
       if(key) span.setAttribute('data-for', key);
       span.innerHTML=svg;
+      row.insertBefore(span, el); // Insert icon before input/select
     } else {
       // Ensure attributes match latest key
       if(key) span.setAttribute('data-for', key);
     }
-    if(span.parentElement !== row){
-      row.appendChild(span);
+    // Remove any trailing icon after the input/select
+    const nextSibling = el.nextSibling;
+    if(nextSibling && nextSibling.classList && nextSibling.classList.contains('field-icon')) {
+      nextSibling.remove();
     }
     el.dataset.iconized='1';
   }
