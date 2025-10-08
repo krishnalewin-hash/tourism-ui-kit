@@ -86,8 +86,14 @@ function enhanceVisual(rootDoc){
     el.dataset.iconized='1';
   }
   Object.entries(ICONS).forEach(([k,svg])=>{
-    [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-    [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    if (k === 'number_of_passengers') {
+      // Only inject icon for select, not input
+      [...rootDoc.querySelectorAll(`select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+      [...rootDoc.querySelectorAll(`select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    } else {
+      [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+      [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    }
   });
 }
 
