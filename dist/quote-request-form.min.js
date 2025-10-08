@@ -1,4 +1,4 @@
-  // Inject sticky sidebar CSS and body overflow rule for all pages with higher specificity
+  // Inject sticky sidebar CSS and body overflow rule with aggressive enforcement
   function ensureStickyCSS() {
     if (document.getElementById('quote-form-sticky-sidebar-styles')) {
       document.getElementById('quote-form-sticky-sidebar-styles').remove();
@@ -6,22 +6,47 @@
     const style = document.createElement('style');
     style.id = 'quote-form-sticky-sidebar-styles';
     style.textContent = `
-      /* High specificity sticky sidebar CSS */
+      /* Ultra high specificity sticky sidebar CSS */
+      html body .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO,
       body .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO,
-      html body .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
+      .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
         position: sticky !important;
         top: 24px !important;
         align-self: flex-start !important;
       }
+      html body { overflow-y: visible !important; }
       body { overflow-y: visible !important; }
     `;
     document.head.appendChild(style);
   }
   
-  // Apply immediately and re-apply after a delay to override late-loading styles
+  // Continuously monitor and enforce sticky positioning
+  function enforceStickyPosition() {
+    const sidebar = document.querySelector('.form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO');
+    if (sidebar) {
+      const computedStyle = window.getComputedStyle(sidebar);
+      if (computedStyle.position !== 'sticky') {
+        sidebar.style.setProperty('position', 'sticky', 'important');
+        sidebar.style.setProperty('top', '24px', 'important');
+        sidebar.style.setProperty('align-self', 'flex-start', 'important');
+      }
+    }
+  }
+  
+  // Apply CSS immediately and re-apply with delays
   ensureStickyCSS();
+  setTimeout(ensureStickyCSS, 500);
   setTimeout(ensureStickyCSS, 1000);
+  setTimeout(ensureStickyCSS, 2000);
   setTimeout(ensureStickyCSS, 3000);
+  
+  // Monitor and enforce positioning every 2 seconds
+  setInterval(enforceStickyPosition, 2000);
+  
+  // Also monitor on scroll to re-enforce if needed
+  window.addEventListener('scroll', () => {
+    setTimeout(enforceStickyPosition, 10);
+  }, { passive: true });
   // Cleanup trailing icons after enhancement
   function cleanupTrailingIcons() {
     const rows = rootDoc.querySelectorAll('.icon-input-row');
