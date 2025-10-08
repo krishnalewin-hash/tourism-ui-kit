@@ -30,12 +30,6 @@ body, input, button, select, textarea {
     background-color: #fff !important;
     color: #222 !important;
     border-radius: 10px !important;
-    padding: 10px 18px !important;
-}
-
-/* Hide specific element */
-#aWEGkxHplDFuKOJWnHSg {
-    display: none !important;
 }
 
 /* Google Places Autocomplete (pac) unified sizing & appearance */
