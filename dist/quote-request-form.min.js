@@ -1,13 +1,14 @@
-  // Inject sticky sidebar CSS for Tour Details pages
-  if (!document.getElementById('tour-sidebar-sticky')) {
+  // Inject sticky sidebar CSS and body overflow rule for all pages
+  if (!document.getElementById('quote-form-sticky-sidebar-styles')) {
     const style = document.createElement('style');
-    style.id = 'tour-sidebar-sticky';
+    style.id = 'quote-form-sticky-sidebar-styles';
     style.textContent = `
       .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
         position: sticky !important;
         top: 24px;
         align-self: flex-start !important;
       }
+      body { overflow-y: visible !important; }
     `;
     document.head.appendChild(style);
   }
