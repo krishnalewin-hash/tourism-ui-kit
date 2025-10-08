@@ -46,17 +46,17 @@ body, input, button, select, textarea {
 
 /* Number of passengers select field - target the specific ID */
 #aWEGkxHplDFuKOJWnHSg {
-    color: #8c8c8c !important;
+    color: #8c8c8c !important;  /* Default placeholder text */
 }
 
 #aWEGkxHplDFuKOJWnHSg:focus,
 #aWEGkxHplDFuKOJWnHSg:not([value=""]) {
-    color: #8c8c8c !important;  /* Keep numbers as #8c8c8c as requested */
+    color: #ccc !important;  /* Selected text color */
 }
 
-/* When a valid option is selected, ensure text stays #8c8c8c */
+/* When a valid option is selected, ensure text is #ccc */
 #aWEGkxHplDFuKOJWnHSg option:not(:first-child) {
-    color: #8c8c8c !important;
+    color: #ccc !important;
 }
 
 /* Generic number of passengers select styling (fallback) */
