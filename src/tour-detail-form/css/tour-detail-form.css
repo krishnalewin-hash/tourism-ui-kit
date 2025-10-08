@@ -35,16 +35,23 @@ body, input, button, select, textarea {
     padding-top: 12px !important;
     padding-bottom: 12px !important;
     padding-right: 20px !important;
-    padding-left: 20px !important;
+    padding-left: 2.1rem !important; /* Default left padding for icons */
     height: 58px !important;
     box-sizing: border-box !important;
 }
 
 /* Icon field padding override - ensure left padding for icons */
-.icon-field-wrapper > input[data-iconized='1'][data-q],
-.icon-field-wrapper > select[data-iconized='1'][data-q],
-.icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q],
-.icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q] {
+.icon-field-wrapper > input[data-q],
+.icon-field-wrapper > select[data-q],
+.icon-field-wrapper .icon-input-row > input[data-q],
+.icon-field-wrapper .icon-input-row > select[data-q],
+input[data-q="pickup_location"],
+input[data-q="drop-off_location"], 
+input[data-q="pickup_date"],
+input[data-q="pickup_time"],
+input[data-q="full_name"],
+input[data-q="email"],
+input[data-q="phone"] {
     padding-left: 2.1rem !important;
 }
 
@@ -55,13 +62,16 @@ select[data-q="number_of_passengers"] {
     padding-top: 12px !important;
     padding-bottom: 12px !important;
     padding-right: 20px !important;
+    padding-left: 2.1rem !important; /* Icon padding for passenger field */
     line-height: 1.4 !important;
     box-sizing: border-box !important;
 }
 
-/* Passenger select icon padding */
-.icon-field-wrapper #aWEGkxHplDFuKOJWnHSg[data-iconized='1'],
-.icon-field-wrapper select[data-q="number_of_passengers"][data-iconized='1'] {
+/* Passenger select icon padding - redundant but explicit */
+.icon-field-wrapper #aWEGkxHplDFuKOJWnHSg,
+.icon-field-wrapper select[data-q="number_of_passengers"],
+#aWEGkxHplDFuKOJWnHSg[data-iconized='1'],
+select[data-q="number_of_passengers"][data-iconized='1'] {
     padding-left: 2.1rem !important;
 }
 
