@@ -1,23 +1,27 @@
-  // Inject sticky sidebar CSS and body overflow rule for all pages
-  if (!document.getElementById('quote-form-sticky-sidebar-styles')) {
+  // Inject sticky sidebar CSS and body overflow rule for all pages with higher specificity
+  function ensureStickyCSS() {
+    if (document.getElementById('quote-form-sticky-sidebar-styles')) {
+      document.getElementById('quote-form-sticky-sidebar-styles').remove();
+    }
     const style = document.createElement('style');
     style.id = 'quote-form-sticky-sidebar-styles';
     style.textContent = `
-      /* Ensure parent flex rules for sticky sidebar reliability */
-      .ghl-question .fields-container.row {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start !important;
-      }
-      .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
+      /* High specificity sticky sidebar CSS */
+      body .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO,
+      html body .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
         position: sticky !important;
-        top: 24px;
+        top: 24px !important;
         align-self: flex-start !important;
       }
       body { overflow-y: visible !important; }
     `;
     document.head.appendChild(style);
   }
+  
+  // Apply immediately and re-apply after a delay to override late-loading styles
+  ensureStickyCSS();
+  setTimeout(ensureStickyCSS, 1000);
+  setTimeout(ensureStickyCSS, 3000);
   // Cleanup trailing icons after enhancement
   function cleanupTrailingIcons() {
     const rows = rootDoc.querySelectorAll('.icon-input-row');
