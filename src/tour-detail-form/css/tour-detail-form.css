@@ -33,6 +33,17 @@ body, input, button, select, textarea {
     font-size: 20px;
     font-weight: 300;
     padding: 12px 20px !important;
+    height: 58px !important;
+    box-sizing: border-box !important;
+}
+
+/* Specific height and padding for passenger select field */
+#aWEGkxHplDFuKOJWnHSg,
+select[data-q="number_of_passengers"] {
+    height: 58px !important;
+    padding: 12px 20px !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
 }
 
 /* Placeholder styling for specific element */
