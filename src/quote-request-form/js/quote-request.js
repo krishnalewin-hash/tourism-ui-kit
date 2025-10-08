@@ -41,7 +41,7 @@ function matchFieldLook(target){
   target.style.fontWeight = 'normal';
 
   // Keep room for the leading icon, and a normal right padding
-  target.style.paddingLeft = '2.3rem';
+  target.style.paddingLeft = '2.1rem';
   target.style.paddingRight = '18px';
   target.style.webkitAppearance = 'none';
   target.style.appearance = 'none';
