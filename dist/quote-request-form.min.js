@@ -4,7 +4,10 @@
     style.id = 'quote-form-sticky-sidebar-styles';
     style.textContent = `
       /* Ensure parent flex rules for sticky sidebar reliability */
-      .ghl-question .fields-container.row {
+      .ghl-question .fields-container.row,
+      .tdp-wrap,
+      .tdp2-wrap,
+      .tdp3-wrap {
         display: flex !important;
         flex-direction: row !important;
         align-items: flex-start !important;
