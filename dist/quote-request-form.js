@@ -1,74 +1,7 @@
-  // Inject sticky sidebar CSS for Tour Details pages
-  if (!document.getElementById('tour-sidebar-sticky')) {
-    const style = document.createElement('style');
-    style.id = 'tour-sidebar-sticky';
-    style.textContent = `
-      .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
-        position: sticky !important;
-        top: 24px;
-        align-self: flex-start !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-  // Cleanup trailing icons after enhancement
-  function cleanupTrailingIcons() {
-    const rows = document.querySelectorAll('.icon-input-row');
-    rows.forEach(row => {
-      // Find all inputs/selects in the row
-      const fields = row.querySelectorAll('input[data-q], select[data-q]');
-      fields.forEach(field => {
-        let sibling = field.nextSibling;
-        while (sibling) {
-          if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
-            sibling.remove();
-          }
-          sibling = sibling.nextSibling;
-        }
-      });
-    });
-  }
-  // Run cleanup after enhancement
-  setTimeout(cleanupTrailingIcons, 0);
 // Async Client Configuration Loader
 // This module handles loading client-specific configurations before initializing the form
 
 window.BookingForm = window.BookingForm || {};
-
-// Add missing applyPlaceholderClass for passenger select styling
-window.BookingForm.applyPlaceholderClass = function(el) {
-  if (!el) return;
-  if (el.value === '' || el.value === null) {
-    el.classList.add('is-placeholder');
-  } else {
-    el.classList.remove('is-placeholder');
-  }
-};
-
-// Add missing matchFieldLook function for consistent field styling
-window.BookingForm.matchFieldLook = function(target) {
-  const ref =
-    document.querySelector('.icon-field-wrapper input[data-q]') ||
-    document.querySelector('input[data-q]');
-  if (!ref) return;
-
-  const cs = getComputedStyle(ref);
-  const props = [
-    'fontFamily','fontSize','lineHeight','letterSpacing',
-    'color','backgroundColor','border','borderTop','borderRight','borderBottom','borderLeft',
-    'borderRadius','boxShadow','outline','height','minHeight'
-  ];
-  props.forEach(p => { try { target.style[p] = cs[p]; } catch(_){} });
-
-  // Ensure consistent font-weight (don't copy from reference as it might differ)
-  target.style.fontWeight = 'normal';
-
-  // Keep room for the leading icon, and a normal right padding
-  target.style.paddingLeft = '2.3rem';
-  target.style.paddingRight = '18px';
-  target.style.webkitAppearance = 'none';
-  target.style.appearance = 'none';
-};
 
 // Configuration loader with built-in fallbacks
 async function loadClientConfiguration() {
@@ -81,13 +14,13 @@ async function loadClientConfiguration() {
   }
 
   // Determine client from various sources
-  const client = window.CFG?.client || 
-                new URLSearchParams(location.search).get('client') || 
-                sessionStorage.getItem('client') || 
-                'tour-driver';
+    const client = window.CFG?.CLIENT || 
+    new URLSearchParams(location.search).get('client') || 
+    sessionStorage.getItem('client') || 
+    'demo';
 
   // Determine base URL for configs
-  const base = window.CFG?.base || 'krishnalewin-hash/tourism-ui-kit@main';
+  const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
 
   console.log(`[ConfigLoader] Loading configuration for client: ${client}`);
   console.log(`[ConfigLoader] Base URL: ${base}`);
@@ -186,268 +119,11 @@ async function loadClientConfiguration() {
   return window.CFG;
 }
 
-// Detect if we're on a tour detail page and apply appropriate settings
-function detectTourPageContext() {
-  console.log('[TourDetection] Analyzing page context...');
-  
-  // Priority 1: Manual configuration (bulletproof)
-  const manualConfig = window.CFG?.formType === 'tour';
-  const dataAttribute = document.body?.getAttribute('data-booking-form') === 'tour' ||
-                       document.documentElement?.getAttribute('data-booking-form') === 'tour' ||
-                       !!document.querySelector('[data-booking-form="tour"]');
-  
-  if (manualConfig) {
-    console.log('[TourDetection] ✓ MANUAL CONFIG: formType = "tour"');
-  }
-  
-  if (dataAttribute) {
-    console.log('[TourDetection] ✓ DATA ATTRIBUTE: data-booking-form="tour" found');
-  }
-  
-  // If manual config exists, use it (bulletproof)
-  if (manualConfig || dataAttribute) {
-    const isTourPage = true;
-    console.log('[TourDetection] Result: TOUR PAGE (manual configuration)');
-    
-    // Apply tour-specific configuration
-    window.CFG = {
-      ...window.CFG,
-      hideDropoff: true,
-      stickyForm: true,
-      prefillDropoff: true,
-      tourPageDetected: true
-    };
-    
-    console.log('[TourDetection] Applied tour page settings');
-    return isTourPage;
-  }
-  
-  // Automatic detection removed. Only manual config or explicit data attribute will trigger tour page behavior.
-  return false;
-}
-
-// Apply tour-specific behaviors when on a tour page
-function applyTourPageBehavior() {
-  console.log('[TourBehavior] Applying tour page enhancements...');
-  
-  // Apply CSS classes to body for tour-specific styling (idempotent)
-  if (window.CFG.hideDropoff && !document.body.classList.contains('tour-page-hide-dropoff')) {
-    document.body.classList.add('tour-page-hide-dropoff');
-    console.log('[TourBehavior] ✓ Hide dropoff field enabled');
-    
-    // Inject critical CSS immediately without relying on inject function
-    if (!document.getElementById('tour-critical-styles')) {
-      const style = document.createElement('style');
-      style.id = 'tour-critical-styles';
-      style.textContent = `
-        /* Hide drop-off input fields */
-        .tour-page-hide-dropoff [data-name="dropoff_location"],
-        .tour-page-hide-dropoff [name="dropoff_location"],
-        body.tour-page-hide-dropoff [data-name="dropoff_location"],
-        body.tour-page-hide-dropoff [name="dropoff_location"] {
-          display: none !important;
-          visibility: hidden !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        /* Hide parent containers */
-        .tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
-        .tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]),
-        body.tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
-        body.tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]) {
-          display: none !important;
-        }
-        /* Hide specific div ID that contains drop-off field */
-        .tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2,
-        body.tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2 {
-          display: none !important;
-          visibility: hidden !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        /* Remove padding from survey form */
-        .survey-2xXWpyyoCV .hl_form-builder--main {
-          padding: 0px !important;
-        }
-      `;
-      document.head.appendChild(style);
-      console.log('[TourBehavior] ✓ Critical tour styles injected immediately');
-    }
-  }
-  
-  if (window.CFG.stickyForm && !document.body.classList.contains('tour-page-sticky-form')) {
-    document.body.classList.add('tour-page-sticky-form');
-    console.log('[TourBehavior] ✓ Sticky form positioning enabled');
-    
-    // Inject sticky CSS immediately
-    if (!document.getElementById('tour-sticky-styles')) {
-      const style = document.createElement('style');
-      style.id = 'tour-sticky-styles';
-      style.textContent = `
-        /* Sticky form - multiple selectors for maximum override */
-        .tour-page-sticky-form #_builder-form,
-        body.tour-page-sticky-form #_builder-form,
-        .tour-page-sticky-form .hl_form-builder,
-        body.tour-page-sticky-form .hl_form-builder,
-        .tour-page-sticky-form .survey-2xXWpyyoCV,
-        body.tour-page-sticky-form .survey-2xXWpyyoCV {
-          position: sticky !important;
-          top: 20px !important;
-          z-index: 1000 !important;
-          background: white !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-          padding: 10px !important;
-          max-height: calc(100vh - 40px) !important;
-          overflow-y: auto !important;
-          margin-bottom: 20px !important;
-        }
-        
-        /* Form builder main container - no padding */
-        .tour-page-sticky-form .hl_form-builder--main,
-        body.tour-page-sticky-form .hl_form-builder--main {
-          padding: 0px !important;
-        }
-        
-        @media (max-width: 768px) {
-          .tour-page-sticky-form #_builder-form,
-          body.tour-page-sticky-form #_builder-form,
-          .tour-page-sticky-form .hl_form-builder,
-          body.tour-page-sticky-form .hl_form-builder,
-          .tour-page-sticky-form .survey-2xXWpyyoCV,
-          body.tour-page-sticky-form .survey-2xXWpyyoCV,
-          .tour-page-sticky-form .hl_form-builder--main,
-          body.tour-page-sticky-form .hl_form-builder--main {
-            position: relative !important;
-            top: auto !important;
-            margin: 20px 0 !important;
-          }
-        }
-        
-        /* Ensure passenger dropdown works with sticky form */
-        .tour-page-sticky-form .passenger-dropdown,
-        .tour-page-sticky-form .passenger-popup,
-        body.tour-page-sticky-form .passenger-dropdown,
-        body.tour-page-sticky-form .passenger-popup {
-          z-index: 10000 !important;
-          position: relative !important;
-        }
-      `;
-      document.head.appendChild(style);
-      console.log('[TourBehavior] ✓ Sticky form styles injected immediately');
-    }
-  }
-  
-  // Also try to inject with the proper function if available (for completeness)
-  if (window.BookingForm.injectTourStyles) {
-    window.BookingForm.injectTourStyles();
-  } else {
-    // Defer until inject function is available
-    setTimeout(() => {
-      if (window.BookingForm.injectTourStyles) {
-        window.BookingForm.injectTourStyles();
-        console.log('[TourBehavior] ✓ Tour styles injected (deferred)');
-      }
-    }, 100);
-  }
-  
-  // Set up auto-fill for drop-off field (with retry logic)
-  if (window.CFG.prefillDropoff) {
-    setupDropoffAutoFill();
-  }
-  
-  // Additional safety: check for form in DOM and re-apply styles if needed
-  setTimeout(() => {
-    const form = document.querySelector('#_builder-form');
-    if (form && window.CFG.hideDropoff) {
-      // Force hide any drop-off fields that might have appeared late
-      const dropoffFields = document.querySelectorAll('[data-name="dropoff_location"], [name="dropoff_location"]');
-      dropoffFields.forEach(field => {
-        if (field.style.display !== 'none') {
-          field.style.display = 'none !important';
-          console.log('[TourBehavior] ✓ Force-hidden late-appearing drop-off field');
-        }
-      });
-    }
-  }, 500);
-}
-
-// Auto-fill drop-off field with page title
-function setupDropoffAutoFill() {
-  console.log('[AutoFill] Setting up drop-off auto-fill...');
-  
-  function fillDropoffField() {
-    // Get page title, clean it up
-    const pageTitle = document.title
-      .replace(/\s*[\|\-\–\—]\s*.*$/, '') // Remove everything after |, -, –, or —
-      .trim();
-    
-    if (!pageTitle) {
-      console.log('[AutoFill] No page title found');
-      return;
-    }
-    
-    // Find drop-off field with multiple selectors
-    const dropoffSelectors = [
-      '[data-name="dropoff_location"]',
-      '[name="dropoff_location"]',
-      'input[placeholder*="drop" i]',
-      'input[placeholder*="destination" i]'
-    ];
-    
-    let dropoffField = null;
-    for (const selector of dropoffSelectors) {
-      dropoffField = document.querySelector(selector);
-      if (dropoffField) break;
-    }
-    
-    if (dropoffField && !dropoffField.value) {
-      dropoffField.value = pageTitle;
-      
-      // Trigger various events to ensure the value is registered
-      ['input', 'change', 'blur'].forEach(eventType => {
-        dropoffField.dispatchEvent(new Event(eventType, { bubbles: true }));
-      });
-      
-      console.log(`[AutoFill] ✓ Drop-off field filled with: "${pageTitle}"`);
-    } else if (!dropoffField) {
-      console.log('[AutoFill] Drop-off field not found');
-    } else {
-      console.log('[AutoFill] Drop-off field already has value');
-    }
-  }
-  
-  // Try to fill immediately
-  fillDropoffField();
-  
-  // Also try after form is fully loaded
-  setTimeout(fillDropoffField, 500);
-  setTimeout(fillDropoffField, 1000);
-  
-  // Listen for form changes in case field appears later
-  const observer = new MutationObserver(() => {
-    fillDropoffField();
-  });
-  
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-  
-  // Stop observing after 10 seconds
-  setTimeout(() => observer.disconnect(), 10000);
-}
-
 // Initialize configuration and then start form enhancement
 async function initializeBookingFormWithConfig() {
   try {
     // Load configuration first
     await loadClientConfiguration();
-    
-    // Detect tour page context and apply appropriate settings
-    detectTourPageContext();
     
     console.log(`[BookingForm] Configuration loaded from: ${window.CFG.loadedFrom}`);
     console.log(`[BookingForm] GMAPS_KEY: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
@@ -476,11 +152,6 @@ async function initializeBookingFormWithConfig() {
     
     // Signal that configuration is ready
     window.BookingForm.configReady = true;
-    
-    // Apply tour-specific behavior if detected
-    if (window.CFG?.tourPageDetected) {
-      applyTourPageBehavior();
-    }
     
     // Re-initialize BookingForm.CONFIG with the loaded configuration
     if (window.BookingForm.initializeConfig) {
@@ -582,6 +253,24 @@ window.BookingForm.getAutocompleteTypesFromConfig = function() {
 
   if (filtered.includes('establishment')) return ['establishment'];
   return [filtered[0]];
+};// Global namespace for booking form
+window.BookingForm = window.BookingForm || {};
+
+window.BookingForm.PARAM_ALLOWLIST = [
+  'pickup_location','dropoff_location','pickup_date','pickup_time','number_of_passengers',
+  'first_name','last_name','email','phone'
+];
+
+window.BookingForm.cacheIncomingParams = function(qs){
+  window.BookingForm.PARAM_ALLOWLIST.forEach(k=>{
+    if (qs.has(k)) { try { sessionStorage.setItem('lead:'+k, qs.get(k)||''); } catch {} }
+  });
+};
+
+window.BookingForm.getParam = function(qs, name){
+  const v = qs.get(name);
+  if (v && String(v).trim()) return v;
+  try { return sessionStorage.getItem('lead:'+name) || ''; } catch { return ''; }
 };// All style injectors (idempotent)
 
 // Global namespace for booking form
@@ -755,7 +444,7 @@ input[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper se
   `);
   inject('booking-form-iconrow-styles', `
   .icon-field-wrapper .icon-input-row{position:relative;}
-  .icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q], .icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q]{padding-left:2.3rem !important;}
+  .icon-field-wrapper .icon-input-row > input[data-iconized='1'][data-q], .icon-field-wrapper .icon-input-row > select[data-iconized='1'][data-q]{padding-left:2.1rem !important;}
   `);
 };
 
@@ -1017,128 +706,10 @@ window.BookingForm.injectCtaStyles = function() {
   `);
 };
 
-// Tour-specific styles for hideDropoff and stickyForm
-window.BookingForm.injectTourStyles = function() {
-  inject('booking-form-tour-styles', `
-    /* Hide drop-off field for tour pages - comprehensive selectors */
-    .tour-page-hide-dropoff [data-name="dropoff_location"],
-    .tour-page-hide-dropoff [name="dropoff_location"],
-    .tour-page-hide-dropoff input[placeholder*="drop" i],
-    .tour-page-hide-dropoff input[placeholder*="destination" i],
-    body.tour-page-hide-dropoff [data-name="dropoff_location"],
-    body.tour-page-hide-dropoff [name="dropoff_location"],
-    body.tour-page-hide-dropoff input[placeholder*="drop" i],
-    body.tour-page-hide-dropoff input[placeholder*="destination" i] {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    
-    /* Hide the parent row/container that might have spacing */
-    .tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
-    .tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]),
-    .tour-page-hide-dropoff [id*="dropoff"]:not(input):not(select):not(textarea),
-    body.tour-page-hide-dropoff .ghl-form-row:has([data-name="dropoff_location"]),
-    body.tour-page-hide-dropoff .ghl-form-row:has([name="dropoff_location"]),
-    body.tour-page-hide-dropoff [id*="dropoff"]:not(input):not(select):not(textarea) {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    
-    /* Hide specific div ID that contains drop-off field */
-    .tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2,
-    body.tour-page-hide-dropoff #el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2 {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    
-    /* Remove padding from survey form */
-    .survey-2xXWpyyoCV .hl_form-builder--main {
-      padding: 0px !important;
-    }
-    
-    /* Sticky form positioning for tour pages - multiple selectors */
-    .tour-page-sticky-form #_builder-form,
-    body.tour-page-sticky-form #_builder-form,
-    .tour-page-sticky-form .hl_form-builder,
-    body.tour-page-sticky-form .hl_form-builder,
-    .tour-page-sticky-form .survey-2xXWpyyoCV,
-    body.tour-page-sticky-form .survey-2xXWpyyoCV {
-      position: sticky !important;
-      top: 20px !important;
-      z-index: 1000 !important;
-      background: white !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-      padding: 10px !important;
-      max-height: calc(100vh - 40px) !important;
-      overflow-y: auto !important;
-      margin-bottom: 20px !important;
-    }
-    
-    /* Ensure sticky works on the actual form container with no padding */
-    .tour-page-sticky-form .hl_form-builder--main,
-    body.tour-page-sticky-form .hl_form-builder--main {
-      padding: 0px !important;
-    }
-    
-    /* Ensure form container has proper spacing on mobile */
-    @media (max-width: 768px) {
-      .tour-page-sticky-form #_builder-form,
-      body.tour-page-sticky-form #_builder-form,
-      .tour-page-sticky-form .hl_form-builder,
-      body.tour-page-sticky-form .hl_form-builder,
-      .tour-page-sticky-form .survey-2xXWpyyoCV,
-      body.tour-page-sticky-form .survey-2xXWpyyoCV,
-      .tour-page-sticky-form .hl_form-builder--main,
-      body.tour-page-sticky-form .hl_form-builder--main {
-        position: relative !important;
-        top: auto !important;
-        margin: 20px 0 !important;
-      }
-    }
-    
-    /* Ensure passenger dropdown works with sticky form */
-    .tour-page-sticky-form .passenger-dropdown,
-    .tour-page-sticky-form .passenger-popup,
-    body.tour-page-sticky-form .passenger-dropdown,
-    body.tour-page-sticky-form .passenger-popup {
-      z-index: 10000 !important;
-      position: relative !important;
-    }
-  `);
-};
-
 // Initialize styles immediately
 window.BookingForm.injectBaselineStyles();
 window.BookingForm.injectValidationStyles();
-window.BookingForm.injectCtaStyles();// Global namespace for booking form
-window.BookingForm = window.BookingForm || {};
-
-window.BookingForm.PARAM_ALLOWLIST = [
-  'pickup_location','dropoff_location','pickup_date','pickup_time','number_of_passengers',
-  'first_name','last_name','email','phone'
-];
-
-window.BookingForm.cacheIncomingParams = function(qs){
-  window.BookingForm.PARAM_ALLOWLIST.forEach(k=>{
-    if (qs.has(k)) { try { sessionStorage.setItem('lead:'+k, qs.get(k)||''); } catch {} }
-  });
-};
-
-window.BookingForm.getParam = function(qs, name){
-  const v = qs.get(name);
-  if (v && String(v).trim()) return v;
-  try { return sessionStorage.getItem('lead:'+name) || ''; } catch { return ''; }
-};// Section 7: Icon Injection / Visual Enhancement from temp.js
+window.BookingForm.injectCtaStyles();// Section 7: Icon Injection / Visual Enhancement from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -1209,32 +780,31 @@ function enhanceVisual(rootDoc){
       row.appendChild(el);
     }
     // Create or move the icon into the row
-    let span = row.querySelector(':scope > .field-icon');
+    let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
     if(!span){
       span=document.createElement('span');
       span.className='field-icon';
       span.setAttribute('aria-hidden','true');
       if(key) span.setAttribute('data-for', key);
       span.innerHTML=svg;
-      row.insertBefore(span, el); // Insert icon before input/select
     } else {
       // Ensure attributes match latest key
       if(key) span.setAttribute('data-for', key);
     }
-    // Remove any trailing .field-icon after the input/select (not just immediate sibling)
-    let sibling = el.nextSibling;
-    while (sibling) {
-      if (sibling.nodeType === 1 && sibling.classList.contains('field-icon')) {
-        sibling.remove();
-        // Do not break; remove all trailing icons
-      }
-      sibling = sibling.nextSibling;
+    if(span.parentElement !== row){
+      row.appendChild(span);
     }
     el.dataset.iconized='1';
   }
   Object.entries(ICONS).forEach(([k,svg])=>{
-    [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-    [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    if (k === 'number_of_passengers') {
+      // Only inject icon for select, not input
+      [...rootDoc.querySelectorAll(`select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+      [...rootDoc.querySelectorAll(`select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    } else {
+      [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+      [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+    }
   });
 }
 
@@ -1491,9 +1061,7 @@ window.BookingForm = window.BookingForm || {};
   window.__pickupDatePicker={ openFor, close, attach };
   // initial attach
   attach(document);
-})();
-
-// Time picker - using IIFE singleton pattern from temp.js
+})();// Time picker - using IIFE singleton pattern from temp.js
 window.BookingForm = window.BookingForm || {};
 
 (function initSingletonTimePicker(){
@@ -1596,9 +1164,7 @@ window.BookingForm.attachPickupTimePicker = function(rootDoc, specificEl){
     }
     window.__singletonTimePicker.openFor(input);
   });
-};
-
-// Section X: Passenger Count Select (1–15, then 16+) from temp.js
+};// Section X: Passenger Count Select (1–15, then 16+) from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -1834,9 +1400,7 @@ window.BookingForm.initPassengerSelect = function(root = document) {
   if (window.__passengerSelect && window.__passengerSelect.attach) {
     window.__passengerSelect.attach(root);
   }
-};
-
-// Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
+};// Validates step 1 on NEXT (pickup, drop-off, date, time, passengers)
 // Adds inline messages and fade-out animation before advancing
 
 // Global namespace for booking form
@@ -2076,9 +1640,7 @@ window.BookingForm.installStepOneNextValidation = function(){
   }, true);
 
   window.__stepOneNextValidation = true;
-};
-
-// Validates step 2 on SUBMIT (full_name, email, phone)
+};// Validates step 2 on SUBMIT (full_name, email, phone)
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2196,9 +1758,7 @@ window.BookingForm.installStepTwoSubmitValidation = function(){
   }, true);
 
   window.__stepTwoSubmitValidation = true;
-};
-
-// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
+};// Section 10: Maps Initialization + Airport Data + Retry + Prediction Prioritizer from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2385,9 +1945,7 @@ window.BookingForm.initMapsAndFilters = function() {
 };
 
 // Expose loadGoogleMaps function for backwards compatibility
-window.BookingForm.loadGoogleMaps = loadGoogleMaps;
-
-// Google Places Autocomplete + Airport Code Normalization (Section 6)
+window.BookingForm.loadGoogleMaps = loadGoogleMaps;// Google Places Autocomplete + Airport Code Normalization (Section 6)
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2486,9 +2044,7 @@ function wireAutocomplete(rootDoc){
 
 // Expose wireAutocomplete function and biasBoundsFn for external setup
 window.BookingForm.wireAutocomplete = wireAutocomplete;
-window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };
-
-// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
+window.BookingForm.setBiasBoundsFn = function(fn) { biasBoundsFn = fn; };// Section 9: Dynamic Field Observer (MutationObserver) from temp.js
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
@@ -2547,49 +2103,3 @@ window.BookingForm.observeLateFields = function(){
   // The IIFE above handles the singleton pattern, so this is just for API consistency
   return window.__iconFieldObserver;
 };
-// Essential initialization code
-window.BookingForm.initNow = function(root = document) {
-  // Section 1 & 2: Inject essential styles first
-  window.BookingForm.injectBaselineStyles();
-  window.BookingForm.injectValidationStyles();
-};
-
-// Section 8: Form Enhancement Function (called after config is loaded)
-window.BookingForm.enhance = function() {
-  console.log('[BookingForm] Starting form enhancement...');
-  
-    // Apply tour-specific behavior if detected (re-apply in case form loaded late)
-    if (window.CFG?.tourPageDetected) {
-      console.log('[BookingForm] Re-applying tour page behavior during enhancement...');
-      applyTourPageBehavior();
-    }
-    
-    // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
-    // Adjust order only if dependencies change (icons don't depend on others).
-    
-    window.BookingForm.attachPickupDateGuard(document);
-    window.BookingForm.attachPickupTimePicker(document);
-    window.BookingForm.enhanceVisual(document);
-    window.BookingForm.enhanceNextButtonMobile(document);
-    window.BookingForm.enhanceSubmitButton(document);
-    window.BookingForm.initSurveyTransitions(document);
-    
-    // Install validation for both steps
-    window.BookingForm.installStepOneNextValidation();
-    window.BookingForm.installStepTwoSubmitValidation();
-    
-    // Secondary run to catch late-rendered inputs
-    setTimeout(()=>{
-      window.BookingForm.enhanceVisual(document);
-    },400);
-
-    // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
-    window.BookingForm.initMapsAndFilters();
-
-    // Watch for late-rendered/replaced fields (GHL)
-    window.BookingForm.observeLateFields();
-
-    console.log('[BookingForm] Form enhancement complete');
-};
-
-// Note: Form enhancement is called by async-config-loader.js after config loads
