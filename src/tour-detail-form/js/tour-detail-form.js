@@ -52,6 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
   
   ===================================================== */
   
+// Load client configuration if not already loaded
+async function loadClientConfig() {
+  if (window.CFG?.configLoaded) return;
+  
+  const client = window.CFG?.client || 'demo';
+  const baseUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main`;
+  
+  try {
+    const response = await fetch(`${baseUrl}/clients/${client}/core/config.json`);
+    if (response.ok) {
+      const config = await response.json();
+      window.CFG = {
+        ...window.CFG,
+        ...config.FORM_CONFIG,
+        GMAPS_KEY: config.FORM_CONFIG?.GMAPS_KEY,
+        PLACES_API_KEY: config.FORM_CONFIG?.GMAPS_KEY,
+        COUNTRIES: config.FORM_CONFIG?.COUNTRIES,
+        configLoaded: true
+      };
+      console.log(`[TourForm] Loaded config for ${client}, API key: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
+    }
+  } catch (error) {
+    console.warn(`[TourForm] Failed to load config for ${client}:`, error);
+  }
+}
+
+// Initialize config loading
+if (window.CFG?.client) {
+  loadClientConfig();
+}
+
 const CONFIG = {
   googleApiKey:
     (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || '',
@@ -1146,6 +1177,34 @@ autofillHiddenDropOff(document);
     Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
     Adjust order only if dependencies change (icons don’t depend on others).
   ===================================================== */
+  
+  // Hide drop-off field for tour forms
+  function hideDropOffField() {
+    if (window.CFG?.formType === 'tour') {
+      // Hide the entire drop-off container including the icon
+      const dropOffContainer = document.getElementById('el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2');
+      if (dropOffContainer) {
+        dropOffContainer.style.display = 'none';
+        console.log('[TourForm] Hidden drop-off container for tour form');
+      }
+      
+      // Also hide any other drop-off field containers that might exist
+      const dropOffInputs = document.querySelectorAll('input[data-q="drop-off_location"]');
+      dropOffInputs.forEach(input => {
+        // Find the closest form field wrapper
+        const wrapper = input.closest('.form-builder--item') || 
+                       input.closest('.ghl-question') || 
+                       input.closest('.icon-field-wrapper') ||
+                       input.closest('[id*="el_"]');
+        if (wrapper) {
+          wrapper.style.display = 'none';
+          console.log('[TourForm] Hidden drop-off field wrapper');
+        }
+      });
+    }
+  }
+  
+  hideDropOffField();
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
   enhanceVisual(document);
