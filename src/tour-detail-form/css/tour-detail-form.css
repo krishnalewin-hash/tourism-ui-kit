@@ -1,0 +1,177 @@
+.ghl-btn.ghl-submit-btn.bf-cta .bf-cta-text {
+    font-size: 20px !important;
+}
+
+#_builder-form .thank-you-message > div {
+    padding: 40px 0px !important;
+}
+
+.social-icon {
+    padding: 0.3rem !important;
+}
+
+.gradientbg {
+    background: linear-gradient(to bottom, #ffffff 0%, #F6F5F8 100%);
+}
+
+/* ---------- Booking form styles ---------- */
+body, input, button, select, textarea {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+/* Google Places Autocomplete (pac) unified sizing & appearance */
+.pac-container {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+          /* Base fallback size */
+    line-height: 1.35;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    overflow: hidden;
+    z-index: 4000;
+               /* Above form elements */
+}
+
+.pac-container:empty {
+    display: none;
+}
+
+.pac-item {
+    padding: 10px 14px;
+    font-size: 0.92rem;
+          /* Secondary line size (will apply to non-overridden spans) */
+    line-height: 1.25;
+    cursor: pointer;
+    border-top: 1px solid #efefef;
+    background: #fff;
+    color: #222;
+}
+
+.pac-item:first-child {
+    border-top: none;
+}
+
+/* Primary (top) line */
+.pac-item .pac-item-query {
+    display: block;
+    font-size: 1.18rem;
+    font-weight: 600;
+    line-height: 1.1;
+    margin: 0 0 2px 0;
+    color: #222;
+}
+
+/* Secondary address fragments */
+.pac-item .pac-item-query ~ span {
+    display: inline;
+             /* Keep inline; adjust to block if you want forced wrap */
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #555;
+}
+
+/* Hover / keyboard selection */
+.pac-item:hover,
+.pac-item.pac-item-selected {
+    background: #266BBC;
+    color: #fff;
+}
+
+.pac-item:hover .pac-item-query,
+.pac-item.pac-item-selected .pac-item-query {
+    color: #fff;
+}
+
+.pac-item:hover .pac-item-query ~ span,
+.pac-item.pac-item-selected .pac-item-query ~ span {
+    color: #fff;
+}
+
+/* Suggestion icon spacing (default Google icon) */
+.pac-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+}
+
+/* Preserve Google's required branding (do not hide the logo element itself) */
+.pac-container .pac-logo:after {
+  display: none; /* Only removes extra decorative line some themes add */
+}
+
+/* Mobile tap target + slight scale adjustment */
+@media (max-width: 600px) {
+  .pac-container {
+    font-size: 1.12rem;   /* Slightly larger base */
+  }
+  .pac-item {
+    padding: 12px 16px;
+  }
+  .pac-item .pac-item-query {
+    font-size: 1.2rem;
+  }
+  .pac-item .pac-item-query ~ span {
+    font-size: 0.88rem;
+  }
+}
+
+@media (min-width:640px){
+  /* Ensure the parent can place items side-by-side */
+  .ghl-question .fields-container.row{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    gap: 0px 5px; /* adjust or remove if tight on space */
+    align-items:flex-start;
+  }
+
+  /* Default: all wrappers full width (stacked) */
+  .ghl-question .fields-container.row > .form-field-wrapper{
+    width:100%;
+    max-width:100%;
+    flex: 0 0 100%;
+    box-sizing:border-box;
+  }
+
+  /* Make just Pickup Date + Pickup Time half width */
+  .ghl-question .fields-container.row > .form-field-wrapper:has([data-q="pickup_date"]),
+  .ghl-question .fields-container.row > .form-field-wrapper:has([data-q="pickup_time"]){
+    width: calc(50% - 3px) !important;      /* override .col-12 */
+    max-width: calc(50% - 3px) !important;  /* override .col-12 */
+    flex: 0 0 calc(50% - 3px) !important;   /* override .col-12 */
+  }
+}
+
+/* 1) Safety net while debugging */
+html, body { max-width: 100%; overflow-x: hidden; }
+* { box-sizing: border-box; }
+
+@media (max-width: 600px) {
+  form#_builder-form {
+    padding: 0px 10px !important;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+  }
+  
+ /* img.hl-un-optimized.mw-100 {
+    padding: 0 0 10px 0 !important;
+  } */
+}
+  
+  #lc-form-mount .ghl-form-wrap {
+  margin-bottom: 0 !important;
+}
+  
+/*---------------NEW-------------*/
+
+  /* your right column itself (the flex child) */
+.form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
+  align-self: flex-start;              /* avoid vertical stretching quirks */
+}
+
+body{ overflow-x: clip; overflow-y: visible !important; }  /* or overflow-y:auto; */
+  
+.form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO{
+  position: sticky !important;
+  top: 24px;
+}

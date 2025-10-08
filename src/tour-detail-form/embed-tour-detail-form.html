@@ -1,0 +1,40 @@
+<!-- Tour Detail Form Styling - Clean Implementation -->
+<!-- Use this embed script for tour detail pages -->
+
+<!-- Configuration: Set formType to 'tour' for tour pages, disable script sticky to use CSS sticky -->
+<script>
+window.CFG = {
+    client: 'kamar-tours',
+    formType: 'tour',         // Manual configuration ensures drop-off is hidden
+    stickyForm: false,        // Disable to avoid conflicts with CSS sticky positioning
+    GMAPS_KEY: 'YOUR_GOOGLE_MAPS_API_KEY',
+    COUNTRIES: ['jm'],
+    REGION: 'jm'
+};
+</script>
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail-form/css/tour-detail-form.css">
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail-form/js/tour-detail-form.js"></script>
+
+<!-- 
+Features included:
+- ✅ Google Maps Places Autocomplete
+- ✅ Custom date/time pickers 
+- ✅ Passenger dropdown select (1-15, 16+)
+- ✅ Field validation with inline messages
+- ✅ Form field icons
+- ✅ Sticky sidebar positioning (CSS-based)
+- ✅ Drop-off field hiding for tour pages
+- ✅ Step transitions with animations
+- ✅ Mobile-responsive design
+- ✅ Auto-fill drop-off from page title
+
+Usage:
+1. Add your Google Maps API key to window.CFG.GMAPS_KEY
+2. Set formType: 'tour' for tour detail pages
+3. For airport transfer pages, remove formType or set to 'transfer'
+4. Ensure your form sidebar has the class: form-sidebar
+-->
