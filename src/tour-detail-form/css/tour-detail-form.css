@@ -30,6 +30,18 @@ body, input, button, select, textarea {
     background-color: #fff !important;
     color: #222 !important;
     border-radius: 10px !important;
+    font-size: 20px;
+    font-weight: 300;
+}
+
+/* Placeholder styling for specific element */
+#aWEGkxHplDFuKOJWnHSg::placeholder {
+    color: #8c8c8c !important;
+}
+
+#aWEGkxHplDFuKOJWnHSg:focus::placeholder,
+#aWEGkxHplDFuKOJWnHSg:not(:placeholder-shown) {
+    color: #222 !important;
 }
 
 /* Google Places Autocomplete (pac) unified sizing & appearance */
