@@ -1,226 +1,206 @@
-// Section 7: Icon Injection / Visual Enhancement from temp.js
+// src/booking/js/booking.js
+
+// IMPORTANT: Load async config loader FIRST before other modules
+import './async-config-loader.js';
+
+// Include all modules by importing them (they'll be bundled)
+import './config.js';
+import './styles.js';
+import './utils.js';
+import './visuals.js';
+import './date-guard.js';
+import './date-picker.js';
+import './time-picker.js';
+import './passengers.js';
+import './validation-step1.js';
+import './validation-step2.js';
+import './maps.js';
+import './autocomplete.js';
+import './observer.js';
 
 // Global namespace for booking form
 window.BookingForm = window.BookingForm || {};
 
-// Enhanced layout for date and time fields on desktop (custom from your temp.js)
-function enhanceDateTimeLayout(rootDoc) {
-  if (!rootDoc) return;
-  
-  // Find date and time input wrappers
-  const dateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_date"])') ||
-                     rootDoc.querySelector('input[data-q="pickup_date"]')?.closest('.icon-field-wrapper');
-  const timeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="pickup_time"])') ||
-                     rootDoc.querySelector('input[data-q="pickup_time"]')?.closest('.icon-field-wrapper');
-  
-  if (!dateWrapper || !timeWrapper) return;
-  
-  // Check if they're siblings and not already in a flex container
-  if (dateWrapper.nextElementSibling === timeWrapper && !dateWrapper.parentElement.classList.contains('bf-datetime-container')) {
-    // Create flex container
-    const container = document.createElement('div');
-    container.className = 'bf-datetime-container';
-    container.style.cssText = 'display: flex; gap: 12px; align-items: flex-start;';
-    
-    // Insert container before date wrapper
-    dateWrapper.parentElement.insertBefore(container, dateWrapper);
-    
-    // Move both wrappers into container and set flex properties
-    dateWrapper.style.cssText = 'flex: 2; min-width: 0;'; // Date gets more space
-    timeWrapper.style.cssText = 'flex: 1; min-width: 0;'; // Time gets less space
-    
-    container.appendChild(dateWrapper);
-    container.appendChild(timeWrapper);
-  }
+// Section 8: Initial Enhancement Invocation
+// Helper functions for styling selects to match inputs
+function matchFieldLook(target){
+  const ref =
+    document.querySelector('.icon-field-wrapper input[data-q]') ||
+    document.querySelector('input[data-q]');
+  if (!ref) return;
+
+  const cs = getComputedStyle(ref);
+  const props = [
+    'fontFamily','fontSize','lineHeight','letterSpacing',
+    'color','backgroundColor','border','borderTop','borderRight','borderBottom','borderLeft',
+    'borderRadius','boxShadow','outline','height','minHeight'
+  ];
+  props.forEach(p => { try { target.style[p] = cs[p]; } catch(_){} });
+
+  // Ensure consistent font-weight (don't copy from reference as it might differ)
+  target.style.fontWeight = 'normal';
+
+  // Keep room for the leading icon, and a normal right padding
+  target.style.paddingLeft = '2.1rem';
+  target.style.paddingRight = '18px';
+  target.style.webkitAppearance = 'none';
+  target.style.appearance = 'none';
 }
 
-// Section 7 implementation from temp.js
-function enhanceVisual(rootDoc){
-  if(!rootDoc) return;
-  const ICONS={
-    'pickup_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
-    'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
-    'pickup_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
-    'pickup_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
-    'number_of_passengers':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`,
-    'full_name':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/></svg>`,
-    'email':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z'/><polyline points='22,6 12,13 2,6'/></svg>`,
-    'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
-  };
-  function wrap(el, svg, key){
-    if(!el) return;
-    // Find or create wrapper
-    let wrapDiv = el.closest('.icon-field-wrapper');
-    if(!wrapDiv){
-      wrapDiv=document.createElement('div');
-      wrapDiv.className='icon-field-wrapper';
-      el.parentNode.insertBefore(wrapDiv, el);
-    }
-    // Ensure an input-row exists (icon aligns to this row only)
-    let row = wrapDiv.querySelector(':scope > .icon-input-row');
-    if(!row){
-      row=document.createElement('div');
-      row.className='icon-input-row';
-      // place at top so any error message can appear below
-      wrapDiv.insertBefore(row, wrapDiv.firstChild);
-    }
-    // Move input into the row if not already
-    if(el.parentElement !== row){
-      row.appendChild(el);
-    }
-    // Create or move the icon into the row
-    let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
-    if(!span){
-      span=document.createElement('span');
-      span.className='field-icon';
-      span.setAttribute('aria-hidden','true');
-      if(key) span.setAttribute('data-for', key);
-      span.innerHTML=svg;
-    } else {
-      // Ensure attributes match latest key
-      if(key) span.setAttribute('data-for', key);
-    }
-    if(span.parentElement !== row){
-      row.appendChild(span);
-    }
-    el.dataset.iconized='1';
-  }
-  Object.entries(ICONS).forEach(([k,svg])=>{
-    if (k === 'number_of_passengers') {
-      // Only inject icon for select, not input
-      [...rootDoc.querySelectorAll(`select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-      [...rootDoc.querySelectorAll(`select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
-    } else {
-      [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-      [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
-    }
-  });
+function applyPlaceholderClass(select){
+  const isEmpty = !select.value;
+  select.classList.toggle('is-placeholder', isEmpty);
 }
 
-// Enhance Step 1 NEXT button on mobile by appending a "NEXT" label next to the arrow
-function enhanceNextButtonMobile(rootDoc){
-  if(!rootDoc) rootDoc = document;
-  const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-footer-next');
-  btns.forEach(btn => {
-    let labelSpan = btn.querySelector('.bf-next-label');
-    if(isMobile){
-      // Ensure alignment class exists only on mobile
-      btn.classList.add('bf-next');
-      // Add or move label to the first position
-      if(!labelSpan){
-        labelSpan = document.createElement('span');
-        labelSpan.className = 'bf-next-label';
-        labelSpan.textContent = 'NEXT';
-        btn.insertBefore(labelSpan, btn.firstChild);
-      } else if (btn.firstElementChild !== labelSpan) {
-        btn.insertBefore(labelSpan, btn.firstChild);
-      }
-    } else {
-      // Desktop: remove our alignment class and custom label to avoid side effects
-      btn.classList.remove('bf-next');
-      if(labelSpan) labelSpan.remove();
-    }
-  });
-}
+// Expose helper functions
+window.BookingForm.matchFieldLook = matchFieldLook;
+window.BookingForm.applyPlaceholderClass = applyPlaceholderClass;
 
-// Toggle NEXT label on viewport changes
-try {
-  const mq = window.matchMedia('(max-width: 768px)');
-  const reapply = ()=> enhanceNextButtonMobile(document);
-  if(mq.addEventListener){ mq.addEventListener('change', reapply); }
-  else if(mq.addListener){ mq.addListener(reapply); }
-  window.addEventListener('resize', reapply, { passive: true });
-} catch(_) {}
+window.BookingForm.initNow = function(root = document) {
+  // Section 1 & 2: Inject essential styles first
+  window.BookingForm.injectBaselineStyles();
+  window.BookingForm.injectValidationStyles();
+};
 
-// Initialize survey step transitions (disabled to prevent navigation issues)
-// Remove the disabled approach since it causes navigation issues
-// (Survey transitions are handled by GoHighLevel's platform)
-function initSurveyTransitions() {
-  // Intentionally disabled to prevent navigation issues
-}
-
-// Enhance the Step 2 submit button with CTA text + white arrow + loading state
-function enhanceSubmitButton(rootDoc){
-  if(!rootDoc) rootDoc = document;
-  const btns = rootDoc.querySelectorAll('.ghl-btn.ghl-submit-btn');
-  btns.forEach(btn => {
-    if(btn.dataset.bfCtaWired === '1') return;
-    // Replace text with our CTA while preserving the button element and its listeners
-    const label = 'GET YOUR QUOTE!';
-    btn.classList.add('bf-cta');
-    btn.innerHTML = `<span class="bf-cta-text">${label}</span>`+
-      `<span class="bf-arrow" aria-hidden="true">`+
-      `<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">`+
-      `<line x1="5" y1="12" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `<line x1="12" y1="5" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `<line x1="12" y1="19" x2="19" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"></line>`+
-      `</svg>`+
-      `</span>`;
+// Section 8: Form Enhancement Function (called after config is loaded)
+window.BookingForm.enhance = function() {
+  console.log('[BookingForm] Starting form enhancement...');
     
-    // Add loading state functionality with fullscreen overlay approach
-    btn.addEventListener('click', function(e) {
-      // Check if overlay already exists
-      if (document.querySelector('.bf-loading-overlay')) {
-        return; // Loading overlay already exists
-      }
+    // Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
+    // Adjust order only if dependencies change (icons don't depend on others).
+    
+    window.BookingForm.attachPickupDateGuard(document);
+    window.BookingForm.attachPickupTimePicker(document);
+    window.BookingForm.enhanceVisual(document);
+    window.BookingForm.enhanceNextButtonMobile(document);
+    window.BookingForm.enhanceSubmitButton(document);
+    window.BookingForm.initSurveyTransitions(document);
+    
+    // Install validation for both steps
+    window.BookingForm.installStepOneNextValidation();
+    window.BookingForm.installStepTwoSubmitValidation();
+    
+    // Secondary run to catch late-rendered inputs
+    setTimeout(()=>{
+      window.BookingForm.enhanceVisual(document);
+    },400);
+
+    // Section 10: Initialize Google Maps, autocomplete, PAC filters, and prediction prioritizer
+    window.BookingForm.initMapsAndFilters();
+
+    // Watch for late-rendered/replaced fields (GHL)
+    window.BookingForm.observeLateFields();
+
+    // Section 11: Populate URL parameters after components are initialized
+    setTimeout(() => {
+      try {
+      const qs = new URLSearchParams(location.search);
+      window.BookingForm.cacheIncomingParams(qs);
       
-      // Create fullscreen loading overlay immediately
-      const loadingOverlay = document.createElement('div');
-      loadingOverlay.className = 'bf-loading-overlay';
-      loadingOverlay.innerHTML = `
-        <div class="bf-loading-content">
-          <div class="bf-loading-spinner-container">
-            <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
-              <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
-            </svg>
-          </div>
-          <span class="bf-loading-text">Processing Your Request...</span>
-        </div>
-      `;
-      
-      // Make it fullscreen with subtle styling
-      loadingOverlay.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0, 0, 0, 0.7) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        z-index: 999999 !important;
-        backdrop-filter: blur(5px) !important;
-        font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-      `;
-      
-      document.body.appendChild(loadingOverlay);
-      
-      // Check for validation errors after a brief delay
-      setTimeout(() => {
-        const hasErrors = rootDoc.querySelectorAll('.error, .ghl-error, [data-error="true"], .invalid').length > 0;
-        const formElement = btn.closest('form');
-        const isFormValid = formElement ? formElement.checkValidity() : true;
-        
-        if (hasErrors || !isFormValid) {
-          // Remove loading overlay if validation fails
-          loadingOverlay.remove();
-        } else {
-          // Keep overlay visible during submission and redirect
+      // Populate form fields from URL parameters with better field selection
+      window.BookingForm.PARAM_ALLOWLIST.forEach(paramName => {
+        const paramValue = window.BookingForm.getParam(qs, paramName);
+        if (paramValue) {
+          // Try multiple selectors to find the field
+          let field = document.querySelector(`[data-q="${paramName}"]`) || 
+                     document.querySelector(`[name="${paramName}"]`);
+          
+          // For number_of_passengers, prefer the original input over the select
+          if (paramName === 'number_of_passengers') {
+            const input = document.querySelector(`input[data-q="${paramName}"], input[name="${paramName}"]`);
+            const select = document.querySelector(`select[data-q="${paramName}"], select[name="${paramName}"]`);
+            
+            if (input && select) {
+              // Populate both the hidden input and the visible select for GHL survey
+              input.value = paramValue;
+              select.value = paramValue;
+              select.setAttribute('value', paramValue);
+              
+              // Mark as survey field for GHL
+              input.setAttribute('data-ghl-survey-field', 'true');
+              input.setAttribute('data-survey-populated', 'true');
+              
+              // Apply placeholder styling
+              if (window.BookingForm.applyPlaceholderClass) {
+                window.BookingForm.applyPlaceholderClass(select);
+              }
+              
+              // Trigger comprehensive events for GHL survey
+              const events = ['change', 'input', 'blur'];
+              events.forEach(eventType => {
+                input.dispatchEvent(new Event(eventType, { bubbles: true }));
+                select.dispatchEvent(new Event(eventType, { bubbles: true }));
+              });
+              
+              // Custom GHL survey event
+              try {
+                input.dispatchEvent(new CustomEvent('ghl-survey-field-populated', { 
+                  detail: { field: paramName, value: paramValue, step: 'step1' },
+                  bubbles: true 
+                }));
+              } catch(e) {
+                console.warn('GHL survey custom event failed:', e);
+              }
+            } else if (input) {
+              input.value = paramValue;
+              input.setAttribute('data-ghl-survey-field', 'true');
+              input.setAttribute('data-survey-populated', 'true');
+              
+              // If there's a synced select, update it too
+              if (input._syncedSelect) {
+                input._syncedSelect.value = paramValue;
+                input._syncedSelect.setAttribute('value', paramValue);
+                if (window.BookingForm.applyPlaceholderClass) {
+                  window.BookingForm.applyPlaceholderClass(input._syncedSelect);
+                }
+              }
+              
+              const events = ['change', 'input', 'blur'];
+              events.forEach(eventType => {
+                input.dispatchEvent(new Event(eventType, { bubbles: true }));
+              });
+              
+            } else if (select) {
+              // If only select exists, populate it and sync to hidden input if present
+              select.value = paramValue;
+              select.setAttribute('value', paramValue);
+              
+              if (window.BookingForm.applyPlaceholderClass) {
+                window.BookingForm.applyPlaceholderClass(select);
+              }
+              
+              if (select._syncedInput) {
+                select._syncedInput.value = paramValue;
+                select._syncedInput.setAttribute('data-ghl-survey-field', 'true');
+                select._syncedInput.setAttribute('data-survey-populated', 'true');
+                
+                const events = ['change', 'input', 'blur'];
+                events.forEach(eventType => {
+                  select._syncedInput.dispatchEvent(new Event(eventType, { bubbles: true }));
+                });
+              }
+              
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              select.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+              console.warn(`GHL Survey: No passenger field found for ${paramName}`);
+            }
+          } else if (field) {
+            field.value = paramValue;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            console.warn(`Field not found for parameter: ${paramName}`);
+          }
         }
-      }, 100);
-      
-    });
-    
-    btn.dataset.bfCtaWired = '1';
-  });
-}
+      });
+    } catch (e) {
+      console.warn('URL parameter population failed:', e);
+    }
+  }, 800); // Longer delay to ensure passenger select is created
+  
+  console.log('[BookingForm] Form enhancement complete');
+};
 
-// Expose functions on global namespace
-window.BookingForm.enhanceVisual = enhanceVisual;
-window.BookingForm.enhanceDateTimeLayout = enhanceDateTimeLayout;
-window.BookingForm.enhanceNextButtonMobile = enhanceNextButtonMobile;
-window.BookingForm.enhanceSubmitButton = enhanceSubmitButton;
-window.BookingForm.initSurveyTransitions = initSurveyTransitions;
+// Note: Form enhancement is now called by async-config-loader.js after config loads
+// The old DOM ready initialization is replaced by the config-driven approach
