@@ -3,6 +3,12 @@
     const style = document.createElement('style');
     style.id = 'quote-form-sticky-sidebar-styles';
     style.textContent = `
+      /* Ensure parent flex rules for sticky sidebar reliability */
+      .ghl-question .fields-container.row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+      }
       .form-sidebar.borderFull.radius10.none.c-column.c-wrapper.col-EWKLqS1EOO {
         position: sticky !important;
         top: 24px;
