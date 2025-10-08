@@ -32,6 +32,7 @@ body, input, button, select, textarea {
     border-radius: 10px !important;
     font-size: 20px;
     font-weight: 300;
+    padding: 12px 20px !important;
 }
 
 /* Placeholder styling for specific element */
@@ -51,12 +52,12 @@ body, input, button, select, textarea {
 
 #aWEGkxHplDFuKOJWnHSg:focus,
 #aWEGkxHplDFuKOJWnHSg:not([value=""]) {
-    color: #ccc !important;  /* Selected text color */
+    color: #8c8c8c !important;  /* Selected text color */
 }
 
-/* When a valid option is selected, ensure text is #ccc */
+/* When a valid option is selected, ensure text is #8c8c8c */
 #aWEGkxHplDFuKOJWnHSg option:not(:first-child) {
-    color: #ccc !important;
+    color: #8c8c8c !important;
 }
 
 /* Generic number of passengers select styling (fallback) */
