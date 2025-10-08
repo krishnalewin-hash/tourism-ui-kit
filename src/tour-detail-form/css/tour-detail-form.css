@@ -44,19 +44,34 @@ body, input, button, select, textarea {
     color: #222 !important;
 }
 
-/* Number of passengers select placeholder styling */
+/* Number of passengers select field - target the specific ID */
+#aWEGkxHplDFuKOJWnHSg {
+    color: #8c8c8c !important;
+}
+
+#aWEGkxHplDFuKOJWnHSg:focus,
+#aWEGkxHplDFuKOJWnHSg:not([value=""]) {
+    color: #8c8c8c !important;  /* Keep numbers as #8c8c8c as requested */
+}
+
+/* When a valid option is selected, ensure text stays #8c8c8c */
+#aWEGkxHplDFuKOJWnHSg option:not(:first-child) {
+    color: #8c8c8c !important;
+}
+
+/* Generic number of passengers select styling (fallback) */
 select[data-q="number_of_passengers"] {
     color: #8c8c8c !important;
 }
 
 select[data-q="number_of_passengers"]:focus,
 select[data-q="number_of_passengers"]:not([value=""]) {
-    color: #222 !important;
+    color: #8c8c8c !important;  /* Keep consistent */
 }
 
-/* When a valid option is selected, ensure text is dark */
+/* When a valid option is selected, ensure text is consistent */
 select[data-q="number_of_passengers"] option:not(:first-child) {
-    color: #222 !important;
+    color: #8c8c8c !important;
 }
 
 /* Hide or reposition SVG icon behind number of passengers select to prevent flash */
