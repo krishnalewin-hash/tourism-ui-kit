@@ -44,6 +44,35 @@ body, input, button, select, textarea {
     color: #222 !important;
 }
 
+/* Number of passengers select placeholder styling */
+select[data-q="number_of_passengers"] {
+    color: #8c8c8c !important;
+}
+
+select[data-q="number_of_passengers"]:focus,
+select[data-q="number_of_passengers"]:not([value=""]) {
+    color: #222 !important;
+}
+
+/* When a valid option is selected, ensure text is dark */
+select[data-q="number_of_passengers"] option:not(:first-child) {
+    color: #222 !important;
+}
+
+/* Hide or reposition SVG icon behind number of passengers select to prevent flash */
+.icon-field-wrapper:has(select[data-q="number_of_passengers"]) .field-icon {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform: translateY(10px);
+}
+
+/* Show icon only after field is focused or has value */
+.icon-field-wrapper:has(select[data-q="number_of_passengers"]:focus) .field-icon,
+.icon-field-wrapper:has(select[data-q="number_of_passengers"]:not([value=""])) .field-icon {
+    opacity: 1;
+    transform: translateY(-50%);
+}
+
 /* Google Places Autocomplete (pac) unified sizing & appearance */
 .pac-container {
     font-family: 'Poppins', sans-serif;
