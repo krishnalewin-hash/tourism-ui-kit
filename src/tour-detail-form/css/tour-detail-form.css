@@ -19,6 +19,21 @@ body, input, button, select, textarea {
     font-family: 'Poppins', sans-serif !important;
 }
 
+/* Form builder input styling */
+#_builder-form .form-builder--item input[type=text][class=form-control], 
+#aWEGkxHplDFuKOJWnHSg, 
+#_builder-form .form-builder--item .date-picker-custom-style, 
+#_builder-form .form-builder--item input[type=number] {
+    font-family: 'Poppins', sans-serif !important;
+    border: 2px solid #DDDDDD !important;
+    box-shadow: 1px 1px 9px 0px #DCDCDC !important;
+    background: #fff !important;
+    color: #222 !important;
+    border-radius: 4px !important;
+    padding: 10px 18px !important;
+    min-height: 56px !important;
+}
+
 /* Google Places Autocomplete (pac) unified sizing & appearance */
 .pac-container {
     font-family: 'Poppins', sans-serif;

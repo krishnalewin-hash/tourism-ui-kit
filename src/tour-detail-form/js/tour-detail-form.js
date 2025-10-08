@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
 // Load client configuration if not already loaded
 async function loadClientConfig() {
-  if (window.CFG?.configLoaded) return;
+  if (window.CFG?.configLoaded) return window.CFG;
   
   const client = window.CFG?.client || 'demo';
   const baseUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main`;
@@ -72,15 +72,23 @@ async function loadClientConfig() {
         configLoaded: true
       };
       console.log(`[TourForm] Loaded config for ${client}, API key: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
+      
+      // Update CONFIG object after loading
+      CONFIG.googleApiKey = window.CFG.GMAPS_KEY || '';
+      CONFIG.countries = window.CFG.COUNTRIES ? (Array.isArray(window.CFG.COUNTRIES) ? window.CFG.COUNTRIES.map(x => String(x).toLowerCase()) : [String(window.CFG.COUNTRIES).toLowerCase()]) : null;
+      
+      return window.CFG;
     }
   } catch (error) {
     console.warn(`[TourForm] Failed to load config for ${client}:`, error);
   }
+  return window.CFG;
 }
 
-// Initialize config loading
+// Initialize config loading and wait for it
+let configPromise = null;
 if (window.CFG?.client) {
-  loadClientConfig();
+  configPromise = loadClientConfig();
 }
 
 const CONFIG = {
@@ -106,19 +114,37 @@ const CONFIG = {
   ===================================================== */
   
   function loadGoogleMaps(callback){
-    if (window.google?.maps?.places) return callback();
-    if (document.querySelector('script[data-gmaps-loader]')){
+    // First ensure config is loaded
+    const loadMapsWithConfig = async () => {
+      if (configPromise) {
+        await configPromise;
+      }
+      
+      if (window.google?.maps?.places) return callback();
+      if (document.querySelector('script[data-gmaps-loader]')){
+        const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+        setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
+        return;
+      }
+      
+      const apiKey = CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || '';
+      console.log(`[TourForm] Loading Google Maps with API key: ${apiKey?.substring(0, 10)}...`);
+      
+      if (!apiKey) {
+        console.error('[TourForm] No Google Maps API key found in CONFIG.googleApiKey or window.CFG.GMAPS_KEY');
+        return;
+      }
+      
+      const s = document.createElement('script');
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
+      s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
+      s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
+      document.head.appendChild(s);
       const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
       setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
-      return;
-    }
-    const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(CONFIG.googleApiKey)}&libraries=places`;
-    s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
-    s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
-    document.head.appendChild(s);
-    const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
-    setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
+    };
+    
+    loadMapsWithConfig();
   }
 
   /* ===== Section 4: Past Date Guard (attachPickupDateGuard)
