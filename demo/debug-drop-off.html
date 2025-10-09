@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Drop-off Field</title>
+  <style>
+    body { padding: 20px; font-family: Arial, sans-serif; }
+    .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    input { padding: 10px; margin: 5px 0; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Debug Drop-off Field Test</h1>
+  
+  <div class="debug">
+    <h3>Before Script Load</h3>
+    <p>Drop-off field should be visible:</p>
+    <input type="text" data-q="drop-off_location" placeholder="Drop-off Location" />
+  </div>
+
+  <script>
+    // Set up basic config without formType
+    window.CFG = {
+      client: 'demo',
+      GMAPS_KEY: 'test-key'
+      // Note: no formType specified
+    };
+
+    console.log('=== BEFORE SCRIPT LOAD ===');
+    const dropOffBefore = document.querySelector('input[data-q="drop-off_location"]');
+    console.log('Drop-off field before script:', dropOffBefore);
+    console.log('Type before:', dropOffBefore ? dropOffBefore.type : 'not found');
+    console.log('Display before:', dropOffBefore ? getComputedStyle(dropOffBefore).display : 'not found');
+  </script>
+
+  <!-- Load the tour-detail-form script -->
+  <script src="../src/tour-detail-form/js/tour-detail-form.js"></script>
+
+  <script>
+    console.log('=== AFTER SCRIPT LOAD ===');
+    const dropOffAfter = document.querySelector('input[data-q="drop-off_location"]');
+    console.log('Drop-off field after script:', dropOffAfter);
+    console.log('Type after:', dropOffAfter ? dropOffAfter.type : 'not found');
+    console.log('Display after:', dropOffAfter ? getComputedStyle(dropOffAfter).display : 'not found');
+    console.log('CFG.formType:', window.CFG?.formType);
+    
+    // Try to make it visible again
+    if (dropOffAfter && dropOffAfter.type === 'hidden') {
+      console.log('Field was hidden by script, making visible...');
+      dropOffAfter.type = 'text';
+      console.log('Type after fix:', dropOffAfter.type);
+    }
+  </script>
+
+  <div class="debug">
+    <h3>After Script Load</h3>
+    <p>If the drop-off field disappeared or became hidden, the autofillHiddenDropOff function is the culprit.</p>
+    <button onclick="debugDropOff()">Debug Drop-off Field</button>
+  </div>
+
+  <script>
+    function debugDropOff() {
+      const el = document.querySelector('input[data-q="drop-off_location"]');
+      console.log('=== DEBUG DROP-OFF ===');
+      console.log('Element found:', !!el);
+      if (el) {
+        console.log('Type:', el.type);
+        console.log('Value:', el.value);
+        console.log('Dataset.dropAutoFilled:', el.dataset.dropAutoFilled);
+        console.log('Style.display:', el.style.display);
+        console.log('Computed display:', getComputedStyle(el).display);
+        
+        // Force show
+        el.type = 'text';
+        el.style.display = '';
+        el.style.visibility = '';
+        console.log('Forced to show - type is now:', el.type);
+      }
+    }
+  </script>
+</body>
+</html>

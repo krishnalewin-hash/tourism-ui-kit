@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drop-off Field Test - Tour vs Transfer</title>
+  <style>
+    body { padding: 20px; font-family: Arial, sans-serif; }
+    .test-section { border: 2px solid #ccc; margin: 20px 0; padding: 20px; border-radius: 8px; }
+    .tour { border-color: #4CAF50; }
+    .transfer { border-color: #2196F3; }
+    input { padding: 10px; margin: 5px 0; display: block; width: 300px; }
+    button { padding: 10px 20px; margin: 10px 5px 10px 0; cursor: pointer; }
+    .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>Drop-off Field Test - Tour vs Transfer Forms</h1>
+  
+  <div class="test-section tour">
+    <h2>🗺️ Tour Form (drop-off should be VISIBLE)</h2>
+    <p>When no formType is specified or formType is 'tour', the drop-off field should remain visible for users to enter their destination.</p>
+    
+    <input type="text" data-q="pickup_location" placeholder="Pickup Location" />
+    <input type="text" data-q="drop-off_location" placeholder="Drop-off Location" id="tour-dropoff" />
+    <input type="text" data-q="pickup_date" placeholder="Pickup Date" />
+    
+    <button onclick="testTourForm()">Test Tour Form Behavior</button>
+    <div id="tour-result" class="result"></div>
+  </div>
+
+  <div class="test-section transfer">
+    <h2>🚌 Transfer Form (drop-off should be HIDDEN)</h2>
+    <p>When formType is 'transfer', the drop-off field should be hidden since it's auto-filled from the page title.</p>
+    
+    <input type="text" data-q="pickup_location" placeholder="Pickup Location" />
+    <input type="text" data-q="drop-off_location" placeholder="Drop-off Location" id="transfer-dropoff" />
+    <input type="text" data-q="pickup_date" placeholder="Pickup Date" />
+    
+    <button onclick="testTransferForm()">Test Transfer Form Behavior</button>
+    <div id="transfer-result" class="result"></div>
+  </div>
+
+  <script>
+    function testTourForm() {
+      // Simulate tour form configuration (no formType specified)
+      window.CFG = {
+        client: 'demo',
+        GMAPS_KEY: 'test-key'
+        // No formType = should show drop-off field
+      };
+
+      const dropOffField = document.getElementById('tour-dropoff');
+      
+      // Reset field state
+      dropOffField.type = 'text';
+      dropOffField.style.display = '';
+      dropOffField.value = '';
+      dropOffField.dataset.dropAutoFilled = '';
+
+      // Simulate what the autofillHiddenDropOff function would do
+      simulateAutofillLogic(dropOffField, 'tour-result');
+    }
+
+    function testTransferForm() {
+      // Simulate transfer form configuration
+      window.CFG = {
+        client: 'demo',
+        GMAPS_KEY: 'test-key',
+        formType: 'transfer'  // Should hide drop-off field
+      };
+
+      const dropOffField = document.getElementById('transfer-dropoff');
+      
+      // Reset field state
+      dropOffField.type = 'text';
+      dropOffField.style.display = '';
+      dropOffField.value = '';
+      dropOffField.dataset.dropAutoFilled = '';
+
+      // Simulate what the autofillHiddenDropOff function would do
+      simulateAutofillLogic(dropOffField, 'transfer-result');
+    }
+
+    function simulateAutofillLogic(el, resultId) {
+      const resultDiv = document.getElementById(resultId);
+      let log = [];
+
+      log.push(`BEFORE: formType = ${window.CFG?.formType || 'undefined'}`);
+      log.push(`BEFORE: field type = ${el.type}`);
+      log.push(`BEFORE: field visible = ${el.style.display !== 'none' && el.type !== 'hidden'}`);
+
+      // This is the NEW logic from our fix
+      const shouldHide = window.CFG?.formType === 'transfer' || el.type === 'hidden';
+      log.push(`shouldHide = ${shouldHide} (formType='transfer' OR already hidden)`);
+
+      if (shouldHide && el.type !== 'hidden') {
+        el.type = 'hidden';
+        log.push(`ACTION: Set field to type="hidden"`);
+      } else {
+        log.push(`ACTION: Left field visible (type="${el.type}")`);
+      }
+
+      // Set a sample value (simulating page title autofill)
+      el.value = document.title;
+      el.dataset.dropAutoFilled = '1';
+
+      log.push(`AFTER: field type = ${el.type}`);
+      log.push(`AFTER: field visible = ${el.style.display !== 'none' && el.type !== 'hidden'}`);
+      log.push(`AFTER: field value = "${el.value}"`);
+
+      resultDiv.innerHTML = log.join('<br>');
+    }
+  </script>
+
+  <div style="margin-top: 40px; padding: 20px; background: #e8f5e8; border-radius: 8px;">
+    <h3>✅ Expected Results:</h3>
+    <ul>
+      <li><strong>Tour Form:</strong> Drop-off field should remain visible (type="text")</li>
+      <li><strong>Transfer Form:</strong> Drop-off field should be hidden (type="hidden")</li>
+    </ul>
+    <p><strong>The Fix:</strong> Modified <code>autofillHiddenDropOff()</code> function to only hide the field when <code>formType === 'transfer'</code> instead of always hiding it.</p>
+  </div>
+</body>
+</html>

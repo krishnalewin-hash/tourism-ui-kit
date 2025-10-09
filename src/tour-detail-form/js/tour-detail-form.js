@@ -1170,7 +1170,14 @@ function autofillHiddenDropOff(rootDoc) {
   if (!title) return;
 
   // Ensure it's hidden if that's your intent (won’t hurt if already hidden)
-  try { if (el.type !== 'hidden') el.type = 'hidden'; } catch(_) {}
+  try { 
+    // Only hide the field if formType is explicitly 'transfer' or if it's already hidden
+    // For tour forms or when no formType is specified, leave the field visible
+    const shouldHide = window.CFG?.formType === 'transfer' || el.type === 'hidden';
+    if (shouldHide && el.type !== 'hidden') {
+      el.type = 'hidden';
+    }
+  } catch(_) {}
 
   setInputValue(el, title);
   el.dataset.dropAutoFilled = '1';
