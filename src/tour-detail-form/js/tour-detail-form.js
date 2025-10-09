@@ -1394,13 +1394,32 @@ autofillHiddenDropOff(document);
   ];
 
   const obs = new MutationObserver(muts=>{
-    console.log('[PassengerSelect] MutationObserver triggered with', muts.length, 'mutations');
+    // Only log when we have significant mutations to reduce noise
+    if (muts.length > 0) {
+      console.log('[PassengerSelect] MutationObserver triggered with', muts.length, 'mutations');
+    }
+    
+    // Check if passenger select was removed
+    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
+    if (!passengerSelect) {
+      console.log('[PassengerSelect] MutationObserver detected passenger select was removed!');
+      // Try to recreate it immediately
+      if (window.__passengerSelect && window.__passengerSelect.attach) {
+        console.log('[PassengerSelect] MutationObserver attempting to recreate passenger select');
+        window.__passengerSelect.attach(document);
+      }
+    }
+    
     for(const m of muts){
       if(!m.addedNodes) continue;
 
       m.addedNodes.forEach(node=>{
         if(!(node instanceof HTMLElement)) return;
-        console.log('[PassengerSelect] MutationObserver examining node:', node.tagName, node.className);
+        
+        // Skip certain elements that are unlikely to contain forms to reduce processing
+        if (node.tagName && ['SCRIPT', 'STYLE', 'META', 'LINK'].includes(node.tagName)) {
+          return;
+        }
 
         const candidates = node.matches?.('input,select')
           ? [node]
@@ -1408,8 +1427,8 @@ autofillHiddenDropOff(document);
 
         candidates.forEach(el=>{
           const q = el.getAttribute('data-q');
-          console.log('[PassengerSelect] MutationObserver found element with data-q:', q);
           if(q && targetAttrs.includes(q)){
+            console.log('[PassengerSelect] MutationObserver found element with data-q:', q);
             
             // For passenger field, handle select conversion BEFORE visual enhancements
             if(q === 'number_of_passengers'){
