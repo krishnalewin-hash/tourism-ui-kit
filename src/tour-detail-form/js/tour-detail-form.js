@@ -761,7 +761,15 @@ const CONFIG = {
       sel.setAttribute('data-q', 'number_of_passengers');
       if (input.id) sel.id = input.id;
       if (input.required) sel.required = true;
-      sel.className = input.className; // inherit any theme classes
+      
+      // Inherit theme classes but filter out icon-related classes to avoid conflicts
+      if (input.className) {
+        const filteredClasses = input.className
+          .split(' ')
+          .filter(cls => !cls.includes('icon') && cls !== 'pac-target-input')
+          .join(' ');
+        sel.className = filteredClasses;
+      }
 
       // --- Placeholder (pulled from the original input, same source as other fields) ---
       const phText = input.getAttribute('placeholder') || 'Number of Passengers';
@@ -821,14 +829,31 @@ const CONFIG = {
       // Build the select element
       const selectEl = buildSelectFromInput(input);
       
-      // Hide the original input but keep it for form submission
-      input.style.display = 'none';
-      input.style.visibility = 'hidden';
-      input.style.position = 'absolute';
-      input.style.left = '-9999px';
+      // Check if input is inside an icon wrapper and handle it properly
+      const iconWrapper = input.closest('.icon-field-wrapper');
+      const iconRow = iconWrapper?.querySelector('.icon-input-row');
       
-      // Insert select after the hidden input (don't replace it)
-      input.parentNode.insertBefore(selectEl, input.nextSibling);
+      if (iconWrapper && iconRow && iconRow.contains(input)) {
+        // Input is in an icon wrapper - replace it properly within the wrapper
+        // Hide the original input but keep it for form submission
+        input.style.display = 'none';
+        input.style.visibility = 'hidden';
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+        
+        // Insert select in the same icon row where the input was
+        iconRow.appendChild(selectEl);
+      } else {
+        // No icon wrapper or not in a row - do standard replacement
+        // Hide the original input but keep it for form submission
+        input.style.display = 'none';
+        input.style.visibility = 'hidden';
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+        
+        // Insert select after the hidden input (don't replace it)
+        input.parentNode.insertBefore(selectEl, input.nextSibling);
+      }
       
       // Sync select changes back to the hidden input for form submission
       selectEl.addEventListener('change', () => {
