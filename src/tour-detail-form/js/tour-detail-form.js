@@ -994,6 +994,17 @@ const CONFIG = {
     };
     function wrap(el, svg, key){
       if(!el) return;
+      
+      // Skip hidden or invisible elements to prevent duplicate icons
+      const style = getComputedStyle(el);
+      if (el.style.display === 'none' || 
+          el.style.visibility === 'hidden' || 
+          style.display === 'none' || 
+          style.visibility === 'hidden' ||
+          el.style.position === 'absolute' && el.style.left === '-9999px') {
+        return;
+      }
+      
       // Find or create wrapper
       let wrapDiv = el.closest('.icon-field-wrapper');
       if(!wrapDiv){
