@@ -1316,7 +1316,17 @@ autofillHiddenDropOff(document);
         candidates.forEach(el=>{
           const q = el.getAttribute('data-q');
           if(q && targetAttrs.includes(q)){
-            // Visual & button enhancements (idempotent)
+            
+            // For passenger field, handle select conversion BEFORE visual enhancements
+            if(q === 'number_of_passengers'){
+              try { 
+                if (window.__passengerSelect && window.__passengerSelect.attach) {
+                  window.__passengerSelect.attach(document);
+                }
+              } catch(_) {}
+            }
+            
+            // Visual & button enhancements (idempotent) - run AFTER passenger select
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
@@ -1344,15 +1354,6 @@ autofillHiddenDropOff(document);
             // Late time field: time picker attachment  
             if(q === 'pickup_time'){
               try { attachPickupTimePicker(document, el); } catch(_) {}
-            }
-
-            // Late passenger field: dropdown select
-            if(q === 'number_of_passengers'){
-              try { 
-                if (window.__passengerSelect && window.__passengerSelect.attach) {
-                  window.__passengerSelect.attach(document);
-                }
-              } catch(_) {}
             }
           }
         });
