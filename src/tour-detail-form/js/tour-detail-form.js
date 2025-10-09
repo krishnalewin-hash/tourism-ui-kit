@@ -826,7 +826,9 @@ const CONFIG = {
       
       // Debug logging
       if (window.__debugPassengerSelect) {
+        const stack = new Error().stack;
         console.log('[PassengerSelect] Called - input:', !!input, 'select exists:', !!selAlready, 'input wired:', input?.dataset.paxSelectWired);
+        console.log('[PassengerSelect] Call stack:', stack);
       }
       
       if (!input || selAlready) return;
