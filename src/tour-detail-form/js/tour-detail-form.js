@@ -896,6 +896,16 @@ const CONFIG = {
         
         // Insert select in the same icon row where the input was
         iconRow.appendChild(selectEl);
+        
+        // Add aggressive protection to prevent removal
+        setTimeout(() => {
+          if (!document.contains(selectEl)) {
+            console.log('[PassengerSelect] Select removed from icon wrapper - re-adding');
+            if (iconRow && iconRow.parentNode) {
+              iconRow.appendChild(selectEl);
+            }
+          }
+        }, 10);
       } else {
         // No icon wrapper or not in a row - do standard replacement
         // Hide the original input but keep it for form submission
@@ -906,6 +916,16 @@ const CONFIG = {
         
         // Insert select after the hidden input (don't replace it)
         input.parentNode.insertBefore(selectEl, input.nextSibling);
+        
+        // Add aggressive protection to prevent removal
+        setTimeout(() => {
+          if (!document.contains(selectEl)) {
+            console.log('[PassengerSelect] Select removed from standard location - re-adding');
+            if (input.parentNode) {
+              input.parentNode.insertBefore(selectEl, input.nextSibling);
+            }
+          }
+        }, 10);
       }
       
       // Sync select changes back to the hidden input for form submission
@@ -935,6 +955,24 @@ const CONFIG = {
       
       selectEl.dataset.paxSelectWired = '1';
       input.dataset.paxSelectWired = '1';
+      
+      // Add persistent protection with multiple checks
+      const protectSelect = () => {
+        if (!document.contains(selectEl)) {
+          console.log('[PassengerSelect] Persistent protection - select was removed, recreating');
+          // Recreate the entire passenger select
+          if (window.__passengerSelect && window.__passengerSelect.attach) {
+            window.__passengerSelect.attach(document);
+          }
+        }
+      };
+      
+      // Multiple protection intervals
+      setTimeout(protectSelect, 50);
+      setTimeout(protectSelect, 100);
+      setTimeout(protectSelect, 200);
+      setTimeout(protectSelect, 500);
+      setTimeout(protectSelect, 1000);
 
       // No need to re-run enhanceVisual here since it runs after this function
     }
