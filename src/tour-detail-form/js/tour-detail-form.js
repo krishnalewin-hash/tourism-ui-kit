@@ -1403,11 +1403,14 @@ autofillHiddenDropOff(document);
     const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
     if (!passengerSelect) {
       console.log('[PassengerSelect] MutationObserver detected passenger select was removed!');
-      // Try to recreate it immediately
-      if (window.__passengerSelect && window.__passengerSelect.attach) {
-        console.log('[PassengerSelect] MutationObserver attempting to recreate passenger select');
-        window.__passengerSelect.attach(document);
-      }
+      // Add a small delay to prevent rapid cycling and let DOM settle
+      setTimeout(() => {
+        const stillMissing = !document.querySelector('select[data-q="number_of_passengers"]');
+        if (stillMissing && window.__passengerSelect && window.__passengerSelect.attach) {
+          console.log('[PassengerSelect] MutationObserver attempting to recreate passenger select after delay');
+          window.__passengerSelect.attach(document);
+        }
+      }, 100);
     }
     
     for(const m of muts){
