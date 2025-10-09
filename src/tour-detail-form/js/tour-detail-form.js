@@ -1258,10 +1258,11 @@ autofillHiddenDropOff(document);
   
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
-    enhanceVisual(document);
+    // Run passenger select attachment BEFORE enhanceVisual to avoid duplicate icons
     if (window.__passengerSelect && window.__passengerSelect.attach) {
       window.__passengerSelect.attach(document);
     }
+    enhanceVisual(document);
   },400);
   
   /* ===== Section 9: Dynamic Field Observer (MutationObserver)
