@@ -1350,6 +1350,19 @@ autofillHiddenDropOff(document);
   
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
+  // Additional passenger select protection after initial setup
+  setTimeout(() => {
+    const passengerInput = document.querySelector('input[data-q="number_of_passengers"]');
+    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
+    
+    if (passengerInput && !passengerSelect) {
+      console.log('[PassengerSelect] Early protection - recreating missing select');
+      if (window.__passengerSelect && window.__passengerSelect.attach) {
+        window.__passengerSelect.attach(document);
+      }
+    }
+  }, 50);
+  
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
     // Run passenger select attachment BEFORE enhanceVisual to avoid duplicate icons
@@ -1357,14 +1370,10 @@ autofillHiddenDropOff(document);
     if (window.__passengerSelect && window.__passengerSelect.attach) {
       const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
       if (!existingSelect) {
-        if (window.__debugPassengerSelect) {
-          console.log('[PassengerSelect] setTimeout calling attach - no existing select found');
-        }
+        console.log('[PassengerSelect] setTimeout calling attach - no existing select found');
         window.__passengerSelect.attach(document);
       } else {
-        if (window.__debugPassengerSelect) {
-          console.log('[PassengerSelect] setTimeout skipping attach - select already exists');
-        }
+        console.log('[PassengerSelect] setTimeout skipping attach - select already exists');
       }
     }
     enhanceVisual(document);
@@ -1501,6 +1510,19 @@ autofillHiddenDropOff(document);
   obs.observe(document.documentElement, { subtree:true, childList:true });
   console.log('[PassengerSelect] MutationObserver started - watching document.documentElement');
   window.__iconFieldObserver = obs;
+  
+  // Final safety check after MutationObserver is active
+  setTimeout(() => {
+    const passengerInput = document.querySelector('input[data-q="number_of_passengers"]');
+    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
+    
+    if (passengerInput && !passengerSelect) {
+      console.log('[PassengerSelect] Final safety check - recreating missing select after MutationObserver setup');
+      if (window.__passengerSelect && window.__passengerSelect.attach) {
+        window.__passengerSelect.attach(document);
+      }
+    }
+  }, 200);
 })();
          
 
