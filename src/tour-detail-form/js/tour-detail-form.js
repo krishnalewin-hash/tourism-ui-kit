@@ -1399,8 +1399,15 @@ autofillHiddenDropOff(document);
             // For passenger field, handle select conversion BEFORE visual enhancements
             if(q === 'number_of_passengers'){
               try { 
-                if (window.__passengerSelect && window.__passengerSelect.attach) {
+                // Only run if no select exists yet (avoid interference with successful creation)
+                const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
+                if (!existingSelect && window.__passengerSelect && window.__passengerSelect.attach) {
+                  if (window.__debugPassengerSelect) {
+                    console.log('[PassengerSelect] MutationObserver calling attach - no existing select found');
+                  }
                   window.__passengerSelect.attach(document);
+                } else if (window.__debugPassengerSelect) {
+                  console.log('[PassengerSelect] MutationObserver skipping attach - select already exists');
                 }
               } catch(_) {}
             }
