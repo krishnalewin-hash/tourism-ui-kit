@@ -31,6 +31,9 @@
     window.CFG = {
       client: 'kamar-tours'
     };
+    
+    // Enable debug logging
+    window.__debugPassengerSelect = true;
 
     const debugLog = document.getElementById('debug-log');
     
@@ -80,6 +83,30 @@
     // Monitor before script load
     addLog('BEFORE script load');
     logState('Initial state');
+
+    // Track when select field disappears
+    const trackSelectDisappearance = () => {
+      const selectExists = !!document.querySelector('select[data-q="number_of_passengers"]');
+      const currentTime = new Date().toLocaleTimeString();
+      
+      if (!selectExists && window.__selectWasPresent) {
+        addLog(`🚨 SELECT FIELD DISAPPEARED at ${currentTime}!`, true);
+        logState('After select disappeared');
+        
+        // Log what's left
+        const input = document.querySelector('input[data-q="number_of_passengers"]');
+        const wrapper = document.querySelector('.icon-field-wrapper');
+        addLog(`Remaining: input=${!!input}, wrapper=${!!wrapper}`, true);
+        if (input) {
+          addLog(`Input state: visible=${getComputedStyle(input).display !== 'none'}, wired=${input.dataset.paxSelectWired}`, true);
+        }
+      } else if (selectExists) {
+        window.__selectWasPresent = true;
+      }
+    };
+
+    // Check every 100ms for disappearance
+    setInterval(trackSelectDisappearance, 100);
 
     // Override key functions to track when they run
     const originalEnhanceVisual = window.enhanceVisual;

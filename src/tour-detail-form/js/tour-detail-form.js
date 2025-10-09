@@ -823,6 +823,12 @@ const CONFIG = {
       const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
       // If the select already exists, bail
       const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
+      
+      // Debug logging
+      if (window.__debugPassengerSelect) {
+        console.log('[PassengerSelect] Called - input:', !!input, 'select exists:', !!selAlready, 'input wired:', input?.dataset.paxSelectWired);
+      }
+      
       if (!input || selAlready) return;
       if (input.dataset.paxSelectWired === '1') return;
 
