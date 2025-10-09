@@ -1177,9 +1177,14 @@ function autofillHiddenDropOff(rootDoc) {
     if (shouldHide && el.type !== 'hidden') {
       el.type = 'hidden';
     }
+    
+    // Only auto-fill the value if the field is hidden (for transfer forms)
+    // For visible fields (tour forms), leave empty for user input
+    if (el.type === 'hidden') {
+      setInputValue(el, title);
+    }
   } catch(_) {}
 
-  setInputValue(el, title);
   el.dataset.dropAutoFilled = '1';
 }
 
