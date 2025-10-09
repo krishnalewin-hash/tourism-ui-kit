@@ -761,15 +761,7 @@ const CONFIG = {
       sel.setAttribute('data-q', 'number_of_passengers');
       if (input.id) sel.id = input.id;
       if (input.required) sel.required = true;
-      
-      // Inherit theme classes but filter out icon-related classes to avoid conflicts
-      if (input.className) {
-        const filteredClasses = input.className
-          .split(' ')
-          .filter(cls => !cls.includes('icon') && cls !== 'pac-target-input')
-          .join(' ');
-        sel.className = filteredClasses;
-      }
+      sel.className = input.className; // inherit any theme classes
 
       // --- Placeholder (pulled from the original input, same source as other fields) ---
       const phText = input.getAttribute('placeholder') || 'Number of Passengers';
@@ -823,110 +815,20 @@ const CONFIG = {
       const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
       // If the select already exists, bail
       const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
-      
-      // Debug logging
-      if (window.__debugPassengerSelect) {
-        const stack = new Error().stack;
-        console.log('[PassengerSelect] Called - input:', !!input, 'select exists:', !!selAlready, 'input wired:', input?.dataset.paxSelectWired);
-        console.log('[PassengerSelect] Call stack:', stack);
-        
-        // Check if select was removed somehow
-        if (input?.dataset.paxSelectWired === '1' && !selAlready) {
-          console.warn('[PassengerSelect] WARNING: Input was wired but select no longer exists! Select was removed from DOM.');
-        }
-      }
-      
-      if (!input || selAlready) {
-        if (window.__debugPassengerSelect) {
-          console.log('[PassengerSelect] Returning early - no input or select already exists');
-        }
-        return;
-      }
-      if (input.dataset.paxSelectWired === '1') {
-        if (window.__debugPassengerSelect) {
-          console.log('[PassengerSelect] Returning early - input already wired');
-        }
-        return;
-      }
+      if (!input || selAlready) return;
+      if (input.dataset.paxSelectWired === '1') return;
 
       // Build the select element
       const selectEl = buildSelectFromInput(input);
       
-      // Add debugging to track if this select gets removed
-      if (window.__debugPassengerSelect) {
-        console.log('[PassengerSelect] Creating select element:', selectEl);
-        
-        // Set up a MutationObserver to watch for when this select gets removed
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            mutation.removedNodes.forEach((node) => {
-              if (node === selectEl || (node.nodeType === 1 && node.contains && node.contains(selectEl))) {
-                console.warn('[PassengerSelect] SELECT REMOVED FROM DOM!', {
-                  removedNode: node,
-                  selectElement: selectEl,
-                  stillInDOM: document.contains(selectEl),
-                  mutation: mutation
-                });
-              }
-            });
-          });
-        });
-        
-        // Start observing the document for removed nodes
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true
-        });
-        
-        // Stop observing after 10 seconds to avoid memory leaks
-        setTimeout(() => observer.disconnect(), 10000);
-      }
+      // Hide the original input but keep it for form submission
+      input.style.display = 'none';
+      input.style.visibility = 'hidden';
+      input.style.position = 'absolute';
+      input.style.left = '-9999px';
       
-      // Check if input is inside an icon wrapper and handle it properly
-      const iconWrapper = input.closest('.icon-field-wrapper');
-      const iconRow = iconWrapper?.querySelector('.icon-input-row');
-      
-      if (iconWrapper && iconRow && iconRow.contains(input)) {
-        // Input is in an icon wrapper - replace it properly within the wrapper
-        // Hide the original input but keep it for form submission
-        input.style.display = 'none';
-        input.style.visibility = 'hidden';
-        input.style.position = 'absolute';
-        input.style.left = '-9999px';
-        
-        // Insert select in the same icon row where the input was
-        iconRow.appendChild(selectEl);
-        
-        // Add aggressive protection to prevent removal
-        setTimeout(() => {
-          if (!document.contains(selectEl)) {
-            console.log('[PassengerSelect] Select removed from icon wrapper - re-adding');
-            if (iconRow && iconRow.parentNode) {
-              iconRow.appendChild(selectEl);
-            }
-          }
-        }, 10);
-      } else {
-        // No icon wrapper or not in a row - do standard replacement
-        // Hide the original input but keep it for form submission
-        input.style.display = 'none';
-        input.style.visibility = 'hidden';
-        input.style.position = 'absolute';
-        input.style.left = '-9999px';
-        
-        // Insert select after the hidden input (don't replace it)
-        input.parentNode.insertBefore(selectEl, input.nextSibling);
-        
-        // Add aggressive protection to prevent removal
-        setTimeout(() => {
-          if (!document.contains(selectEl)) {
-            console.log('[PassengerSelect] Select removed from standard location - re-adding');
-            if (input.parentNode) {
-              input.parentNode.insertBefore(selectEl, input.nextSibling);
-            }
-          }
-        }, 10);
-      }
+      // Insert select after the hidden input (don't replace it)
+      input.parentNode.insertBefore(selectEl, input.nextSibling);
       
       // Sync select changes back to the hidden input for form submission
       selectEl.addEventListener('change', () => {
@@ -955,26 +857,9 @@ const CONFIG = {
       
       selectEl.dataset.paxSelectWired = '1';
       input.dataset.paxSelectWired = '1';
-      
-      // Add persistent protection with multiple checks
-      const protectSelect = () => {
-        if (!document.contains(selectEl)) {
-          console.log('[PassengerSelect] Persistent protection - select was removed, recreating');
-          // Recreate the entire passenger select
-          if (window.__passengerSelect && window.__passengerSelect.attach) {
-            window.__passengerSelect.attach(document);
-          }
-        }
-      };
-      
-      // Multiple protection intervals
-      setTimeout(protectSelect, 50);
-      setTimeout(protectSelect, 100);
-      setTimeout(protectSelect, 200);
-      setTimeout(protectSelect, 500);
-      setTimeout(protectSelect, 1000);
 
-      // No need to re-run enhanceVisual here since it runs after this function
+      // Note: enhanceVisual will be called separately in the main enhancement sequence
+      // No need to call it here to avoid duplicate icons
     }
 
     window.__passengerSelect = { attach: attachPassengerSelect };
@@ -1084,22 +969,7 @@ const CONFIG = {
       'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
     };
     function wrap(el, svg, key){
-      if(!el) return;
-      
-      // For number_of_passengers specifically, skip if it's the hidden input (replaced by select)
-      if (key === 'number_of_passengers' && el.tagName === 'INPUT') {
-        // Check if this input has been hidden by our passenger select replacement
-        if (el.style.position === 'absolute' && el.style.left === '-9999px') {
-          return; // Skip the hidden input, let the select get the icon
-        }
-      }
-      
-      // General visibility check for other cases
-      const style = getComputedStyle(el);
-      if (style.display === 'none' || style.visibility === 'hidden') {
-        return;
-      }
-      
+      if(!el || el.dataset.iconized === '1') return;
       // Find or create wrapper
       let wrapDiv = el.closest('.icon-field-wrapper');
       if(!wrapDiv){
@@ -1374,47 +1244,24 @@ autofillHiddenDropOff(document);
   hideDropOffField();
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
-  
-  // Initialize passenger select dropdown BEFORE enhanceVisual to avoid duplicate icons
-  if (window.__passengerSelect && window.__passengerSelect.attach) {
-    console.log('[PassengerSelect] Initial attach call');
-    window.__passengerSelect.attach(document);
-  }
-  
   enhanceVisual(document);
   enhanceNextButtonMobile(document);
   enhanceSubmitButton(document);
   applyPrefillBasic(document);
   
-  // Step 1 NEXT validation is installed by its module above (IIFE).
+  // Initialize passenger select dropdown
+  if (window.__passengerSelect && window.__passengerSelect.attach) {
+    window.__passengerSelect.attach(document);
+  }
   
-  // Additional passenger select protection after initial setup
-  setTimeout(() => {
-    const passengerInput = document.querySelector('input[data-q="number_of_passengers"]');
-    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
-    
-    if (passengerInput && !passengerSelect) {
-      console.log('[PassengerSelect] Early protection - recreating missing select');
-      if (window.__passengerSelect && window.__passengerSelect.attach) {
-        window.__passengerSelect.attach(document);
-      }
-    }
-  }, 50);
+  // Step 1 NEXT validation is installed by its module above (IIFE).
   
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
-    // Run passenger select attachment BEFORE enhanceVisual to avoid duplicate icons
-    // Only run if no select exists yet (avoid interference with successful initial creation)
-    if (window.__passengerSelect && window.__passengerSelect.attach) {
-      const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
-      if (!existingSelect) {
-        console.log('[PassengerSelect] setTimeout calling attach - no existing select found');
-        window.__passengerSelect.attach(document);
-      } else {
-        console.log('[PassengerSelect] setTimeout skipping attach - select already exists');
-      }
-    }
     enhanceVisual(document);
+    if (window.__passengerSelect && window.__passengerSelect.attach) {
+      window.__passengerSelect.attach(document);
+    }
   },400);
   
   /* ===== Section 9: Dynamic Field Observer (MutationObserver)
@@ -1422,18 +1269,7 @@ autofillHiddenDropOff(document);
    Remove for static forms to reduce overhead.
 ===================================================== */
 (function observeLateFields(){
-  console.log('[PassengerSelect] Setting up MutationObserver...');
-  
-  // Disconnect existing observer if it exists
-  if(window.__iconFieldObserver) {
-    console.log('[PassengerSelect] Disconnecting existing observer');
-    try {
-      window.__iconFieldObserver.disconnect();
-    } catch(e) {
-      console.log('[PassengerSelect] Error disconnecting observer:', e);
-    }
-    window.__iconFieldObserver = null;
-  }
+  if(window.__iconFieldObserver) return;
 
   const targetAttrs = [
     'pickup_location','drop-off_location','pickup_date','pickup_time',
@@ -1441,35 +1277,11 @@ autofillHiddenDropOff(document);
   ];
 
   const obs = new MutationObserver(muts=>{
-    // Only log when we have significant mutations to reduce noise
-    if (muts.length > 0) {
-      console.log('[PassengerSelect] MutationObserver triggered with', muts.length, 'mutations');
-    }
-    
-    // Check if passenger select was removed
-    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
-    if (!passengerSelect) {
-      console.log('[PassengerSelect] MutationObserver detected passenger select was removed!');
-      // Add a small delay to prevent rapid cycling and let DOM settle
-      setTimeout(() => {
-        const stillMissing = !document.querySelector('select[data-q="number_of_passengers"]');
-        if (stillMissing && window.__passengerSelect && window.__passengerSelect.attach) {
-          console.log('[PassengerSelect] MutationObserver attempting to recreate passenger select after delay');
-          window.__passengerSelect.attach(document);
-        }
-      }, 100);
-    }
-    
     for(const m of muts){
       if(!m.addedNodes) continue;
 
       m.addedNodes.forEach(node=>{
         if(!(node instanceof HTMLElement)) return;
-        
-        // Skip certain elements that are unlikely to contain forms to reduce processing
-        if (node.tagName && ['SCRIPT', 'STYLE', 'META', 'LINK'].includes(node.tagName)) {
-          return;
-        }
 
         const candidates = node.matches?.('input,select')
           ? [node]
@@ -1478,27 +1290,7 @@ autofillHiddenDropOff(document);
         candidates.forEach(el=>{
           const q = el.getAttribute('data-q');
           if(q && targetAttrs.includes(q)){
-            console.log('[PassengerSelect] MutationObserver found element with data-q:', q);
-            
-            // For passenger field, handle select conversion BEFORE visual enhancements
-            if(q === 'number_of_passengers'){
-              console.log('[PassengerSelect] MutationObserver processing passenger field');
-              try { 
-                // Only run if no select exists yet (avoid interference with successful creation)
-                const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
-                console.log('[PassengerSelect] MutationObserver existingSelect check:', !!existingSelect);
-                if (!existingSelect && window.__passengerSelect && window.__passengerSelect.attach) {
-                  console.log('[PassengerSelect] MutationObserver calling attach - no existing select found');
-                  window.__passengerSelect.attach(document);
-                } else {
-                  console.log('[PassengerSelect] MutationObserver skipping attach - select already exists');
-                }
-              } catch(err) {
-                console.error('[PassengerSelect] MutationObserver error:', err);
-              }
-            }
-            
-            // Visual & button enhancements (idempotent) - run AFTER passenger select
+            // Visual & button enhancements (idempotent)
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
@@ -1527,6 +1319,15 @@ autofillHiddenDropOff(document);
             if(q === 'pickup_time'){
               try { attachPickupTimePicker(document, el); } catch(_) {}
             }
+
+            // Late passenger field: dropdown select
+            if(q === 'number_of_passengers'){
+              try { 
+                if (window.__passengerSelect && window.__passengerSelect.attach) {
+                  window.__passengerSelect.attach(document);
+                }
+              } catch(_) {}
+            }
           }
         });
 
@@ -1546,21 +1347,7 @@ autofillHiddenDropOff(document);
   });
 
   obs.observe(document.documentElement, { subtree:true, childList:true });
-  console.log('[PassengerSelect] MutationObserver started - watching document.documentElement');
   window.__iconFieldObserver = obs;
-  
-  // Final safety check after MutationObserver is active
-  setTimeout(() => {
-    const passengerInput = document.querySelector('input[data-q="number_of_passengers"]');
-    const passengerSelect = document.querySelector('select[data-q="number_of_passengers"]');
-    
-    if (passengerInput && !passengerSelect) {
-      console.log('[PassengerSelect] Final safety check - recreating missing select after MutationObserver setup');
-      if (window.__passengerSelect && window.__passengerSelect.attach) {
-        window.__passengerSelect.attach(document);
-      }
-    }
-  }, 200);
 })();
          
 
