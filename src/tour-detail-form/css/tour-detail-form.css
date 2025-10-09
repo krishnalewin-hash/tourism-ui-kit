@@ -34,7 +34,7 @@ body, input, button, select, textarea {
     font-weight: 300;
     padding-top: 12px !important;
     padding-bottom: 12px !important;
-    padding-right: 20px !important;
+    padding-right: 10px !important;
     padding-left: 2.1rem !important; /* Default left padding for icons */
     height: 58px !important;
     box-sizing: border-box !important;
