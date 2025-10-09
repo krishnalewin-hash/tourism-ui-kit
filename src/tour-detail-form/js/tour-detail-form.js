@@ -1352,8 +1352,19 @@ autofillHiddenDropOff(document);
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
     // Run passenger select attachment BEFORE enhanceVisual to avoid duplicate icons
+    // Only run if no select exists yet (avoid interference with successful initial creation)
     if (window.__passengerSelect && window.__passengerSelect.attach) {
-      window.__passengerSelect.attach(document);
+      const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
+      if (!existingSelect) {
+        if (window.__debugPassengerSelect) {
+          console.log('[PassengerSelect] setTimeout calling attach - no existing select found');
+        }
+        window.__passengerSelect.attach(document);
+      } else {
+        if (window.__debugPassengerSelect) {
+          console.log('[PassengerSelect] setTimeout skipping attach - select already exists');
+        }
+      }
     }
     enhanceVisual(document);
   },400);
