@@ -852,6 +852,36 @@ const CONFIG = {
       // Build the select element
       const selectEl = buildSelectFromInput(input);
       
+      // Add debugging to track if this select gets removed
+      if (window.__debugPassengerSelect) {
+        console.log('[PassengerSelect] Creating select element:', selectEl);
+        
+        // Set up a MutationObserver to watch for when this select gets removed
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.removedNodes.forEach((node) => {
+              if (node === selectEl || (node.nodeType === 1 && node.contains && node.contains(selectEl))) {
+                console.warn('[PassengerSelect] SELECT REMOVED FROM DOM!', {
+                  removedNode: node,
+                  selectElement: selectEl,
+                  stillInDOM: document.contains(selectEl),
+                  mutation: mutation
+                });
+              }
+            });
+          });
+        });
+        
+        // Start observing the document for removed nodes
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+        
+        // Stop observing after 10 seconds to avoid memory leaks
+        setTimeout(() => observer.disconnect(), 10000);
+      }
+      
       // Check if input is inside an icon wrapper and handle it properly
       const iconWrapper = input.closest('.icon-field-wrapper');
       const iconRow = iconWrapper?.querySelector('.icon-input-row');
