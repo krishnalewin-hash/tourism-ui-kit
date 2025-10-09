@@ -1376,7 +1376,17 @@ autofillHiddenDropOff(document);
 ===================================================== */
 (function observeLateFields(){
   console.log('[PassengerSelect] Setting up MutationObserver...');
-  if(window.__iconFieldObserver) return;
+  
+  // Disconnect existing observer if it exists
+  if(window.__iconFieldObserver) {
+    console.log('[PassengerSelect] Disconnecting existing observer');
+    try {
+      window.__iconFieldObserver.disconnect();
+    } catch(e) {
+      console.log('[PassengerSelect] Error disconnecting observer:', e);
+    }
+    window.__iconFieldObserver = null;
+  }
 
   const targetAttrs = [
     'pickup_location','drop-off_location','pickup_date','pickup_time',
