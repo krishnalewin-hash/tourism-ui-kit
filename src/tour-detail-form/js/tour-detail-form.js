@@ -829,10 +829,25 @@ const CONFIG = {
         const stack = new Error().stack;
         console.log('[PassengerSelect] Called - input:', !!input, 'select exists:', !!selAlready, 'input wired:', input?.dataset.paxSelectWired);
         console.log('[PassengerSelect] Call stack:', stack);
+        
+        // Check if select was removed somehow
+        if (input?.dataset.paxSelectWired === '1' && !selAlready) {
+          console.warn('[PassengerSelect] WARNING: Input was wired but select no longer exists! Select was removed from DOM.');
+        }
       }
       
-      if (!input || selAlready) return;
-      if (input.dataset.paxSelectWired === '1') return;
+      if (!input || selAlready) {
+        if (window.__debugPassengerSelect) {
+          console.log('[PassengerSelect] Returning early - no input or select already exists');
+        }
+        return;
+      }
+      if (input.dataset.paxSelectWired === '1') {
+        if (window.__debugPassengerSelect) {
+          console.log('[PassengerSelect] Returning early - input already wired');
+        }
+        return;
+      }
 
       // Build the select element
       const selectEl = buildSelectFromInput(input);
