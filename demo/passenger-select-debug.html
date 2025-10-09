@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Select Debug Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-field {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .test-buttons {
+            margin: 20px 0;
+        }
+        .test-buttons button {
+            margin-right: 10px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-buttons button:hover {
+            background: #0056b3;
+        }
+        #console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔍 Passenger Select Debug Page</h1>
+        <p>This page is designed to isolate and debug the "Number of Passengers" select field disappearing issue.</p>
+        
+        <div class="debug-info">
+            <strong>Debug Mode:</strong> All passenger select operations will be logged to the console below.
+        </div>
+
+        <!-- Simple form to test passenger select -->
+        <form id="test-form">
+            <div class="form-field">
+                <label for="pickup_location">Pickup Location:</label>
+                <input type="text" id="pickup_location" data-q="pickup_location" placeholder="Enter pickup location">
+            </div>
+
+            <div class="form-field">
+                <label for="drop_off_location">Drop-off Location:</label>
+                <input type="text" id="drop_off_location" data-q="drop-off_location" placeholder="Enter drop-off location">
+            </div>
+
+            <div class="form-field">
+                <label for="pickup_date">Pickup Date:</label>
+                <input type="text" id="pickup_date" data-q="pickup_date" placeholder="Select pickup date">
+            </div>
+
+            <div class="form-field">
+                <label for="pickup_time">Pickup Time:</label>
+                <input type="text" id="pickup_time" data-q="pickup_time" placeholder="Select pickup time">
+            </div>
+
+            <div class="form-field">
+                <label for="number_of_passengers">Number of Passengers:</label>
+                <input type="number" id="number_of_passengers" data-q="number_of_passengers" min="1" max="20" value="1" placeholder="Number of passengers">
+            </div>
+        </form>
+
+        <div class="test-buttons">
+            <button onclick="testPassengerSelect()">🔄 Test Passenger Select Creation</button>
+            <button onclick="checkSelectStatus()">🔍 Check Select Status</button>
+            <button onclick="clearConsole()">🧹 Clear Console</button>
+            <button onclick="simulatePageLoad()">📄 Simulate Page Load</button>
+        </div>
+
+        <div class="debug-info">
+            <strong>Console Output:</strong>
+        </div>
+        <div id="console-output"></div>
+    </div>
+
+    <!-- Set up debugging environment -->
+    <script>
+        // Enable debug mode
+        window.__debugPassengerSelect = true;
+        
+        // Set up client config for demo
+        window.CFG = {
+            client: 'demo',
+            GMAPS_KEY: 'AIzaSyD4gs...',  // Demo key
+            configLoaded: true
+        };
+
+        // Console capture for debug display
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        function logToDebugConsole(type, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = `[${timestamp}] ${type.toUpperCase()}: ${args.join(' ')}\n`;
+            consoleOutput.textContent += message;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToDebugConsole('log', ...args);
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            logToDebugConsole('warn', ...args);
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToDebugConsole('error', ...args);
+        };
+
+        // Test functions
+        function testPassengerSelect() {
+            console.log('🔄 Testing passenger select creation...');
+            if (window.__passengerSelect && window.__passengerSelect.attach) {
+                window.__passengerSelect.attach(document);
+            } else {
+                console.error('❌ Passenger select module not loaded');
+            }
+        }
+
+        function checkSelectStatus() {
+            const input = document.querySelector('input[data-q="number_of_passengers"]');
+            const select = document.querySelector('select[data-q="number_of_passengers"]');
+            
+            console.log('🔍 Input element:', !!input, input ? `(id: ${input.id})` : '');
+            console.log('🔍 Select element:', !!select, select ? `(id: ${select.id})` : '');
+            console.log('🔍 Input wired:', input?.dataset?.paxSelectWired);
+            console.log('🔍 Select wired:', select?.dataset?.paxSelectWired);
+            
+            if (input && !select) {
+                console.warn('⚠️ Input exists but select is missing!');
+            } else if (!input && select) {
+                console.warn('⚠️ Select exists but input is missing!');
+            } else if (input && select) {
+                console.log('✅ Both input and select exist');
+            } else {
+                console.error('❌ Neither input nor select exist');
+            }
+        }
+
+        function clearConsole() {
+            consoleOutput.textContent = '';
+        }
+
+        function simulatePageLoad() {
+            console.log('📄 Simulating page load sequence...');
+            
+            // Reset form
+            document.getElementById('test-form').reset();
+            
+            // Remove any existing selects
+            const existingSelect = document.querySelector('select[data-q="number_of_passengers"]');
+            if (existingSelect) {
+                existingSelect.remove();
+                console.log('🗑️ Removed existing select');
+            }
+            
+            // Reset input attributes
+            const input = document.querySelector('input[data-q="number_of_passengers"]');
+            if (input) {
+                delete input.dataset.paxSelectWired;
+                input.style.display = '';
+                input.style.visibility = '';
+                input.style.position = '';
+                input.style.left = '';
+                console.log('🔄 Reset input element');
+            }
+            
+            // Simulate the full initialization sequence
+            setTimeout(() => {
+                console.log('🚀 Starting initialization sequence...');
+                testPassengerSelect();
+                
+                setTimeout(() => {
+                    checkSelectStatus();
+                }, 100);
+            }, 50);
+        }
+
+        // Log page load
+        console.log('📄 Debug page loaded');
+        console.log('🔧 Debug mode enabled');
+    </script>
+
+    <!-- Load the tour-detail-form script -->
+    <script src="../src/tour-detail-form/js/tour-detail-form.js"></script>
+
+    <script>
+        // Additional initialization after form script loads
+        setTimeout(() => {
+            console.log('🔍 Checking initial state after script load...');
+            checkSelectStatus();
+        }, 200);
+    </script>
+</body>
+</html>
