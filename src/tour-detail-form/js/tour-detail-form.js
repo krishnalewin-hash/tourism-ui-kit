@@ -858,8 +858,7 @@ const CONFIG = {
       selectEl.dataset.paxSelectWired = '1';
       input.dataset.paxSelectWired = '1';
 
-      // Re-run icon wrapper just in case
-      try { enhanceVisual(document); } catch(_) {}
+      // No need to re-run enhanceVisual here since it runs after this function
     }
 
     window.__passengerSelect = { attach: attachPassengerSelect };
@@ -1244,15 +1243,16 @@ autofillHiddenDropOff(document);
   hideDropOffField();
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
+  
+  // Initialize passenger select dropdown BEFORE enhanceVisual to avoid duplicate icons
+  if (window.__passengerSelect && window.__passengerSelect.attach) {
+    window.__passengerSelect.attach(document);
+  }
+  
   enhanceVisual(document);
   enhanceNextButtonMobile(document);
   enhanceSubmitButton(document);
   applyPrefillBasic(document);
-  
-  // Initialize passenger select dropdown
-  if (window.__passengerSelect && window.__passengerSelect.attach) {
-    window.__passengerSelect.attach(document);
-  }
   
   // Step 1 NEXT validation is installed by its module above (IIFE).
   
