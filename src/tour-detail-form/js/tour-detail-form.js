@@ -995,13 +995,17 @@ const CONFIG = {
     function wrap(el, svg, key){
       if(!el) return;
       
-      // Skip hidden or invisible elements to prevent duplicate icons
+      // For number_of_passengers specifically, skip if it's the hidden input (replaced by select)
+      if (key === 'number_of_passengers' && el.tagName === 'INPUT') {
+        // Check if this input has been hidden by our passenger select replacement
+        if (el.style.position === 'absolute' && el.style.left === '-9999px') {
+          return; // Skip the hidden input, let the select get the icon
+        }
+      }
+      
+      // General visibility check for other cases
       const style = getComputedStyle(el);
-      if (el.style.display === 'none' || 
-          el.style.visibility === 'hidden' || 
-          style.display === 'none' || 
-          style.visibility === 'hidden' ||
-          el.style.position === 'absolute' && el.style.left === '-9999px') {
+      if (style.display === 'none' || style.visibility === 'hidden') {
         return;
       }
       
