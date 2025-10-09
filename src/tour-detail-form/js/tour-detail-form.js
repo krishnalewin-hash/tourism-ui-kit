@@ -956,77 +956,7 @@ const CONFIG = {
       selectEl.dataset.paxSelectWired = '1';
       input.dataset.paxSelectWired = '1';
       
-      // Make the select element extremely resistant to removal
-      const makeUnremovable = () => {
-        // Override remove methods to prevent deletion
-        const originalRemove = selectEl.remove;
-        const originalRemoveChild = selectEl.parentNode?.removeChild;
-        
-        selectEl.remove = function() {
-          console.log('[PassengerSelect] Blocked attempt to remove select element');
-          return false;
-        };
-        
-        if (selectEl.parentNode) {
-          const parent = selectEl.parentNode;
-          const originalParentRemoveChild = parent.removeChild;
-          parent.removeChild = function(child) {
-            if (child === selectEl) {
-              console.log('[PassengerSelect] Blocked attempt to remove select via parent.removeChild');
-              return selectEl;
-            }
-            return originalParentRemoveChild.call(this, child);
-          };
-        }
-        
-        // Add mutation protection specifically for this element
-        const protectFromMutations = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            mutation.removedNodes.forEach((node) => {
-              if (node === selectEl) {
-                console.log('[PassengerSelect] Element protection - select was removed, immediately re-adding');
-                // Re-add it immediately to the same location
-                if (mutation.target && mutation.target.appendChild) {
-                  try {
-                    mutation.target.appendChild(selectEl);
-                  } catch (e) {
-                    // If that fails, try to add it back to its original location
-                    const originalParent = selectEl.dataset.originalParent 
-                      ? document.querySelector(selectEl.dataset.originalParent)
-                      : input.parentNode;
-                    if (originalParent) {
-                      originalParent.appendChild(selectEl);
-                    }
-                  }
-                }
-              }
-            });
-          });
-        });
-        
-        // Store reference to original location
-        selectEl.dataset.originalParent = input.parentNode?.className || 'form-input-container';
-        
-        // Watch for removal attempts
-        protectFromMutations.observe(document.body, {
-          childList: true,
-          subtree: true
-        });
-        
-        // Stop protection after 30 seconds to avoid memory leaks
-        setTimeout(() => {
-          protectFromMutations.disconnect();
-          // Restore original methods
-          selectEl.remove = originalRemove;
-          if (selectEl.parentNode && originalParentRemoveChild) {
-            selectEl.parentNode.removeChild = originalParentRemoveChild;
-          }
-        }, 30000);
-      };
-      
-      makeUnremovable();
-      
-      // Add persistent protection with multiple checks (as backup)
+      // Add persistent protection with multiple checks
       const protectSelect = () => {
         if (!document.contains(selectEl)) {
           console.log('[PassengerSelect] Persistent protection - select was removed, recreating');
@@ -1037,7 +967,7 @@ const CONFIG = {
         }
       };
       
-      // Multiple protection intervals (as backup)
+      // Multiple protection intervals
       setTimeout(protectSelect, 50);
       setTimeout(protectSelect, 100);
       setTimeout(protectSelect, 200);
