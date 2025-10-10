@@ -1007,14 +1007,8 @@ const CONFIG = {
       el.dataset.iconized='1';
     }
     Object.entries(ICONS).forEach(([k,svg])=>{
-      if (k === 'number_of_passengers') {
-        // Only apply icon to select elements for passenger field
-        [...rootDoc.querySelectorAll(`select[data-q='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
-      } else {
-        // Apply to both input and select for other fields
-        [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-        [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
-      }
+      [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+      [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
     });
   }
 
