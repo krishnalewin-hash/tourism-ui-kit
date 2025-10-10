@@ -1000,30 +1000,8 @@ const CONFIG = {
         return;
       }
       
-      // Skip explicitly hidden elements (but not elements that are just being rendered)
-      // Only skip if explicitly set to display:none or visibility:hidden via style attribute
-      const isExplicitlyHidden = el.style.display === 'none' || 
-                                 el.style.visibility === 'hidden';
-      
-      // Also skip if there's already a visible element with the same data-q attribute
-      // This prevents duplicate icons when input is replaced by select
-      const dataQ = el.getAttribute('data-q');
-      if (dataQ) {
-        const otherElements = document.querySelectorAll(`[data-q="${dataQ}"]`);
-        const visibleElements = Array.from(otherElements).filter(otherEl => {
-          return otherEl !== el && 
-                 otherEl.style.display !== 'none' && 
-                 otherEl.style.visibility !== 'hidden' &&
-                 otherEl.dataset.iconized === '1';
-        });
-        
-        if (visibleElements.length > 0 && isExplicitlyHidden) {
-          if(debug) console.log('[ICON DEBUG] Found visible iconized element with same data-q, skipping hidden element:', key, el);
-          return;
-        }
-      }
-      
-      if(isExplicitlyHidden) {
+      // Simple check: Skip elements that are explicitly hidden via style attribute
+      if (el.style.display === 'none' || el.style.visibility === 'hidden') {
         if(debug) console.log('[ICON DEBUG] Element is explicitly hidden, skipping icon creation:', key, el);
         return;
       }
@@ -1033,7 +1011,6 @@ const CONFIG = {
         console.log('[ICON DEBUG] Element type:', el.tagName.toLowerCase());
         console.log('[ICON DEBUG] Element data-q:', el.getAttribute('data-q'));
         console.log('[ICON DEBUG] Element visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
-        console.log('[ICON DEBUG] Call stack:', new Error().stack);
       }
       
       // Find or create wrapper
