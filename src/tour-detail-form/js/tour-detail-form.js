@@ -815,6 +815,7 @@ const CONFIG = {
       const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
       // If the select already exists, bail
       const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
+      if(debug) console.log('[PASSENGER DEBUG] attachPassengerSelect called, input found:', !!input, 'select already exists:', !!selAlready);
       if (!input || selAlready) return;
       if (input.dataset.paxSelectWired === '1') return;
 
@@ -829,6 +830,8 @@ const CONFIG = {
       
       // Insert select after the hidden input (don't replace it)
       input.parentNode.insertBefore(selectEl, input.nextSibling);
+      
+      if(debug) console.log('[PASSENGER DEBUG] Select element created and inserted:', selectEl);
       
       // Sync select changes back to the hidden input for form submission
       selectEl.addEventListener('change', () => {
@@ -964,6 +967,13 @@ const CONFIG = {
       console.log('[ICON DEBUG] enhanceVisual() called');
       console.log('[ICON DEBUG] Current passenger inputs:', document.querySelectorAll('input[data-q="number_of_passengers"]').length);
       console.log('[ICON DEBUG] Current passenger selects:', document.querySelectorAll('select[data-q="number_of_passengers"]').length);
+      
+      const passengerSelects = document.querySelectorAll('select[data-q="number_of_passengers"]');
+      if(passengerSelects.length > 0) {
+        console.log('[ICON DEBUG] Passenger select element:', passengerSelects[0]);
+        console.log('[ICON DEBUG] Passenger select visible:', passengerSelects[0].offsetWidth > 0 && passengerSelects[0].offsetHeight > 0);
+        console.log('[ICON DEBUG] Passenger select parent element:', passengerSelects[0].parentElement);
+      }
     }
     
     const ICONS={
