@@ -1013,41 +1013,60 @@ const CONFIG = {
         console.log('[ICON DEBUG] Element visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
       }
       
-      // Find or create wrapper
-      let wrapDiv = el.closest('.icon-field-wrapper');
-      if(!wrapDiv){
-        wrapDiv=document.createElement('div');
-        wrapDiv.className='icon-field-wrapper';
-        el.parentNode.insertBefore(wrapDiv, el);
+      try {
+        // Find or create wrapper
+        let wrapDiv = el.closest('.icon-field-wrapper');
+        if(debug) console.log('[ICON DEBUG] Found existing wrapper:', !!wrapDiv);
+        
+        if(!wrapDiv){
+          wrapDiv=document.createElement('div');
+          wrapDiv.className='icon-field-wrapper';
+          el.parentNode.insertBefore(wrapDiv, el);
+          if(debug) console.log('[ICON DEBUG] Created new wrapper');
+        }
+        
+        // Ensure an input-row exists (icon aligns to this row only)
+        let row = wrapDiv.querySelector(':scope > .icon-input-row');
+        if(!row){
+          row=document.createElement('div');
+          row.className='icon-input-row';
+          // place at top so any error message can appear below
+          wrapDiv.insertBefore(row, wrapDiv.firstChild);
+          if(debug) console.log('[ICON DEBUG] Created input row');
+        }
+        
+        // Move input into the row if not already
+        if(el.parentElement !== row){
+          row.appendChild(el);
+          if(debug) console.log('[ICON DEBUG] Moved element into row');
+        }
+        
+        // Create or move the icon into the row
+        let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
+        if(!span){
+          span=document.createElement('span');
+          span.className='field-icon';
+          span.setAttribute('aria-hidden','true');
+          if(key) span.setAttribute('data-for', key);
+          span.innerHTML=svg;
+          if(debug) console.log('[ICON DEBUG] Created new icon span');
+        } else {
+          // Ensure attributes match latest key
+          if(key) span.setAttribute('data-for', key);
+          if(debug) console.log('[ICON DEBUG] Updated existing icon span');
+        }
+        
+        if(span.parentElement !== row){
+          row.appendChild(span);
+          if(debug) console.log('[ICON DEBUG] Moved icon into row');
+        }
+        
+        el.dataset.iconized='1';
+        if(debug) console.log('[ICON DEBUG] Successfully created icon for:', key);
+        
+      } catch(error) {
+        if(debug) console.error('[ICON DEBUG] Error creating icon for:', key, error);
       }
-      // Ensure an input-row exists (icon aligns to this row only)
-      let row = wrapDiv.querySelector(':scope > .icon-input-row');
-      if(!row){
-        row=document.createElement('div');
-        row.className='icon-input-row';
-        // place at top so any error message can appear below
-        wrapDiv.insertBefore(row, wrapDiv.firstChild);
-      }
-      // Move input into the row if not already
-      if(el.parentElement !== row){
-        row.appendChild(el);
-      }
-      // Create or move the icon into the row
-      let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
-      if(!span){
-        span=document.createElement('span');
-        span.className='field-icon';
-        span.setAttribute('aria-hidden','true');
-        if(key) span.setAttribute('data-for', key);
-        span.innerHTML=svg;
-      } else {
-        // Ensure attributes match latest key
-        if(key) span.setAttribute('data-for', key);
-      }
-      if(span.parentElement !== row){
-        row.appendChild(span);
-      }
-      el.dataset.iconized='1';
     }
     Object.entries(ICONS).forEach(([k,svg])=>{
       [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
