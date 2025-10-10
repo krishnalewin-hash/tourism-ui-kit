@@ -990,14 +990,31 @@ const CONFIG = {
         return;
       }
       
-      // Skip hidden elements (they shouldn't get icons)
-      const isHidden = el.style.display === 'none' || 
-                      el.style.visibility === 'hidden' || 
-                      el.offsetWidth === 0 || 
-                      el.offsetHeight === 0;
+      // Skip explicitly hidden elements (but not elements that are just being rendered)
+      // Only skip if explicitly set to display:none or visibility:hidden via style attribute
+      const isExplicitlyHidden = el.style.display === 'none' || 
+                                 el.style.visibility === 'hidden';
       
-      if(isHidden) {
-        if(debug) console.log('[ICON DEBUG] Element is hidden, skipping icon creation:', key, el);
+      // Also skip if there's already a visible element with the same data-q attribute
+      // This prevents duplicate icons when input is replaced by select
+      const dataQ = el.getAttribute('data-q');
+      if (dataQ) {
+        const otherElements = document.querySelectorAll(`[data-q="${dataQ}"]`);
+        const visibleElements = Array.from(otherElements).filter(otherEl => {
+          return otherEl !== el && 
+                 otherEl.style.display !== 'none' && 
+                 otherEl.style.visibility !== 'hidden' &&
+                 otherEl.dataset.iconized === '1';
+        });
+        
+        if (visibleElements.length > 0 && isExplicitlyHidden) {
+          if(debug) console.log('[ICON DEBUG] Found visible iconized element with same data-q, skipping hidden element:', key, el);
+          return;
+        }
+      }
+      
+      if(isExplicitlyHidden) {
+        if(debug) console.log('[ICON DEBUG] Element is explicitly hidden, skipping icon creation:', key, el);
         return;
       }
       
