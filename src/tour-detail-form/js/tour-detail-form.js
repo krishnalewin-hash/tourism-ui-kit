@@ -46,6 +46,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const s=document.createElement('style'); s.id='booking-form-cta-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
+  // Loading overlay styles
+  (function injectLoadingOverlayStyles(){
+    if(document.getElementById('booking-form-loading-styles')) return;
+    const css = `
+    /* Loading state styling */
+    .ghl-btn.ghl-submit-btn.bf-cta.bf-loading {
+      pointer-events: none !important;
+      opacity: 0.8 !important;
+    }
+    .ghl-btn.ghl-submit-btn.bf-cta.bf-loading:hover .bf-arrow {
+      transform: none !important;
+    }
+    .bf-spinner {
+      width: 18px !important;
+      height: 18px !important;
+      animation: bf-spin 1s linear infinite !important;
+    }
+    @keyframes bf-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Fullscreen loading overlay styles */
+    .bf-loading-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.85) !important;
+      z-index: 999999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .bf-loading-overlay .bf-loading-content {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 20px !important;
+      text-align: center !important;
+    }
+    .bf-loading-overlay .bf-loading-spinner-container {
+      width: 60px !important;
+      height: 60px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .bf-loading-overlay .bf-spinner {
+      width: 50px !important;
+      height: 50px !important;
+      animation: bf-spin 1s linear infinite !important;
+    }
+    .bf-loading-overlay .bf-loading-text {
+      font-family: "Poppins", sans-serif !important;
+      font-size: 53px !important;
+      font-weight: 700 !important;
+      letter-spacing: -1px !important;
+      color: white !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    }
+    
+    @media (max-width: 768px) {
+      .bf-loading-overlay .bf-loading-text {
+        font-size: 34px !important;
+      }
+    }
+    `;
+    const s=document.createElement('style'); s.id='booking-form-loading-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
   /* ===== Section 2: Global Configuration
     Purpose: Centralized settings for API key, country restriction, time picker window, timeouts.
     Remove or trim properties only if the dependent feature (see comments) is removed.
@@ -1070,6 +1142,36 @@ const CONFIG = {
         `<polyline points="12,6 18,12 12,18"></polyline>`+
         `</svg>`+
         `</span>`;
+      
+      // Add loading state functionality with fullscreen overlay
+      btn.addEventListener('click', function(e) {
+        // Check if overlay already exists
+        if (document.querySelector('.bf-loading-overlay')) {
+          return; // Loading overlay already exists
+        }
+        
+        // Create fullscreen loading overlay immediately
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'bf-loading-overlay';
+        loadingOverlay.innerHTML = `
+          <div class="bf-loading-content">
+            <div class="bf-loading-spinner-container">
+              <svg class="bf-spinner" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
+                <path fill="white" d="M4,12a8,8 0 0,1 16,0" opacity="0.75"/>
+              </svg>
+            </div>
+            <span class="bf-loading-text">Processing Your Request...</span>
+          </div>
+        `;
+        
+        // Append to body immediately
+        document.body.appendChild(loadingOverlay);
+        
+        // Also add loading class to button for visual feedback
+        btn.classList.add('bf-loading');
+      });
+      
       btn.dataset.bfCtaWired = '1';
     });
   }
