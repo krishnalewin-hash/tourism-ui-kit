@@ -46,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const s=document.createElement('style'); s.id='booking-form-cta-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
+  // Hide specific field test
+  (function injectFieldHidingStyles(){
+    if(document.getElementById('booking-form-field-hiding-styles')) return;
+    const css = `/* Hide specific text input field */\ninput[type="text"]#aWEGkxHplDFuKOJWnHSg{display:none !important;}\n`;
+    const s=document.createElement('style'); s.id='booking-form-field-hiding-styles'; s.textContent=css; document.head.appendChild(s);
+  })();
+
   /* ===== Section 2: Global Configuration
     Purpose: Centralized settings for API key, country restriction, time picker window, timeouts.
     Remove or trim properties only if the dependent feature (see comments) is removed.
@@ -815,7 +822,6 @@ const CONFIG = {
       const input = rootDoc.querySelector('input[data-q="number_of_passengers"]');
       // If the select already exists, bail
       const selAlready = rootDoc.querySelector('select[data-q="number_of_passengers"]');
-      if(debug) console.log('[PASSENGER DEBUG] attachPassengerSelect called, input found:', !!input, 'select already exists:', !!selAlready);
       if (!input || selAlready) return;
       if (input.dataset.paxSelectWired === '1') return;
 
@@ -830,8 +836,6 @@ const CONFIG = {
       
       // Insert select after the hidden input (don't replace it)
       input.parentNode.insertBefore(selectEl, input.nextSibling);
-      
-      if(debug) console.log('[PASSENGER DEBUG] Select element created and inserted:', selectEl);
       
       // Sync select changes back to the hidden input for form submission
       selectEl.addEventListener('change', () => {
@@ -861,8 +865,8 @@ const CONFIG = {
       selectEl.dataset.paxSelectWired = '1';
       input.dataset.paxSelectWired = '1';
 
-      // Note: enhanceVisual will be called separately in the main enhancement sequence
-      // No need to call it here to avoid duplicate icons
+      // Re-run icon wrapper just in case
+      try { enhanceVisual(document); } catch(_) {}
     }
 
     window.__passengerSelect = { attach: attachPassengerSelect };
@@ -961,21 +965,6 @@ const CONFIG = {
   ===================================================== */
   function enhanceVisual(rootDoc){
     if(!rootDoc) return;
-    
-    // Debug logging for function calls
-    if(window.CFG?.debug) {
-      console.log('[ICON DEBUG] enhanceVisual() called');
-      console.log('[ICON DEBUG] Current passenger inputs:', document.querySelectorAll('input[data-q="number_of_passengers"]').length);
-      console.log('[ICON DEBUG] Current passenger selects:', document.querySelectorAll('select[data-q="number_of_passengers"]').length);
-      
-      const passengerSelects = document.querySelectorAll('select[data-q="number_of_passengers"]');
-      if(passengerSelects.length > 0) {
-        console.log('[ICON DEBUG] Passenger select element:', passengerSelects[0]);
-        console.log('[ICON DEBUG] Passenger select visible:', passengerSelects[0].offsetWidth > 0 && passengerSelects[0].offsetHeight > 0);
-        console.log('[ICON DEBUG] Passenger select parent element:', passengerSelects[0].parentElement);
-      }
-    }
-    
     const ICONS={
       'pickup_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
       'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
@@ -987,72 +976,42 @@ const CONFIG = {
       'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
     };
     function wrap(el, svg, key){
-      // Debug logging for icon creation
-      const debug = window.CFG?.debug || false;
-      
-      if(!el) {
-        if(debug) console.log('[ICON DEBUG] wrap() called with null element for key:', key);
-        return;
+      if(!el) return;
+      // Find or create wrapper
+      let wrapDiv = el.closest('.icon-field-wrapper');
+      if(!wrapDiv){
+        wrapDiv=document.createElement('div');
+        wrapDiv.className='icon-field-wrapper';
+        el.parentNode.insertBefore(wrapDiv, el);
       }
-      
-      if(el.dataset.iconized === '1') {
-        if(debug) console.log('[ICON DEBUG] Element already iconized, skipping:', key, el);
-        return;
+      // Ensure an input-row exists (icon aligns to this row only)
+      let row = wrapDiv.querySelector(':scope > .icon-input-row');
+      if(!row){
+        row=document.createElement('div');
+        row.className='icon-input-row';
+        // place at top so any error message can appear below
+        wrapDiv.insertBefore(row, wrapDiv.firstChild);
       }
-      
-      // Simple check: Skip elements that are explicitly hidden via style attribute
-      if (el.style.display === 'none' || el.style.visibility === 'hidden') {
-        if(debug) console.log('[ICON DEBUG] Element is explicitly hidden, skipping icon creation:', key, el);
-        return;
+      // Move input into the row if not already
+      if(el.parentElement !== row){
+        row.appendChild(el);
       }
-      
-      if(debug) {
-        console.log('[ICON DEBUG] Creating icon for:', key);
-        console.log('[ICON DEBUG] Element type:', el.tagName.toLowerCase());
-        console.log('[ICON DEBUG] Element data-q:', el.getAttribute('data-q'));
-        console.log('[ICON DEBUG] Element visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
+      // Create or move the icon into the row
+      let span = row.querySelector(':scope > .field-icon') || wrapDiv.querySelector(':scope > .field-icon');
+      if(!span){
+        span=document.createElement('span');
+        span.className='field-icon';
+        span.setAttribute('aria-hidden','true');
+        if(key) span.setAttribute('data-for', key);
+        span.innerHTML=svg;
+      } else {
+        // Ensure attributes match latest key
+        if(key) span.setAttribute('data-for', key);
       }
-      
-      try {
-        // SIMPLIFIED APPROACH: Don't move elements, just add icon as sibling
-        if(debug) console.log('[ICON DEBUG] Using simplified icon approach - no DOM restructuring');
-        
-        // Check if element already has an icon
-        let existingIcon = el.parentElement.querySelector('.field-icon[data-for="' + key + '"]');
-        if (existingIcon) {
-          if(debug) console.log('[ICON DEBUG] Icon already exists, skipping');
-          el.dataset.iconized='1';
-          return;
-        }
-        
-        // Create icon as simple sibling element
-        let iconSpan = document.createElement('span');
-        iconSpan.className = 'field-icon';
-        iconSpan.setAttribute('aria-hidden', 'true');
-        iconSpan.setAttribute('data-for', key);
-        iconSpan.innerHTML = svg;
-        iconSpan.style.cssText = 'position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; pointer-events: none; z-index: 10; color: #666;';
-        
-        // Make sure parent has relative positioning for absolute icon
-        if (el.parentElement.style.position !== 'relative') {
-          el.parentElement.style.position = 'relative';
-        }
-        
-        // Add some left padding to the input so text doesn't overlap icon
-        el.style.paddingLeft = '35px';
-        
-        // Insert icon as first child of parent
-        el.parentElement.insertBefore(iconSpan, el.parentElement.firstChild);
-        
-        el.dataset.iconized='1';
-        if(debug) {
-          console.log('[ICON DEBUG] Successfully created simple icon for:', key);
-          console.log('[ICON DEBUG] Icon element:', iconSpan);
-        }
-        
-      } catch(error) {
-        if(debug) console.error('[ICON DEBUG] Error creating icon for:', key, error);
+      if(span.parentElement !== row){
+        row.appendChild(span);
       }
+      el.dataset.iconized='1';
     }
     Object.entries(ICONS).forEach(([k,svg])=>{
       [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
@@ -1292,11 +1251,7 @@ autofillHiddenDropOff(document);
   hideDropOffField();
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
-  
-  // Debug logging for icon enhancement calls
-  if(window.CFG?.debug) console.log('[ICON DEBUG] Initial enhanceVisual call');
   enhanceVisual(document);
-  
   enhanceNextButtonMobile(document);
   enhanceSubmitButton(document);
   applyPrefillBasic(document);
@@ -1310,7 +1265,6 @@ autofillHiddenDropOff(document);
   
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
-    if(window.CFG?.debug) console.log('[ICON DEBUG] Secondary enhanceVisual call (400ms delay)');
     enhanceVisual(document);
     if (window.__passengerSelect && window.__passengerSelect.attach) {
       window.__passengerSelect.attach(document);
@@ -1344,7 +1298,6 @@ autofillHiddenDropOff(document);
           const q = el.getAttribute('data-q');
           if(q && targetAttrs.includes(q)){
             // Visual & button enhancements (idempotent)
-            if(window.CFG?.debug) console.log('[ICON DEBUG] MutationObserver enhanceVisual call for:', q, el);
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
