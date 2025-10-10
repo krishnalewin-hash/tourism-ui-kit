@@ -997,24 +997,64 @@ const CONFIG = {
         let display='';
         if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
         else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
-        // Defer value mutation to next tick so Google can close the dropdown first.
+        
+        // Immediate aggressive close before value setting
+        function forceCloseDropdown() {
+          // Hide all pac-containers immediately
+          document.querySelectorAll('.pac-container').forEach(pc => {
+            pc.style.display = 'none !important';
+            pc.style.visibility = 'hidden !important';
+            pc.style.opacity = '0 !important';
+            pc.style.pointerEvents = 'none !important';
+            pc.style.zIndex = '-1 !important';
+          });
+          
+          // Add temporary global style to ensure it stays hidden
+          if (!document.getElementById('pac-force-hide')) {
+            const forceHideStyle = document.createElement('style');
+            forceHideStyle.id = 'pac-force-hide';
+            forceHideStyle.textContent = `
+              .pac-container { 
+                display: none !important; 
+                visibility: hidden !important; 
+                opacity: 0 !important; 
+                pointer-events: none !important; 
+                z-index: -1 !important; 
+              }
+            `;
+            document.head.appendChild(forceHideStyle);
+            
+            // Remove the force-hide style after a delay
+            setTimeout(() => {
+              if (document.getElementById('pac-force-hide')) {
+                document.getElementById('pac-force-hide').remove();
+              }
+            }, 1000);
+          }
+        }
+        
+        // Force close immediately
+        forceCloseDropdown();
+        
+        // Defer value mutation to next tick
         setTimeout(()=>{
           el.value = display;
           el.setAttribute('value', display);
           el.dispatchEvent(new Event('input', { bubbles:true }));
           el.dispatchEvent(new Event('change', { bubbles:true }));
-          // Force close: blur + synthetic Escape + multi-pass hide + temporary CSS rule
+          
+          // Additional closing techniques
           try { el.blur(); } catch(_) {}
           try { el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); } catch(_) {}
-          if(!document.getElementById('pac-temp-hide')){
-            const st=document.createElement('style');
-            st.id='pac-temp-hide';
-            st.textContent='.pac-container{display:none !important;}';
-            document.head.appendChild(st);
-            setTimeout(()=>{ st.remove(); },400);
-          }
-          function hideAll(){ document.querySelectorAll('.pac-container').forEach(pc=>{ pc.style.display='none'; }); }
-          [0,30,80,160,300].forEach(d=> setTimeout(hideAll,d));
+          try { el.dispatchEvent(new KeyboardEvent('keyup',{key:'Escape',bubbles:true})); } catch(_) {}
+          
+          // Force close again after value setting
+          forceCloseDropdown();
+          
+          // Multiple delayed attempts to ensure it stays closed
+          [50, 100, 200, 400, 800].forEach(delay => {
+            setTimeout(forceCloseDropdown, delay);
+          });
         },0);
       });
 
