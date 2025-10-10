@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour Detail Form - Debug Mode</title>
+</head>
+<body>
+  <h1>Tour Detail Form - Debug Mode</h1>
+  <p>Check the console for debug logs about icon creation.</p>
+
+  <!-- Enable debug mode -->
+  <script>
+    window.CFG = {
+      client: 'kamar-tours',
+      debug: true  // Enable debug logging
+    };
+  </script>
+
+  <!-- Load the CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail-form/css/tour-detail-form.css">
+
+  <!-- Sample form HTML -->
+  <div class="form-container">
+    <input type="text" data-q="pickup_location" placeholder="Pickup Location" />
+    <input type="text" data-q="drop-off_location" placeholder="Drop-off Location" />
+    <input type="text" data-q="pickup_date" placeholder="Pickup Date" />
+    <input type="text" data-q="pickup_time" placeholder="Pickup Time" />
+    <input type="number" data-q="number_of_passengers" placeholder="Number of Passengers" />
+  </div>
+
+  <!-- Load the JS with debug support -->
+  <script src="../src/tour-detail-form/js/tour-detail-form.js"></script>
+
+  <div style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+    <p><strong>Debug Instructions:</strong></p>
+    <ol>
+      <li>Open the browser console (F12 → Console)</li>
+      <li>Look for <code>[ICON DEBUG]</code> messages</li>
+      <li>Watch for the duplicate icon creation sequence</li>
+      <li>Note the timing of when icons appear/disappear</li>
+    </ol>
+  </div>
+</body>
+</html>

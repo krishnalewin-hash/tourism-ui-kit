@@ -958,6 +958,14 @@ const CONFIG = {
   ===================================================== */
   function enhanceVisual(rootDoc){
     if(!rootDoc) return;
+    
+    // Debug logging for function calls
+    if(window.CFG?.debug) {
+      console.log('[ICON DEBUG] enhanceVisual() called');
+      console.log('[ICON DEBUG] Current passenger inputs:', document.querySelectorAll('input[data-q="number_of_passengers"]').length);
+      console.log('[ICON DEBUG] Current passenger selects:', document.querySelectorAll('select[data-q="number_of_passengers"]').length);
+    }
+    
     const ICONS={
       'pickup_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
       'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
@@ -969,7 +977,27 @@ const CONFIG = {
       'phone':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.86 19.86 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.66 12.66 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.66 12.66 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z'/></svg>`
     };
     function wrap(el, svg, key){
-      if(!el || el.dataset.iconized === '1') return;
+      // Debug logging for icon creation
+      const debug = window.CFG?.debug || false;
+      
+      if(!el) {
+        if(debug) console.log('[ICON DEBUG] wrap() called with null element for key:', key);
+        return;
+      }
+      
+      if(el.dataset.iconized === '1') {
+        if(debug) console.log('[ICON DEBUG] Element already iconized, skipping:', key, el);
+        return;
+      }
+      
+      if(debug) {
+        console.log('[ICON DEBUG] Creating icon for:', key);
+        console.log('[ICON DEBUG] Element type:', el.tagName.toLowerCase());
+        console.log('[ICON DEBUG] Element data-q:', el.getAttribute('data-q'));
+        console.log('[ICON DEBUG] Element visible:', el.offsetWidth > 0 && el.offsetHeight > 0);
+        console.log('[ICON DEBUG] Call stack:', new Error().stack);
+      }
+      
       // Find or create wrapper
       let wrapDiv = el.closest('.icon-field-wrapper');
       if(!wrapDiv){
@@ -1244,7 +1272,11 @@ autofillHiddenDropOff(document);
   hideDropOffField();
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
+  
+  // Debug logging for icon enhancement calls
+  if(window.CFG?.debug) console.log('[ICON DEBUG] Initial enhanceVisual call');
   enhanceVisual(document);
+  
   enhanceNextButtonMobile(document);
   enhanceSubmitButton(document);
   applyPrefillBasic(document);
@@ -1258,6 +1290,7 @@ autofillHiddenDropOff(document);
   
   // Secondary run to catch late-rendered inputs
   setTimeout(()=>{
+    if(window.CFG?.debug) console.log('[ICON DEBUG] Secondary enhanceVisual call (400ms delay)');
     enhanceVisual(document);
     if (window.__passengerSelect && window.__passengerSelect.attach) {
       window.__passengerSelect.attach(document);
@@ -1291,6 +1324,7 @@ autofillHiddenDropOff(document);
           const q = el.getAttribute('data-q');
           if(q && targetAttrs.includes(q)){
             // Visual & button enhancements (idempotent)
+            if(window.CFG?.debug) console.log('[ICON DEBUG] MutationObserver enhanceVisual call for:', q, el);
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
