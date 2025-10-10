@@ -46,13 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const s=document.createElement('style'); s.id='booking-form-cta-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
-  // Hide specific field test
-  (function injectFieldHidingStyles(){
-    if(document.getElementById('booking-form-field-hiding-styles')) return;
-    const css = `/* Hide specific text input field */\ninput[type="text"]#aWEGkxHplDFuKOJWnHSg{display:none !important;}\n`;
-    const s=document.createElement('style'); s.id='booking-form-field-hiding-styles'; s.textContent=css; document.head.appendChild(s);
-  })();
-
   /* ===== Section 2: Global Configuration
     Purpose: Centralized settings for API key, country restriction, time picker window, timeouts.
     Remove or trim properties only if the dependent feature (see comments) is removed.
@@ -1014,8 +1007,14 @@ const CONFIG = {
       el.dataset.iconized='1';
     }
     Object.entries(ICONS).forEach(([k,svg])=>{
-      [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
-      [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+      if (k === 'number_of_passengers') {
+        // Only apply icon to select elements for passenger field
+        [...rootDoc.querySelectorAll(`select[data-q='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+      } else {
+        // Apply to both input and select for other fields
+        [...rootDoc.querySelectorAll(`input[data-q='${k}'],select[data-q='${k}']`)].forEach(el=>wrap(el,svg,k));
+        [...rootDoc.querySelectorAll(`input[name='${k}'],select[name='${k}']`)].forEach(el=>wrap(el,svg,k));
+      }
     });
   }
 
