@@ -990,6 +990,17 @@ const CONFIG = {
         return;
       }
       
+      // Skip hidden elements (they shouldn't get icons)
+      const isHidden = el.style.display === 'none' || 
+                      el.style.visibility === 'hidden' || 
+                      el.offsetWidth === 0 || 
+                      el.offsetHeight === 0;
+      
+      if(isHidden) {
+        if(debug) console.log('[ICON DEBUG] Element is hidden, skipping icon creation:', key, el);
+        return;
+      }
+      
       if(debug) {
         console.log('[ICON DEBUG] Creating icon for:', key);
         console.log('[ICON DEBUG] Element type:', el.tagName.toLowerCase());
