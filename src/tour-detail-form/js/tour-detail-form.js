@@ -1018,31 +1018,32 @@ const CONFIG = {
             pc.classList.add('pac-hidden');
           });
           
-          // Add more aggressive global style
-          if (!document.getElementById('pac-force-hide')) {
-            const forceHideStyle = document.createElement('style');
-            forceHideStyle.id = 'pac-force-hide';
-            forceHideStyle.textContent = `
-              .pac-container, .pac-container * { 
+          // Add targeted style that only affects existing containers temporarily
+          const existingContainers = document.querySelectorAll('.pac-container');
+          if (existingContainers.length > 0 && !document.getElementById('pac-temp-hide')) {
+            const tempHideStyle = document.createElement('style');
+            tempHideStyle.id = 'pac-temp-hide';
+            tempHideStyle.textContent = `
+              .pac-container.pac-hidden { 
                 display: none !important; 
                 visibility: hidden !important; 
                 opacity: 0 !important; 
                 pointer-events: none !important; 
                 z-index: -9999 !important; 
-                height: 0 !important;
-                width: 0 !important;
-                overflow: hidden !important;
               }
-              .pac-hidden { display: none !important; }
             `;
-            document.head.appendChild(forceHideStyle);
+            document.head.appendChild(tempHideStyle);
             
-            // Keep the style active for much longer
+            // Remove the targeted style after a shorter delay to allow new autocomplete instances
             setTimeout(() => {
-              if (document.getElementById('pac-force-hide')) {
-                document.getElementById('pac-force-hide').remove();
+              if (document.getElementById('pac-temp-hide')) {
+                document.getElementById('pac-temp-hide').remove();
               }
-            }, 5000);
+              // Also remove the pac-hidden class from containers to allow reuse
+              document.querySelectorAll('.pac-container.pac-hidden').forEach(pc => {
+                pc.classList.remove('pac-hidden');
+              });
+            }, 1000); // Reduced from 5000ms to 1000ms
           }
         }
         
@@ -1104,11 +1105,11 @@ const CONFIG = {
               // Only restore autocomplete after a shorter delay
               el.setAttribute('autocomplete', 'on');
               el.removeAttribute('aria-autocomplete');
-            }, 300); // Reduced from 1000ms to 300ms
-          }, 100); // Reduced from 200ms to 100ms
+            }, 200); // Further reduced from 300ms to 200ms
+          }, 50); // Further reduced from 100ms to 50ms
           
-          // Continuous force close attempts
-          [10, 50, 100, 200, 500, 1000, 2000, 3000].forEach(delay => {
+          // Reduced force close attempts to avoid interfering with other fields
+          [10, 50, 100, 200, 500].forEach(delay => {
             setTimeout(forceCloseDropdown, delay);
           });
         }, 0);
