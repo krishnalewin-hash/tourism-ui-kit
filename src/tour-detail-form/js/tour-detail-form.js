@@ -1068,8 +1068,16 @@ const CONFIG = {
           inputEvent.isProgrammatic = true;
           changeEvent.isProgrammatic = true;
           
+          // Temporarily allow events to pass through
+          el.dataset.allowEvents = 'true';
+          
           el.dispatchEvent(inputEvent);
           el.dispatchEvent(changeEvent);
+          
+          // Clear the allow flag immediately
+          setTimeout(() => {
+            delete el.dataset.allowEvents;
+          }, 10);
           
           // Aggressive close after value setting
           forceCloseDropdown();
@@ -1090,14 +1098,14 @@ const CONFIG = {
           // Extended cleanup and protection
           setTimeout(() => {
             delete el.dataset.placingValue;
-            // Keep the placeSelected flag longer for extra protection
+            // Keep the placeSelected flag for a shorter period
             setTimeout(() => {
               delete el.dataset.placeSelected;
-              // Only restore autocomplete after a significant delay
+              // Only restore autocomplete after a shorter delay
               el.setAttribute('autocomplete', 'on');
               el.removeAttribute('aria-autocomplete');
-            }, 1000);
-          }, 200);
+            }, 300); // Reduced from 1000ms to 300ms
+          }, 100); // Reduced from 200ms to 100ms
           
           // Continuous force close attempts
           [10, 50, 100, 200, 500, 1000, 2000, 3000].forEach(delay => {
@@ -1117,18 +1125,12 @@ const CONFIG = {
 			}, { once:true });
 
       // Add input event listener to prevent autocomplete during place selection
+      // But allow programmatic events and events when allowEvents is set
       el.addEventListener('input', (e) => {
-        if (el.dataset.placeSelected === 'true') {
-          // If a place was just selected, prevent any autocomplete triggers
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }, true);
-
-      // Add additional protection against clicks that might reopen autocomplete
-      el.addEventListener('click', (e) => {
-        if (el.dataset.placeSelected === 'true') {
-          e.preventDefault();
+        if (el.dataset.placeSelected === 'true' && 
+            !e.isProgrammatic && 
+            el.dataset.allowEvents !== 'true') {
+          // Only block non-programmatic events when place is selected and events aren't explicitly allowed
           e.stopImmediatePropagation();
           return false;
         }
