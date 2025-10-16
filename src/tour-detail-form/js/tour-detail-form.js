@@ -998,6 +998,14 @@ const CONFIG = {
         if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
         else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
         
+        // Immediately disable the autocomplete service to prevent any further suggestions
+        el.setAttribute('autocomplete', 'off');
+        el.setAttribute('aria-autocomplete', 'none');
+        
+        // Mark that we're in a place selection process
+        el.dataset.placingValue = 'true';
+        el.dataset.placeSelected = 'true';
+        
         // Immediate aggressive close before value setting
         function forceCloseDropdown() {
           // Hide all pac-containers immediately
@@ -1007,88 +1015,124 @@ const CONFIG = {
             pc.style.opacity = '0 !important';
             pc.style.pointerEvents = 'none !important';
             pc.style.zIndex = '-1 !important';
+            pc.classList.add('pac-hidden');
           });
           
-          // Add temporary global style to ensure it stays hidden
+          // Add more aggressive global style
           if (!document.getElementById('pac-force-hide')) {
             const forceHideStyle = document.createElement('style');
             forceHideStyle.id = 'pac-force-hide';
             forceHideStyle.textContent = `
-              .pac-container { 
+              .pac-container, .pac-container * { 
                 display: none !important; 
                 visibility: hidden !important; 
                 opacity: 0 !important; 
                 pointer-events: none !important; 
-                z-index: -1 !important; 
+                z-index: -9999 !important; 
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
               }
+              .pac-hidden { display: none !important; }
             `;
             document.head.appendChild(forceHideStyle);
             
-            // Remove the force-hide style after a delay
+            // Keep the style active for much longer
             setTimeout(() => {
               if (document.getElementById('pac-force-hide')) {
                 document.getElementById('pac-force-hide').remove();
               }
-            }, 2000); // Extended delay
+            }, 5000);
           }
         }
         
-        // Force close immediately
+        // Force close immediately and continuously
         forceCloseDropdown();
         
-        // Temporarily disable autocomplete to prevent retriggering
-        const originalAutocomplete = el.getAttribute('autocomplete');
-        el.setAttribute('autocomplete', 'off');
+        // Temporarily disable the Google Autocomplete instance itself
+        try {
+          ac.set('input', '');
+          ac.setComponentRestrictions({});
+        } catch(_) {}
         
-        // Mark that we're in a place selection process
-        el.dataset.placingValue = 'true';
-        
-        // Defer value mutation to next tick
+        // Set value and fire events in a controlled manner
         setTimeout(()=>{
           el.value = display;
           el.setAttribute('value', display);
           
-          // Fire events immediately after setting value
-          el.dispatchEvent(new Event('input', { bubbles:true }));
-          el.dispatchEvent(new Event('change', { bubbles:true }));
+          // Create custom events to avoid triggering autocomplete
+          const inputEvent = new Event('input', { bubbles: true });
+          const changeEvent = new Event('change', { bubbles: true });
           
-          // Additional closing techniques
-          try { el.blur(); } catch(_) {}
-          try { el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); } catch(_) {}
-          try { el.dispatchEvent(new KeyboardEvent('keyup',{key:'Escape',bubbles:true})); } catch(_) {}
+          // Mark these events as programmatic
+          inputEvent.isProgrammatic = true;
+          changeEvent.isProgrammatic = true;
           
-          // Force close again after value setting
+          el.dispatchEvent(inputEvent);
+          el.dispatchEvent(changeEvent);
+          
+          // Aggressive close after value setting
           forceCloseDropdown();
           
-          // Clean up after a short delay
-          setTimeout(() => {
-            // Clear the placing flag
-            delete el.dataset.placingValue;
-            
-            // Restore original autocomplete setting
-            if (originalAutocomplete) {
-              el.setAttribute('autocomplete', originalAutocomplete);
-            } else {
-              el.setAttribute('autocomplete', 'on');
-            }
-          }, 50);
+          // Multiple blur attempts
+          try { 
+            el.blur(); 
+            setTimeout(() => el.blur(), 10);
+            setTimeout(() => el.blur(), 50);
+          } catch(_) {}
           
-          // Multiple delayed attempts to ensure it stays closed
-          [100, 200, 400, 800, 1500].forEach(delay => {
+          // Escape key simulation
+          try { 
+            el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+            el.dispatchEvent(new KeyboardEvent('keyup',{key:'Escape',bubbles:true}));
+          } catch(_) {}
+          
+          // Extended cleanup and protection
+          setTimeout(() => {
+            delete el.dataset.placingValue;
+            // Keep the placeSelected flag longer for extra protection
+            setTimeout(() => {
+              delete el.dataset.placeSelected;
+              // Only restore autocomplete after a significant delay
+              el.setAttribute('autocomplete', 'on');
+              el.removeAttribute('aria-autocomplete');
+            }, 1000);
+          }, 200);
+          
+          // Continuous force close attempts
+          [10, 50, 100, 200, 500, 1000, 2000, 3000].forEach(delay => {
             setTimeout(forceCloseDropdown, delay);
           });
-        },0);
+        }, 0);
       });
 
       el.addEventListener('focus', ()=>{
-			  // Don't show autocomplete if we're in the middle of placing a value
-			  if (el.dataset.placingValue === 'true') {
+			  // Don't show autocomplete if we're in the middle of placing a value or just selected a place
+			  if (el.dataset.placingValue === 'true' || el.dataset.placeSelected === 'true') {
 			    return;
 			  }
 			  if(!el.value && typeof airportBounds === 'function') {
 			    ac.setBounds(airportBounds());
 			  }
 			}, { once:true });
+
+      // Add input event listener to prevent autocomplete during place selection
+      el.addEventListener('input', (e) => {
+        if (el.dataset.placeSelected === 'true') {
+          // If a place was just selected, prevent any autocomplete triggers
+          e.stopImmediatePropagation();
+          return false;
+        }
+      }, true);
+
+      // Add additional protection against clicks that might reopen autocomplete
+      el.addEventListener('click', (e) => {
+        if (el.dataset.placeSelected === 'true') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return false;
+        }
+      }, true);
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
       normalizeSafely(el, obs);
