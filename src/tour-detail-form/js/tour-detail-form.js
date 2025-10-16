@@ -1029,19 +1029,43 @@ const CONFIG = {
               if (document.getElementById('pac-force-hide')) {
                 document.getElementById('pac-force-hide').remove();
               }
-            }, 1000);
+            }, 2000); // Extended delay
           }
         }
         
         // Force close immediately
         forceCloseDropdown();
         
+        // Temporarily disable autocomplete to prevent retriggering
+        const originalAutocomplete = el.getAttribute('autocomplete');
+        el.setAttribute('autocomplete', 'off');
+        
+        // Mark that we're in a place selection process
+        el.dataset.placingValue = 'true';
+        
         // Defer value mutation to next tick
         setTimeout(()=>{
           el.value = display;
           el.setAttribute('value', display);
-          el.dispatchEvent(new Event('input', { bubbles:true }));
-          el.dispatchEvent(new Event('change', { bubbles:true }));
+          
+          // Wait before firing events to ensure autocomplete is fully closed
+          setTimeout(() => {
+            // Only fire events if we're still in placing mode (prevents recursive triggers)
+            if (el.dataset.placingValue === 'true') {
+              el.dispatchEvent(new Event('input', { bubbles:true }));
+              el.dispatchEvent(new Event('change', { bubbles:true }));
+            }
+            
+            // Clear the placing flag
+            delete el.dataset.placingValue;
+            
+            // Restore original autocomplete setting
+            if (originalAutocomplete) {
+              el.setAttribute('autocomplete', originalAutocomplete);
+            } else {
+              el.setAttribute('autocomplete', 'on');
+            }
+          }, 100);
           
           // Additional closing techniques
           try { el.blur(); } catch(_) {}
@@ -1052,17 +1076,30 @@ const CONFIG = {
           forceCloseDropdown();
           
           // Multiple delayed attempts to ensure it stays closed
-          [50, 100, 200, 400, 800].forEach(delay => {
+          [50, 100, 200, 400, 800, 1500].forEach(delay => {
             setTimeout(forceCloseDropdown, delay);
           });
         },0);
       });
 
       el.addEventListener('focus', ()=>{
+			  // Don't show autocomplete if we're in the middle of placing a value
+			  if (el.dataset.placingValue === 'true') {
+			    return;
+			  }
 			  if(!el.value && typeof airportBounds === 'function') {
 			    ac.setBounds(airportBounds());
 			  }
 			}, { once:true });
+
+      // Additional safety: prevent autocomplete from showing during value placement
+      el.addEventListener('input', (e) => {
+        if (el.dataset.placingValue === 'true') {
+          // Prevent the autocomplete from processing this input event
+          e.stopImmediatePropagation();
+          return false;
+        }
+      }, true); // Use capture phase to intercept before Google's listeners
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
       normalizeSafely(el, obs);
