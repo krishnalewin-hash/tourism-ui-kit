@@ -1,0 +1,64 @@
+<!-- Quote Form Styling Embed Script -->
+<!-- 
+  This embed script provides enhanced quote form styling with:
+  - Icon injection for form fields
+  - Google Places autocomplete
+  - Date and time pickers
+  - Form validation with visual feedback
+  - Auto-config loading for clients
+  - Mobile-responsive enhancements
+-->
+
+<!-- CSS Styles -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/css/quote-form-styling.css">
+
+<!-- JavaScript Enhancement -->
+<script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/tour-detail/js/quote-form-styling.js"></script>
+
+<!-- Optional: Client Configuration -->
+<script>
+// Example configuration (customize for your needs)
+window.CFG = {
+  CLIENT: 'kamar-tours',        // Auto-loads config from clients/_build/
+  GMAPS_KEY: 'your-api-key',    // Or let auto-config handle this
+  COUNTRIES: ['jm'],            // Country restriction for Places API
+  REGION: 'jm'                  // Region bias for Places API
+};
+</script>
+
+<!-- 
+Usage Instructions:
+1. Include this embed script in your HTML page
+2. Set up window.CFG with your configuration
+3. Ensure your form has the required data-q attributes:
+   - data-q="pickup_location"
+   - data-q="drop-off_location" 
+   - data-q="pickup_date"
+   - data-q="pickup_time"
+   - data-q="number_of_passengers"
+
+Example Form Structure:
+<form>
+  <input type="text" data-q="pickup_location" placeholder="Pickup Location">
+  <input type="text" data-q="drop-off_location" placeholder="Drop-off Location">
+  <input type="text" data-q="pickup_date" placeholder="Pickup Date">
+  <input type="text" data-q="pickup_time" placeholder="Pickup Time">
+  <input type="number" data-q="number_of_passengers" placeholder="Passengers">
+  
+  <button type="button" class="ghl-btn ghl-footer-next">Next</button>
+  <button type="submit" class="ghl-btn ghl-submit-btn">Submit</button>
+</form>
+
+Features Included:
+- ✅ Icon injection for input fields
+- ✅ Google Places autocomplete
+- ✅ Custom date picker
+- ✅ Time picker with 15-minute intervals
+- ✅ Form validation with error states
+- ✅ Mobile-responsive button labels
+- ✅ Smooth animations and transitions
+- ✅ Auto-config loading for supported clients
+- ✅ Passenger count validation
+- ✅ Date and time validation
+- ✅ Geolocation integration
+-->
