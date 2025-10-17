@@ -970,9 +970,8 @@ const CONFIG = {
       const el=rootDoc.querySelector(sel);
       if(!el || el.dataset.placesWired==='1') continue;
       
-      // Skip if hidden/invisible (drop-off is hidden on this page)
-	    const cs = el.ownerDocument.defaultView.getComputedStyle(el);
-	    if (el.type === 'hidden' || cs.display === 'none' || cs.visibility === 'hidden') continue;
+      // Skip if truly hidden (type="hidden" only, not display:none which might be temporary)
+	    if (el.type === 'hidden') continue;
     
       el.dataset.placesWired='1';
       let ac;
@@ -1360,7 +1359,7 @@ autofillHiddenDropOff(document);
     }
   }
   
-  hideDropOffField();
+  // Don't hide drop-off field yet - wait until after autocomplete is wired
   attachPickupDateGuard(document);
   attachPickupTimePicker(document);
   enhanceVisual(document);
@@ -1512,6 +1511,10 @@ autofillHiddenDropOff(document);
     
     
     wireAutocomplete(document);
+    
+    // Hide drop-off field AFTER autocomplete is wired for tour forms
+    hideDropOffField();
+    
     // Retry wiring in case inputs mount after maps load (GHL async rendering)
     (function retryWireAutocomplete(){
       const start=Date.now();
