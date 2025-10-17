@@ -85,9 +85,12 @@ function injectStyles() {
           configUrl = `https://cdn.jsdelivr.net/gh/${base}/clients/${client}/core/config.json`;
         }
 
-        console.log(`[quote-calc] Fetching core config: ${configUrl}`);
+        // Add timestamp to bypass CDN cache
+        const cacheBuster = `?t=${Date.now()}`;
+        const configUrlWithCache = configUrl + cacheBuster;
+        console.log(`[quote-calc] Fetching core config: ${configUrlWithCache}`);
         
-        const response = await fetch(configUrl, { cache: 'no-store' });
+        const response = await fetch(configUrlWithCache, { cache: 'no-store' });
         if (response.ok) {
           const clientConfig = await response.json();
           
