@@ -94,6 +94,16 @@ function injectStyles() {
           // Update CONFIG with client-specific settings from core config
           if (clientConfig.QUOTE_RESULTS_CONFIG) {
             CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
+            // Force override with new pricing bands
+            CONFIG.bands = [
+              { maxMi: 50,  pricePP: 30 },
+              { maxMi: 60,  pricePP: 40 },
+              { maxMi: 70,  pricePP: 50 },
+              { maxMi: 999, pricePP: 80 }
+            ];
+            CONFIG.MINIMUM_PASSENGERS = 2;
+            CONFIG.MINIMUM_CHARGE_MESSAGE = "Minimum 2 passengers required. Price shown is for up to 2 people.";
+            CONFIG.defaultPassengers = 2;
           } else if (clientConfig.PRICING_RATES) {
             convertPricingRatesToConfig(clientConfig.PRICING_RATES);
           }
@@ -221,23 +231,17 @@ function injectStyles() {
             <span class="qc-detail-label">Number of Passengers:</span>
             <span class="qc-detail-value">${pax || CONFIG.defaultPassengers}</span>
           </div>
-          ${isMinimumCharge ? `
-          <div class="qc-detail-item minimum">
-            <span class="qc-detail-label">Effective passengers (minimum):</span>
-            <span class="qc-detail-value">${effectivePax}</span>
-          </div>
-          ` : ''}
           <div class="qc-detail-item">
             <span class="qc-detail-label">Cost per person:</span>
             <span class="qc-detail-value">$${pp}</span>
           </div>
-          ${isMinimumCharge ? `
-          <div class="qc-minimum-notice">${minimumMessage}</div>
-          ` : ''}
           <div class="qc-detail-item">
             <span class="qc-detail-label">Total Cost:</span>
             <span class="qc-detail-value highlight">$${total}</span>
           </div>
+          ${isMinimumCharge ? `
+          <div class="qc-minimum-notice">${minimumMessage}</div>
+          ` : ''}
           
           <div class="qc-buttons">
             <button class="qc-btn qc-btn-primary" onclick="handlePayNow()">Pay Now</button>
@@ -376,10 +380,13 @@ function injectStyles() {
         const effectivePax = Math.max(pax, minimumPassengers);
         const isMinimumCharge = pax < minimumPassengers;
         
+        // Use the updated pricing bands (force new logic)
         const basePP = pickBandPrice(miles);
         const rsPP = remoteSurchargePP(pickup, dropoff);
         const pp = Math.max(CONFIG.minPricePP, basePP + rsPP);
         const total = Math.round(pp * effectivePax);
+        
+        console.log(`[quote-calc] Pricing calculation: ${miles.toFixed(1)} miles → band price: $${basePP}, remote surcharge: $${rsPP}, final pp: $${pp}, passengers: ${pax} → effective: ${effectivePax}, total: $${total}`);
 
         console.log(`[quote-calc] Distance Matrix calculation successful: ${miles.toFixed(1)} miles, $${total} total (${pax} passengers, ${effectivePax} effective)`);
 
