@@ -913,8 +913,47 @@ const CONFIG = {
     // GHL-specific interception - try to catch their AJAX calls
     const originalFetch = window.fetch;
     window.fetch = function(...args) {
-      console.log('[DEBUG] Fetch called:', args[0]);
-      return originalFetch.apply(this, args);
+      const url = args[0];
+      const options = args[1] || {};
+      
+      console.log('[DEBUG] Fetch called:', url);
+      
+      // If this looks like a GHL form submission, try to add place data
+      if(url && (url.includes('surveys/submit') || url.includes('forms/submit') || url.includes('leadconnectorhq.com'))) {
+        console.log('[DEBUG] Potential GHL form submission detected via fetch');
+        
+        // Try to add place data to the request
+        if(options.body instanceof FormData) {
+          const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+          autocompleteFields.forEach(field => {
+            if(field.dataset.placeId) {
+              console.log(`[DEBUG] Adding place data to FormData for ${field.getAttribute('data-q')}`);
+              options.body.append(field.name + '_place_id', field.dataset.placeId);
+              options.body.append(field.name + '_place_name', field.dataset.placeName || '');
+              options.body.append(field.name + '_place_address', field.dataset.placeFormattedAddress || '');
+            }
+          });
+        } else if(typeof options.body === 'string') {
+          // Try to parse and modify JSON data
+          try {
+            const jsonData = JSON.parse(options.body);
+            const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+            autocompleteFields.forEach(field => {
+              if(field.dataset.placeId) {
+                console.log(`[DEBUG] Adding place data to JSON for ${field.getAttribute('data-q')}`);
+                jsonData[field.name + '_place_id'] = field.dataset.placeId;
+                jsonData[field.name + '_place_name'] = field.dataset.placeName || '';
+                jsonData[field.name + '_place_address'] = field.dataset.placeFormattedAddress || '';
+              }
+            });
+            options.body = JSON.stringify(jsonData);
+          } catch(e) {
+            console.log('[DEBUG] Could not parse fetch body as JSON');
+          }
+        }
+      }
+      
+      return originalFetch.apply(this, [url, options]);
     };
 
     const originalXHROpen = XMLHttpRequest.prototype.open;
@@ -979,6 +1018,51 @@ const CONFIG = {
         console.log('[DEBUG] GHL submit button clicked:', btn);
         const form = btn.closest('form') || document.querySelector('form');
         if(form) addPlaceDataToForm(form);
+      }
+    }, true);
+
+    // More aggressive approach - try to add place data to form fields directly
+    function addPlaceDataToFields() {
+      console.log('[DEBUG] Adding place data directly to form fields');
+      const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+      autocompleteFields.forEach(field => {
+        if(field.dataset.placeId) {
+          console.log(`[DEBUG] Adding place data to field ${field.getAttribute('data-q')}`);
+          
+          // Create hidden inputs next to the field
+          const container = field.parentNode;
+          
+          // Remove existing place data inputs
+          container.querySelectorAll(`[name="${field.name}_place_id"], [name="${field.name}_place_name"], [name="${field.name}_place_address"]`).forEach(el => el.remove());
+          
+          // Add new place data inputs
+          const placeIdInput = document.createElement('input');
+          placeIdInput.type = 'hidden';
+          placeIdInput.name = field.name + '_place_id';
+          placeIdInput.value = field.dataset.placeId;
+          container.appendChild(placeIdInput);
+          
+          const placeNameInput = document.createElement('input');
+          placeNameInput.type = 'hidden';
+          placeNameInput.name = field.name + '_place_name';
+          placeNameInput.value = field.dataset.placeName || '';
+          container.appendChild(placeNameInput);
+          
+          const placeAddressInput = document.createElement('input');
+          placeAddressInput.type = 'hidden';
+          placeAddressInput.name = field.name + '_place_address';
+          placeAddressInput.value = field.dataset.placeFormattedAddress || '';
+          container.appendChild(placeAddressInput);
+        }
+      });
+    }
+
+    // Try to add place data before any form submission
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
+      if(btn && (btn.textContent?.toLowerCase().includes('submit') || btn.value?.toLowerCase().includes('submit'))) {
+        console.log('[DEBUG] Submit button detected, adding place data to fields');
+        addPlaceDataToFields();
       }
     }, true);
 
