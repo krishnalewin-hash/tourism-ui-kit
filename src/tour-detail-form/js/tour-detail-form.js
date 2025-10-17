@@ -908,6 +908,14 @@ const CONFIG = {
       console.log('[DEBUG] Page unloading - checking for forms');
       const forms = document.querySelectorAll('form');
       forms.forEach(form => addPlaceDataToForm(form));
+      
+      // Debug: Log all form field values at page unload
+      console.log('[DEBUG] Page unloading - all form field values:');
+      document.querySelectorAll('input, select, textarea').forEach(field => {
+        if(field.name || field.getAttribute('data-q')) {
+          console.log(`[DEBUG] Field ${field.name || field.getAttribute('data-q')}: "${field.value}"`);
+        }
+      });
     });
 
     // GHL-specific interception - try to catch their AJAX calls
@@ -926,6 +934,23 @@ const CONFIG = {
         if(url.includes('surveys/submit') || url.includes('forms/submit')) {
           console.log('[DEBUG] Form submission detected via fetch, updating field values BEFORE request');
           updateFieldValuesWithPlaceData();
+          
+          // Debug: Log the request body to see what GHL is sending
+          console.log('[DEBUG] Fetch request body:', options.body);
+          if(options.body instanceof FormData) {
+            console.log('[DEBUG] FormData contents:');
+            for(let [key, value] of options.body.entries()) {
+              console.log(`[DEBUG] ${key}: "${value}"`);
+            }
+          } else if(typeof options.body === 'string') {
+            console.log('[DEBUG] String body:', options.body);
+            try {
+              const jsonData = JSON.parse(options.body);
+              console.log('[DEBUG] JSON body:', jsonData);
+            } catch(e) {
+              console.log('[DEBUG] Body is not JSON');
+            }
+          }
         }
       }
       
@@ -1056,6 +1081,14 @@ const CONFIG = {
           // GHL will pick up the value change during form submission
         }
       });
+      
+      // Debug: Log all form field values after update
+      console.log('[DEBUG] All form field values after update:');
+      document.querySelectorAll('input, select, textarea').forEach(field => {
+        if(field.name || field.getAttribute('data-q')) {
+          console.log(`[DEBUG] Field ${field.name || field.getAttribute('data-q')}: "${field.value}"`);
+        }
+      });
     }
 
     // Try to update field values before form submission
@@ -1094,6 +1127,13 @@ const CONFIG = {
     document.addEventListener('submit', (e) => {
       console.log('[DEBUG] Form submit event detected');
       updateFieldValuesWithPlaceData();
+      
+      // Debug: Log form data at submission time
+      console.log('[DEBUG] Form submission - logging all form data:');
+      const formData = new FormData(e.target);
+      for(let [key, value] of formData.entries()) {
+        console.log(`[DEBUG] FormData ${key}: "${value}"`);
+      }
     }, true);
 
     window.__stepTwoSubmitValidation = true;
