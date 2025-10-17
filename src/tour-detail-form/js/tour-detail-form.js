@@ -753,9 +753,17 @@ const CONFIG = {
       
       // Add place data before validation
       const form = btn.closest('form');
+      console.log('[DEBUG] Form found:', !!form);
       if(form) {
         const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+        console.log('[DEBUG] Autocomplete fields found:', autocompleteFields.length);
         autocompleteFields.forEach(field => {
+          console.log(`[DEBUG] Field ${field.getAttribute('data-q')} dataset:`, {
+            placeId: field.dataset.placeId,
+            placeName: field.dataset.placeName,
+            placeFormattedAddress: field.dataset.placeFormattedAddress,
+            value: field.value
+          });
           if(field.dataset.placeId) {
             console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on button click`);
             // Create hidden inputs for the place data
@@ -776,6 +784,8 @@ const CONFIG = {
             placeAddressInput.name = field.name + '_place_address';
             placeAddressInput.value = field.dataset.placeFormattedAddress || '';
             form.appendChild(placeAddressInput);
+          } else {
+            console.log(`[DEBUG] No place data found for ${field.getAttribute('data-q')}`);
           }
         });
       }
@@ -793,9 +803,17 @@ const CONFIG = {
       
       // Add place data before validation
       const form = btn.closest('form');
+      console.log('[DEBUG] Mousedown - Form found:', !!form);
       if(form) {
         const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+        console.log('[DEBUG] Mousedown - Autocomplete fields found:', autocompleteFields.length);
         autocompleteFields.forEach(field => {
+          console.log(`[DEBUG] Mousedown - Field ${field.getAttribute('data-q')} dataset:`, {
+            placeId: field.dataset.placeId,
+            placeName: field.dataset.placeName,
+            placeFormattedAddress: field.dataset.placeFormattedAddress,
+            value: field.value
+          });
           if(field.dataset.placeId) {
             console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on mousedown`);
             // Create hidden inputs for the place data
@@ -816,6 +834,8 @@ const CONFIG = {
             placeAddressInput.name = field.name + '_place_address';
             placeAddressInput.value = field.dataset.placeFormattedAddress || '';
             form.appendChild(placeAddressInput);
+          } else {
+            console.log(`[DEBUG] Mousedown - No place data found for ${field.getAttribute('data-q')}`);
           }
         });
       }
