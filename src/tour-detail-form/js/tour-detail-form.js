@@ -967,27 +967,7 @@ const CONFIG = {
     if(!window.google?.maps?.places) return;
     
     // Add global observer to detect pac-container appearances
-    if (!window.__pacObserver) {
-      window.__pacObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach((node) => {
-              if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('pac-container')) {
-                console.log('[DEBUG] Pac-container appeared:', node);
-                // Only block if the pac-container is associated with a locked field
-                const activeInput = document.activeElement;
-                if (activeInput && activeInput.dataset.placeSelected === 'true') {
-                  console.log('[DEBUG] Blocking pac-container for locked field:', activeInput.getAttribute('data-q'));
-                  node.style.display = 'none';
-                  node.style.visibility = 'hidden';
-                }
-              }
-            });
-          }
-        });
-      });
-      window.__pacObserver.observe(document.body, { childList: true, subtree: true });
-    }
+    // Removed global pac-container observer - letting Google handle autocomplete naturally
     const sels=[
       'input[data-q="pickup_location"]',
       'input[data-q="drop-off_location"]'
@@ -1038,89 +1018,22 @@ const CONFIG = {
         el.value = display;
         el.setAttribute('value', display);
         
-        // Dispatch events
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        // Force close the dropdown
-        console.log(`[DEBUG] Closing dropdown for ${el.getAttribute('data-q')}`);
-        el.blur();
-        
-        // Hide only visible pac-containers (not all of them)
-        const pacContainers = document.querySelectorAll('.pac-container');
-        console.log(`[DEBUG] Found ${pacContainers.length} pac-containers to check`);
-        pacContainers.forEach(pc => {
-          // Only hide if it's actually visible
-          if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
-            pc.style.display = 'none';
-            pc.style.visibility = 'hidden';
-            console.log(`[DEBUG] Hiding visible pac-container`);
-          }
-        });
-        
-        // Set a very short flag to prevent immediate reopening (only for this field)
-        el.dataset.placeSelected = 'true';
-        console.log(`[DEBUG] Set placeSelected=true for ${el.getAttribute('data-q')}`);
-        setTimeout(() => {
-          console.log(`[DEBUG] Releasing lock for ${el.getAttribute('data-q')}`);
-          delete el.dataset.placeSelected;
-          console.log(`[DEBUG] Cleared placeSelected for ${el.getAttribute('data-q')}`);
-        }, 200); // Much shorter delay
+        // Let Google handle the dropdown closing naturally - no manual intervention needed
       });
 
       el.addEventListener('focus', ()=>{
-        console.log(`[DEBUG] Focus event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // Only close pac-containers if this specific field just had a place selected
-        if (el.dataset.placeSelected === 'true') {
-          console.log(`[DEBUG] Closing pac-containers on focus for ${el.getAttribute('data-q')} - place just selected`);
-          // Only close visible pac-containers
-          document.querySelectorAll('.pac-container').forEach(pc => {
-            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
-              pc.style.display = 'none';
-              pc.style.visibility = 'hidden';
-            }
-          });
-        }
-        
+        console.log(`[DEBUG] Focus event on ${el.getAttribute('data-q')}`);
         if(!el.value && typeof airportBounds === 'function') {
           ac.setBounds(airportBounds());
         }
       });
       
       el.addEventListener('input', ()=>{
-        console.log(`[DEBUG] Input event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // Only close pac-containers if this specific field just had a place selected
-        if (el.dataset.placeSelected === 'true') {
-          console.log(`[DEBUG] Closing pac-containers for ${el.getAttribute('data-q')} - place just selected`);
-          // Only close visible pac-containers
-          document.querySelectorAll('.pac-container').forEach(pc => {
-            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
-              pc.style.display = 'none';
-              pc.style.visibility = 'hidden';
-            }
-          });
-        }
-        
-        // If user is actively typing (not just programmatic input), clear any stale placeSelected flag
-        if (el.value.length > 0 && el.dataset.placeSelected === 'true') {
-          console.log(`[DEBUG] User typing detected, clearing stale placeSelected flag for ${el.getAttribute('data-q')}`);
-          delete el.dataset.placeSelected;
-        }
+        console.log(`[DEBUG] Input event on ${el.getAttribute('data-q')}`);
       });
       
       el.addEventListener('click', ()=>{
-        console.log(`[DEBUG] Click event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // Only close pac-containers if this specific field just had a place selected
-        if (el.dataset.placeSelected === 'true') {
-          console.log(`[DEBUG] Closing pac-containers on click for ${el.getAttribute('data-q')} - place just selected`);
-          // Only close visible pac-containers
-          document.querySelectorAll('.pac-container').forEach(pc => {
-            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
-              pc.style.display = 'none';
-              pc.style.visibility = 'hidden';
-            }
-          });
-        }
+        console.log(`[DEBUG] Click event on ${el.getAttribute('data-q')}`);
       });
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
