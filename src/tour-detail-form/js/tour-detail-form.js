@@ -748,6 +748,38 @@ const CONFIG = {
     document.addEventListener('click', (e)=>{
       const btn = e.target.closest?.('.ghl-btn.ghl-submit-btn');
       if(!btn) return;
+      
+      console.log('[DEBUG] Submit button clicked');
+      
+      // Add place data before validation
+      const form = btn.closest('form');
+      if(form) {
+        const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+        autocompleteFields.forEach(field => {
+          if(field.dataset.placeId) {
+            console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on button click`);
+            // Create hidden inputs for the place data
+            const placeIdInput = document.createElement('input');
+            placeIdInput.type = 'hidden';
+            placeIdInput.name = field.name + '_place_id';
+            placeIdInput.value = field.dataset.placeId;
+            form.appendChild(placeIdInput);
+            
+            const placeNameInput = document.createElement('input');
+            placeNameInput.type = 'hidden';
+            placeNameInput.name = field.name + '_place_name';
+            placeNameInput.value = field.dataset.placeName || '';
+            form.appendChild(placeNameInput);
+            
+            const placeAddressInput = document.createElement('input');
+            placeAddressInput.type = 'hidden';
+            placeAddressInput.name = field.name + '_place_address';
+            placeAddressInput.value = field.dataset.placeFormattedAddress || '';
+            form.appendChild(placeAddressInput);
+          }
+        });
+      }
+      
       const ok = validateStep2();
       if(!ok){
         e.preventDefault();
@@ -758,6 +790,36 @@ const CONFIG = {
     document.addEventListener('mousedown', (e)=>{
       const btn = e.target.closest?.('.ghl-btn.ghl-submit-btn');
       if(!btn) return;
+      
+      // Add place data before validation
+      const form = btn.closest('form');
+      if(form) {
+        const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+        autocompleteFields.forEach(field => {
+          if(field.dataset.placeId) {
+            console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on mousedown`);
+            // Create hidden inputs for the place data
+            const placeIdInput = document.createElement('input');
+            placeIdInput.type = 'hidden';
+            placeIdInput.name = field.name + '_place_id';
+            placeIdInput.value = field.dataset.placeId;
+            form.appendChild(placeIdInput);
+            
+            const placeNameInput = document.createElement('input');
+            placeNameInput.type = 'hidden';
+            placeNameInput.name = field.name + '_place_name';
+            placeNameInput.value = field.dataset.placeName || '';
+            form.appendChild(placeNameInput);
+            
+            const placeAddressInput = document.createElement('input');
+            placeAddressInput.type = 'hidden';
+            placeAddressInput.name = field.name + '_place_address';
+            placeAddressInput.value = field.dataset.placeFormattedAddress || '';
+            form.appendChild(placeAddressInput);
+          }
+        });
+      }
+      
       if(!validateStep2()){
         e.preventDefault();
         e.stopPropagation();
@@ -769,9 +831,20 @@ const CONFIG = {
       const form = e.target;
       if(!form) return;
       
+      console.log('[DEBUG] Form submission detected');
+      
       // Find all autocomplete fields and ensure their place data is included
       const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+      console.log('[DEBUG] Found autocomplete fields:', autocompleteFields.length);
+      
       autocompleteFields.forEach(field => {
+        console.log(`[DEBUG] Field ${field.getAttribute('data-q')} dataset:`, {
+          placeId: field.dataset.placeId,
+          placeName: field.dataset.placeName,
+          placeFormattedAddress: field.dataset.placeFormattedAddress,
+          value: field.value
+        });
+        
         if(field.dataset.placeId) {
           // Create hidden inputs for the place data
           const placeIdInput = document.createElement('input');
