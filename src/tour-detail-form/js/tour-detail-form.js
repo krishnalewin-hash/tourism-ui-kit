@@ -910,6 +910,78 @@ const CONFIG = {
       forms.forEach(form => addPlaceDataToForm(form));
     });
 
+    // GHL-specific interception - try to catch their AJAX calls
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+      console.log('[DEBUG] Fetch called:', args[0]);
+      return originalFetch.apply(this, args);
+    };
+
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, ...args) {
+      console.log('[DEBUG] XHR open:', method, url);
+      this._url = url;
+      return originalXHROpen.apply(this, [method, url, ...args]);
+    };
+
+    const originalXHRSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function(data) {
+      console.log('[DEBUG] XHR send to:', this._url, 'Data:', data);
+      
+      // If this looks like a GHL form submission, try to add place data
+      if(this._url && (this._url.includes('ghl') || this._url.includes('form') || this._url.includes('survey'))) {
+        console.log('[DEBUG] Potential GHL form submission detected');
+        
+        // Try to add place data to the request
+        if(data instanceof FormData) {
+          const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+          autocompleteFields.forEach(field => {
+            if(field.dataset.placeId) {
+              console.log(`[DEBUG] Adding place data to FormData for ${field.getAttribute('data-q')}`);
+              data.append(field.name + '_place_id', field.dataset.placeId);
+              data.append(field.name + '_place_name', field.dataset.placeName || '');
+              data.append(field.name + '_place_address', field.dataset.placeFormattedAddress || '');
+            }
+          });
+        } else if(typeof data === 'string') {
+          // Try to parse and modify JSON data
+          try {
+            const jsonData = JSON.parse(data);
+            const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+            autocompleteFields.forEach(field => {
+              if(field.dataset.placeId) {
+                console.log(`[DEBUG] Adding place data to JSON for ${field.getAttribute('data-q')}`);
+                jsonData[field.name + '_place_id'] = field.dataset.placeId;
+                jsonData[field.name + '_place_name'] = field.dataset.placeName || '';
+                jsonData[field.name + '_place_address'] = field.dataset.placeFormattedAddress || '';
+              }
+            });
+            data = JSON.stringify(jsonData);
+          } catch(e) {
+            console.log('[DEBUG] Could not parse data as JSON');
+          }
+        }
+      }
+      
+      return originalXHRSend.apply(this, [data]);
+    };
+
+    // Try to intercept GHL's form submission by watching for their specific events
+    document.addEventListener('ghl-form-submit', (e) => {
+      console.log('[DEBUG] GHL form submit event detected');
+      addPlaceDataToForm(e.target);
+    });
+
+    // Watch for any GHL-specific button clicks
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest?.('[data-ghl-submit], .ghl-submit, [data-submit]');
+      if(btn) {
+        console.log('[DEBUG] GHL submit button clicked:', btn);
+        const form = btn.closest('form') || document.querySelector('form');
+        if(form) addPlaceDataToForm(form);
+      }
+    }, true);
+
     window.__stepTwoSubmitValidation = true;
   })();
 
