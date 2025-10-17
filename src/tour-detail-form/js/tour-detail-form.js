@@ -918,41 +918,8 @@ const CONFIG = {
       
       console.log('[DEBUG] Fetch called:', url);
       
-      // If this looks like a GHL form submission, try to add place data
-      if(url && (url.includes('surveys/submit') || url.includes('forms/submit'))) {
-        console.log('[DEBUG] Potential GHL form submission detected via fetch');
-        
-        // Try to add place data to the request
-        if(options.body instanceof FormData) {
-          const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-          autocompleteFields.forEach(field => {
-            if(field.dataset.placeId) {
-              console.log(`[DEBUG] Adding place data to FormData for ${field.getAttribute('data-q')}`);
-              options.body.append(field.name + '_place_id', field.dataset.placeId);
-              options.body.append(field.name + '_place_name', field.dataset.placeName || '');
-              options.body.append(field.name + '_place_address', field.dataset.placeFormattedAddress || '');
-            }
-          });
-        } else if(typeof options.body === 'string') {
-          // Try to parse and modify JSON data
-          try {
-            const jsonData = JSON.parse(options.body);
-            const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-            autocompleteFields.forEach(field => {
-              if(field.dataset.placeId) {
-                console.log(`[DEBUG] Adding place data to JSON for ${field.getAttribute('data-q')}`);
-                jsonData[field.name + '_place_id'] = field.dataset.placeId;
-                jsonData[field.name + '_place_name'] = field.dataset.placeName || '';
-                jsonData[field.name + '_place_address'] = field.dataset.placeFormattedAddress || '';
-              }
-            });
-            options.body = JSON.stringify(jsonData);
-          } catch(e) {
-            console.log('[DEBUG] Could not parse fetch body as JSON');
-          }
-        }
-      } else if(url && url.includes('leadconnectorhq.com')) {
-        // For other GHL requests, just log but don't modify to avoid breaking them
+      // Don't modify any GHL requests to avoid 422 errors
+      if(url && url.includes('leadconnectorhq.com')) {
         console.log('[DEBUG] GHL request detected but not modifying to avoid 422 errors');
       }
       
@@ -1074,12 +1041,10 @@ const CONFIG = {
       console.log('[DEBUG] Updating field values with place data');
       const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
       autocompleteFields.forEach(field => {
-        if(field.dataset.placeId && field.value !== field.dataset.placeName) {
+        if(field.dataset.placeId && field.dataset.placeName) {
           console.log(`[DEBUG] Updating field value for ${field.getAttribute('data-q')} from "${field.value}" to "${field.dataset.placeName}"`);
-          // Update the field value to include place data
-          const originalValue = field.value;
-          const placeData = `${originalValue} | Place ID: ${field.dataset.placeId} | Name: ${field.dataset.placeName} | Address: ${field.dataset.placeFormattedAddress}`;
-          field.value = placeData;
+          // Update the field value to the full place name instead of the abbreviated version
+          field.value = field.dataset.placeName;
           
           // Trigger change event to notify GHL
           field.dispatchEvent(new Event('input', { bubbles: true }));
