@@ -1,6 +1,6 @@
 /* ===== Block C: Related Tours Section JavaScript ===== */
 
-(async function() {
+(function() {
   'use strict';
 
   // Initialize inline tour data if present
@@ -19,40 +19,29 @@
     console.warn('[Tours] inline JSON parse failed', e);
   }
 
-  // Wait for CFG to be available, but use fallback if DATA_URL is missing
-  function waitForCFG() {
-    return new Promise((resolve) => {
-      let attempts = 0;
-      const maxAttempts = 50; // 5 seconds max wait
-      
-      const checkCFG = () => {
-        attempts++;
-        console.log('[Tours][BlockC] Checking CFG (attempt', attempts, '):', {
-          exists: !!window.CFG,
-          hasDataUrl: !!(window.CFG && window.CFG.DATA_URL),
-          dataUrl: window.CFG?.DATA_URL,
-          keys: window.CFG ? Object.keys(window.CFG) : 'no CFG'
-        });
-        
-        if (window.CFG && window.CFG.DATA_URL) {
-          console.log('[Tours][BlockC] CFG found with DATA_URL:', window.CFG);
-          resolve(window.CFG);
-        } else if (attempts >= maxAttempts) {
-          console.log('[Tours][BlockC] Timeout waiting for DATA_URL, using fallback');
-          resolve({
-            DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
-            CLIENT: 'kamar-tours'
-          });
-        } else {
-          setTimeout(checkCFG, 100);
-        }
-      };
-      checkCFG();
+  // Get CFG immediately or use fallback
+  function getCFG() {
+    console.log('[Tours][BlockC] Checking CFG:', {
+      exists: !!window.CFG,
+      hasDataUrl: !!(window.CFG && window.CFG.DATA_URL),
+      dataUrl: window.CFG?.DATA_URL,
+      keys: window.CFG ? Object.keys(window.CFG) : 'no CFG'
     });
+    
+    if (window.CFG && window.CFG.DATA_URL) {
+      console.log('[Tours][BlockC] CFG found with DATA_URL:', window.CFG);
+      return window.CFG;
+    } else {
+      console.log('[Tours][BlockC] DATA_URL not found, using fallback');
+      return {
+        DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
+        CLIENT: 'kamar-tours'
+      };
+    }
   }
 
   // Use CFG with fallback
-  const CFG = await waitForCFG();
+  const CFG = getCFG();
   
   const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
