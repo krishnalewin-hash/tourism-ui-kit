@@ -764,6 +764,55 @@ const CONFIG = {
       }
     }, true);
 
+    // Handle form submission to ensure place data is sent
+    document.addEventListener('submit', (e)=>{
+      const form = e.target;
+      if(!form) return;
+      
+      // Find all autocomplete fields and ensure their place data is included
+      const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+      autocompleteFields.forEach(field => {
+        if(field.dataset.placeId) {
+          // Create hidden inputs for the place data
+          const placeIdInput = document.createElement('input');
+          placeIdInput.type = 'hidden';
+          placeIdInput.name = field.name + '_place_id';
+          placeIdInput.value = field.dataset.placeId;
+          form.appendChild(placeIdInput);
+          
+          const placeNameInput = document.createElement('input');
+          placeNameInput.type = 'hidden';
+          placeNameInput.name = field.name + '_place_name';
+          placeNameInput.value = field.dataset.placeName || '';
+          form.appendChild(placeNameInput);
+          
+          const placeAddressInput = document.createElement('input');
+          placeAddressInput.type = 'hidden';
+          placeAddressInput.name = field.name + '_place_address';
+          placeAddressInput.value = field.dataset.placeFormattedAddress || '';
+          form.appendChild(placeAddressInput);
+          
+          const placeTypesInput = document.createElement('input');
+          placeTypesInput.type = 'hidden';
+          placeTypesInput.name = field.name + '_place_types';
+          placeTypesInput.value = field.dataset.placeTypes || '[]';
+          form.appendChild(placeTypesInput);
+          
+          const placeGeometryInput = document.createElement('input');
+          placeGeometryInput.type = 'hidden';
+          placeGeometryInput.name = field.name + '_place_geometry';
+          placeGeometryInput.value = field.dataset.placeGeometry || '{}';
+          form.appendChild(placeGeometryInput);
+          
+          console.log(`[DEBUG] Added place data for form submission:`, {
+            field: field.getAttribute('data-q'),
+            placeId: field.dataset.placeId,
+            placeName: field.dataset.placeName
+          });
+        }
+      });
+    }, true);
+
     window.__stepTwoSubmitValidation = true;
   })();
 
@@ -1017,6 +1066,22 @@ const CONFIG = {
         // Set the value immediately
         el.value = display;
         el.setAttribute('value', display);
+        
+        // Store the full place data for form submission
+        el.dataset.placeId = place.place_id;
+        el.dataset.placeName = place.name || '';
+        el.dataset.placeFormattedAddress = place.formatted_address || '';
+        el.dataset.placeTypes = JSON.stringify(place.types || []);
+        el.dataset.placeGeometry = JSON.stringify({
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        });
+        
+        console.log(`[DEBUG] Stored place data for ${el.getAttribute('data-q')}:`, {
+          placeId: place.place_id,
+          name: place.name,
+          formattedAddress: place.formatted_address
+        });
         
         // Let Google handle the dropdown closing naturally - no manual intervention needed
       });
