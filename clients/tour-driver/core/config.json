@@ -31,38 +31,26 @@
   "QUOTE_RESULTS_CONFIG": {
     "bands": [
       {
-        "maxMi": 10,
+        "maxMi": 50,
         "pricePP": 30
       },
       {
-        "maxMi": 20,
+        "maxMi": 60,
         "pricePP": 40
       },
       {
-        "maxMi": 40,
-        "pricePP": 55
+        "maxMi": 70,
+        "pricePP": 50
       },
       {
         "maxMi": 999,
-        "pricePP": 70
+        "pricePP": 80
       }
     ],
     "minPricePP": 30,
-    "defaultPassengers": 1,
-    "remote": {
-      "keywords": [
-        "tryall",
-        "round hill",
-        "dublin castle",
-        "anchovy",
-        "greenwood",
-        "bluefields",
-        "sheffield",
-        "orange bay",
-        "rhodes hall"
-      ],
-      "surchargePP": 10
-    },
+    "defaultPassengers": 2,
+    "MINIMUM_PASSENGERS": 2,
+    "MINIMUM_CHARGE_MESSAGE": "Minimum 2 passengers required. Price shown is for up to 2 people.",
     "map": {
       "zoom": 9
     }
