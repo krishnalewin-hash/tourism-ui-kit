@@ -749,47 +749,6 @@ const CONFIG = {
       const btn = e.target.closest?.('.ghl-btn.ghl-submit-btn');
       if(!btn) return;
       
-      console.log('[DEBUG] Submit button clicked');
-      
-      // Add place data before validation
-      const form = btn.closest('form');
-      console.log('[DEBUG] Form found:', !!form);
-      if(form) {
-        const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-        console.log('[DEBUG] Autocomplete fields found:', autocompleteFields.length);
-        autocompleteFields.forEach(field => {
-          console.log(`[DEBUG] Field ${field.getAttribute('data-q')} dataset:`, {
-            placeId: field.dataset.placeId,
-            placeName: field.dataset.placeName,
-            placeFormattedAddress: field.dataset.placeFormattedAddress,
-            value: field.value
-          });
-          if(field.dataset.placeId) {
-            console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on button click`);
-            // Create hidden inputs for the place data
-            const placeIdInput = document.createElement('input');
-            placeIdInput.type = 'hidden';
-            placeIdInput.name = field.name + '_place_id';
-            placeIdInput.value = field.dataset.placeId;
-            form.appendChild(placeIdInput);
-            
-            const placeNameInput = document.createElement('input');
-            placeNameInput.type = 'hidden';
-            placeNameInput.name = field.name + '_place_name';
-            placeNameInput.value = field.dataset.placeName || '';
-            form.appendChild(placeNameInput);
-            
-            const placeAddressInput = document.createElement('input');
-            placeAddressInput.type = 'hidden';
-            placeAddressInput.name = field.name + '_place_address';
-            placeAddressInput.value = field.dataset.placeFormattedAddress || '';
-            form.appendChild(placeAddressInput);
-          } else {
-            console.log(`[DEBUG] No place data found for ${field.getAttribute('data-q')}`);
-          }
-        });
-      }
-      
       const ok = validateStep2();
       if(!ok){
         e.preventDefault();
@@ -801,45 +760,6 @@ const CONFIG = {
       const btn = e.target.closest?.('.ghl-btn.ghl-submit-btn');
       if(!btn) return;
       
-      // Add place data before validation
-      const form = btn.closest('form');
-      console.log('[DEBUG] Mousedown - Form found:', !!form);
-      if(form) {
-        const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-        console.log('[DEBUG] Mousedown - Autocomplete fields found:', autocompleteFields.length);
-        autocompleteFields.forEach(field => {
-          console.log(`[DEBUG] Mousedown - Field ${field.getAttribute('data-q')} dataset:`, {
-            placeId: field.dataset.placeId,
-            placeName: field.dataset.placeName,
-            placeFormattedAddress: field.dataset.placeFormattedAddress,
-            value: field.value
-          });
-          if(field.dataset.placeId) {
-            console.log(`[DEBUG] Adding place data for ${field.getAttribute('data-q')} on mousedown`);
-            // Create hidden inputs for the place data
-            const placeIdInput = document.createElement('input');
-            placeIdInput.type = 'hidden';
-            placeIdInput.name = field.name + '_place_id';
-            placeIdInput.value = field.dataset.placeId;
-            form.appendChild(placeIdInput);
-            
-            const placeNameInput = document.createElement('input');
-            placeNameInput.type = 'hidden';
-            placeNameInput.name = field.name + '_place_name';
-            placeNameInput.value = field.dataset.placeName || '';
-            form.appendChild(placeNameInput);
-            
-            const placeAddressInput = document.createElement('input');
-            placeAddressInput.type = 'hidden';
-            placeAddressInput.name = field.name + '_place_address';
-            placeAddressInput.value = field.dataset.placeFormattedAddress || '';
-            form.appendChild(placeAddressInput);
-          } else {
-            console.log(`[DEBUG] Mousedown - No place data found for ${field.getAttribute('data-q')}`);
-          }
-        });
-      }
-      
       if(!validateStep2()){
         e.preventDefault();
         e.stopPropagation();
@@ -847,76 +767,8 @@ const CONFIG = {
     }, true);
 
     // Function to add place data to form
-    function addPlaceDataToForm(form) {
-      console.log('[DEBUG] Adding place data to form');
-      const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-      console.log('[DEBUG] Found autocomplete fields:', autocompleteFields.length);
-      
-      autocompleteFields.forEach(field => {
-        console.log(`[DEBUG] Field ${field.getAttribute('data-q')} dataset:`, {
-          placeId: field.dataset.placeId,
-          placeName: field.dataset.placeName,
-          placeFormattedAddress: field.dataset.placeFormattedAddress,
-          value: field.value
-        });
-        
-        if(field.dataset.placeId) {
-          // Create hidden inputs for the place data
-          const placeIdInput = document.createElement('input');
-          placeIdInput.type = 'hidden';
-          placeIdInput.name = field.name + '_place_id';
-          placeIdInput.value = field.dataset.placeId;
-          form.appendChild(placeIdInput);
-          
-          const placeNameInput = document.createElement('input');
-          placeNameInput.type = 'hidden';
-          placeNameInput.name = field.name + '_place_name';
-          placeNameInput.value = field.dataset.placeName || '';
-          form.appendChild(placeNameInput);
-          
-          const placeAddressInput = document.createElement('input');
-          placeAddressInput.type = 'hidden';
-          placeAddressInput.name = field.name + '_place_address';
-          placeAddressInput.value = field.dataset.placeFormattedAddress || '';
-          form.appendChild(placeAddressInput);
-          
-          console.log(`[DEBUG] Added place data for form submission:`, {
-            field: field.getAttribute('data-q'),
-            placeId: field.dataset.placeId,
-            placeName: field.dataset.placeName
-          });
-        }
-      });
-    }
-
-    // Handle form submission to ensure place data is sent
-    document.addEventListener('submit', (e)=>{
-      console.log('[DEBUG] Form submission detected');
-      addPlaceDataToForm(e.target);
-    }, true);
-
-    // Also try to catch any form action changes or navigation
-    const originalFormAction = HTMLFormElement.prototype.submit;
-    HTMLFormElement.prototype.submit = function() {
-      console.log('[DEBUG] Form.submit() called directly');
-      addPlaceDataToForm(this);
-      return originalFormAction.call(this);
-    };
-
-    // Catch any navigation that might be form-related
-    window.addEventListener('beforeunload', () => {
-      console.log('[DEBUG] Page unloading - checking for forms');
-      const forms = document.querySelectorAll('form');
-      forms.forEach(form => addPlaceDataToForm(form));
-      
-      // Debug: Log all form field values at page unload
-      console.log('[DEBUG] Page unloading - all form field values:');
-      document.querySelectorAll('input, select, textarea').forEach(field => {
-        if(field.name || field.getAttribute('data-q')) {
-          console.log(`[DEBUG] Field ${field.name || field.getAttribute('data-q')}: "${field.value}"`);
-        }
-      });
-    });
+    // Note: Form data capture is now handled by fetch request modification
+    // No need for manual form submission handling or hidden input injection
 
     // GHL-specific interception - try to catch their AJAX calls
     const originalFetch = window.fetch;
@@ -924,15 +776,10 @@ const CONFIG = {
       const url = args[0];
       const options = args[1] || {};
       
-      console.log('[DEBUG] Fetch called:', url);
-      
       // Don't modify any GHL requests to avoid 422 errors, but update field values before submission
       if(url && url.includes('leadconnectorhq.com')) {
-        console.log('[DEBUG] GHL request detected but not modifying to avoid 422 errors');
-        
         // If this is a form submission, modify the request body
         if(url.includes('surveys/submit') || url.includes('forms/submit')) {
-          console.log('[DEBUG] Form submission detected, modifying request body');
           
           // Clone the options to avoid mutating the original
           const modifiedOptions = { ...options };
@@ -955,11 +802,9 @@ const CONFIG = {
               // Replace with stored place names
               for(let fieldId in parsedFormData) {
                 if(pickupField && pickupField.name === fieldId && pickupField.dataset.placeName) {
-                  console.log(`[DEBUG] Replacing pickup field ${fieldId}: "${parsedFormData[fieldId]}" -> "${pickupField.dataset.placeName}"`);
                   parsedFormData[fieldId] = pickupField.dataset.placeName;
                 }
                 if(dropoffField && dropoffField.name === fieldId && dropoffField.dataset.placeName) {
-                  console.log(`[DEBUG] Replacing dropoff field ${fieldId}: "${parsedFormData[fieldId]}" -> "${dropoffField.dataset.placeName}"`);
                   parsedFormData[fieldId] = dropoffField.dataset.placeName;
                 }
               }
@@ -983,115 +828,13 @@ const CONFIG = {
       return originalFetch.apply(this, [url, options]);
     };
 
-    const originalXHROpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function(method, url, ...args) {
-      console.log('[DEBUG] XHR open:', method, url);
-      this._url = url;
-      return originalXHROpen.apply(this, [method, url, ...args]);
-    };
+    // Note: XHR interception removed - using fetch interception instead
 
-    const originalXHRSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.send = function(data) {
-      console.log('[DEBUG] XHR send to:', this._url, 'Data:', data);
-      
-      // If this looks like a GHL form submission, try to add place data
-      if(this._url && (this._url.includes('ghl') || this._url.includes('form') || this._url.includes('survey'))) {
-        console.log('[DEBUG] Potential GHL form submission detected');
-        
-        // Try to add place data to the request
-        if(data instanceof FormData) {
-          const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-          autocompleteFields.forEach(field => {
-            if(field.dataset.placeId) {
-              console.log(`[DEBUG] Adding place data to FormData for ${field.getAttribute('data-q')}`);
-              data.append(field.name + '_place_id', field.dataset.placeId);
-              data.append(field.name + '_place_name', field.dataset.placeName || '');
-              data.append(field.name + '_place_address', field.dataset.placeFormattedAddress || '');
-            }
-          });
-        } else if(typeof data === 'string') {
-          // Try to parse and modify JSON data
-          try {
-            const jsonData = JSON.parse(data);
-            const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-            autocompleteFields.forEach(field => {
-              if(field.dataset.placeId) {
-                console.log(`[DEBUG] Adding place data to JSON for ${field.getAttribute('data-q')}`);
-                jsonData[field.name + '_place_id'] = field.dataset.placeId;
-                jsonData[field.name + '_place_name'] = field.dataset.placeName || '';
-                jsonData[field.name + '_place_address'] = field.dataset.placeFormattedAddress || '';
-              }
-            });
-            data = JSON.stringify(jsonData);
-          } catch(e) {
-            console.log('[DEBUG] Could not parse data as JSON');
-          }
-        }
-      }
-      
-      return originalXHRSend.apply(this, [data]);
-    };
+    // Note: GHL form submission is now handled by fetch request modification
+    // No need for manual event listeners or form data injection
 
-    // Try to intercept GHL's form submission by watching for their specific events
-    document.addEventListener('ghl-form-submit', (e) => {
-      console.log('[DEBUG] GHL form submit event detected');
-      addPlaceDataToForm(e.target);
-    });
-
-    // Watch for any GHL-specific button clicks
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest?.('[data-ghl-submit], .ghl-submit, [data-submit]');
-      if(btn) {
-        console.log('[DEBUG] GHL submit button clicked:', btn);
-        const form = btn.closest('form') || document.querySelector('form');
-        if(form) addPlaceDataToForm(form);
-      }
-    }, true);
-
-    // More aggressive approach - try to add place data to form fields directly
-    function addPlaceDataToFields() {
-      console.log('[DEBUG] Adding place data directly to form fields');
-      const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-      autocompleteFields.forEach(field => {
-        if(field.dataset.placeId) {
-          console.log(`[DEBUG] Adding place data to field ${field.getAttribute('data-q')}`);
-          
-          // Create hidden inputs next to the field
-          const container = field.parentNode;
-          
-          // Remove existing place data inputs
-          container.querySelectorAll(`[name="${field.name}_place_id"], [name="${field.name}_place_name"], [name="${field.name}_place_address"]`).forEach(el => el.remove());
-          
-          // Add new place data inputs
-          const placeIdInput = document.createElement('input');
-          placeIdInput.type = 'hidden';
-          placeIdInput.name = field.name + '_place_id';
-          placeIdInput.value = field.dataset.placeId;
-          container.appendChild(placeIdInput);
-          
-          const placeNameInput = document.createElement('input');
-          placeNameInput.type = 'hidden';
-          placeNameInput.name = field.name + '_place_name';
-          placeNameInput.value = field.dataset.placeName || '';
-          container.appendChild(placeNameInput);
-          
-          const placeAddressInput = document.createElement('input');
-          placeAddressInput.type = 'hidden';
-          placeAddressInput.name = field.name + '_place_address';
-          placeAddressInput.value = field.dataset.placeFormattedAddress || '';
-          container.appendChild(placeAddressInput);
-        }
-      });
-    }
-
-    // Try to add place data before any form submission
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
-      if(btn && (btn.textContent?.toLowerCase().includes('submit') || btn.value?.toLowerCase().includes('submit'))) {
-        console.log('[DEBUG] Submit button detected, adding place data to fields');
-        addPlaceDataToFields();
-      }
-    }, true);
+    // Note: Place data is now handled by fetch request modification
+    // No need for manual hidden input injection
 
     // Note: Field value updates are now handled immediately in the place_changed listener
     // No need for separate updateFieldValuesWithPlaceData function since we dispatch
@@ -1312,10 +1055,9 @@ const CONFIG = {
         continue;
       }
       if(el.dataset.placesWired==='1') {
-        console.log(`[DEBUG] Field already wired: ${sel}`);
         continue;
       }
-      console.log(`[DEBUG] Wiring autocomplete for: ${sel}`);
+      // Wiring autocomplete for field
       
       // Skip if truly hidden (type="hidden" only, not display:none which might be temporary)
 	    if (el.type === 'hidden') continue;
@@ -1335,7 +1077,7 @@ const CONFIG = {
 	       }
         
 				ac = new google.maps.places.Autocomplete(el, acOpts);
-				console.log(`[DEBUG] Autocomplete created successfully for: ${sel}`);
+				// Autocomplete created successfully
       } catch(err){ console.error('[Maps] Autocomplete init failed:', err); continue; }
 
       ac.addListener('place_changed',()=>{
@@ -1345,7 +1087,7 @@ const CONFIG = {
         if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
         else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
         
-        console.log(`[DEBUG] Place selected for ${el.getAttribute('data-q')}: ${display}`);
+        // Place selected from autocomplete
         
         // IMMEDIATELY update the input value with the full place name
         el.value = display;
@@ -1361,29 +1103,16 @@ const CONFIG = {
           lng: place.geometry.location.lng()
         });
         
-        console.log(`[DEBUG] Stored place data for ${el.getAttribute('data-q')}:`, {
-          placeId: place.place_id,
-          name: place.name,
-          formattedAddress: place.formatted_address
-        });
+        // Place data stored in dataset
         
         // Note: Not dispatching input/change events to avoid autocomplete reappearing
         // GHL data capture will be handled by fetch request modification instead
       });
 
       el.addEventListener('focus', ()=>{
-        console.log(`[DEBUG] Focus event on ${el.getAttribute('data-q')}`);
         if(!el.value && typeof airportBounds === 'function') {
           ac.setBounds(airportBounds());
         }
-      });
-      
-      el.addEventListener('input', ()=>{
-        console.log(`[DEBUG] Input event on ${el.getAttribute('data-q')}`);
-      });
-      
-      el.addEventListener('click', ()=>{
-        console.log(`[DEBUG] Click event on ${el.getAttribute('data-q')}`);
       });
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
