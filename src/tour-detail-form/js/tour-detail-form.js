@@ -1367,19 +1367,8 @@ const CONFIG = {
           formattedAddress: place.formatted_address
         });
         
-        // CRITICAL: Dispatch events to trigger GHL's capture mechanism
-        console.log(`[DEBUG] Dispatching input/change events for ${el.getAttribute('data-q')} to trigger GHL capture`);
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        // Add a small delay to ensure GHL processes the events
-        setTimeout(() => {
-          // Verify the value is still correct
-          if (el.value !== display) {
-            console.log(`[DEBUG] Value changed after events, restoring: "${el.value}" -> "${display}"`);
-            el.value = display;
-          }
-        }, 50);
+        // Note: Not dispatching input/change events to avoid autocomplete reappearing
+        // GHL data capture will be handled by fetch request modification instead
       });
 
       el.addEventListener('focus', ()=>{
