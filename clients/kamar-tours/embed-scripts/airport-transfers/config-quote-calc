@@ -41,7 +41,8 @@
         });
     </script>
 
-    <!-- Load Quote Results Component (latest with updated URLs) -->
-    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@49c1900/src/quote-results-page/js/quote-results.js"></script>
+    <!-- Load Quote Results Component with 2-person minimum logic -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/css/quote-results.css">
+    <script src="https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main/src/quote-results-page/js/quote-results.js"></script>
 </body>
 </html>
