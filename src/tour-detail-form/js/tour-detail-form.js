@@ -1056,9 +1056,22 @@ const CONFIG = {
     // Try to update field values before form submission
     document.addEventListener('click', (e) => {
       const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
-      if(btn && (btn.textContent?.toLowerCase().includes('submit') || btn.value?.toLowerCase().includes('submit'))) {
-        console.log('[DEBUG] Submit button detected, updating field values with place data');
-        updateFieldValuesWithPlaceData();
+      if(btn) {
+        console.log('[DEBUG] Button clicked:', btn.textContent || btn.value || btn.className);
+        // Check for various submit button patterns
+        const isSubmitButton = (
+          btn.textContent?.toLowerCase().includes('submit') ||
+          btn.value?.toLowerCase().includes('submit') ||
+          btn.className?.includes('submit') ||
+          btn.getAttribute('type') === 'submit' ||
+          btn.getAttribute('data-ghl-submit') ||
+          btn.classList.contains('ghl-submit')
+        );
+        
+        if(isSubmitButton) {
+          console.log('[DEBUG] Submit button detected, updating field values with place data');
+          updateFieldValuesWithPlaceData();
+        }
       }
     }, true);
 
@@ -1331,6 +1344,14 @@ const CONFIG = {
           name: place.name,
           formattedAddress: place.formatted_address
         });
+        
+        // Immediately update the field value to the full place name
+        if(place.name && el.value !== place.name) {
+          console.log(`[DEBUG] Updating field value immediately for ${el.getAttribute('data-q')} from "${el.value}" to "${place.name}"`);
+          el.value = place.name;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         
         // Let Google handle the dropdown closing naturally - no manual intervention needed
       });
