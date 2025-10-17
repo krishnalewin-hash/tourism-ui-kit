@@ -770,6 +770,18 @@ const CONFIG = {
     // Note: Form data capture is now handled by fetch request modification
     // No need for manual form submission handling or hidden input injection
 
+    // Helper function to sanitize field values and prevent URL breaking
+    function sanitizeFieldValue(value) {
+      return value
+        .replace(/[`'"]/g, '') // Remove backticks, single quotes, double quotes
+        .replace(/[<>]/g, '') // Remove angle brackets
+        .replace(/[{}]/g, '') // Remove curly braces
+        .replace(/[\[\]]/g, '') // Remove square brackets
+        .replace(/[|\\]/g, '') // Remove pipes and backslashes
+        .replace(/[&]/g, 'and') // Replace ampersands with 'and'
+        .trim(); // Remove leading/trailing whitespace
+    }
+
     // GHL-specific interception - try to catch their AJAX calls
     const originalFetch = window.fetch;
     window.fetch = function(...args) {
@@ -799,13 +811,19 @@ const CONFIG = {
               const pickupField = document.querySelector('input[data-q="pickup_location"]');
               const dropoffField = document.querySelector('input[data-q="drop-off_location"]');
               
-              // Replace with stored place names
+              // Replace with stored place names and sanitize all field values
               for(let fieldId in parsedFormData) {
+                // Handle autocomplete fields with place data
                 if(pickupField && pickupField.name === fieldId && pickupField.dataset.placeName) {
                   parsedFormData[fieldId] = pickupField.dataset.placeName;
                 }
                 if(dropoffField && dropoffField.name === fieldId && dropoffField.dataset.placeName) {
                   parsedFormData[fieldId] = dropoffField.dataset.placeName;
+                }
+                
+                // Sanitize ALL field values to prevent URL breaking
+                if(parsedFormData[fieldId] && typeof parsedFormData[fieldId] === 'string') {
+                  parsedFormData[fieldId] = sanitizeFieldValue(parsedFormData[fieldId]);
                 }
               }
               
