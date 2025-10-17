@@ -918,9 +918,15 @@ const CONFIG = {
       
       console.log('[DEBUG] Fetch called:', url);
       
-      // Don't modify any GHL requests to avoid 422 errors
+      // Don't modify any GHL requests to avoid 422 errors, but update field values before submission
       if(url && url.includes('leadconnectorhq.com')) {
         console.log('[DEBUG] GHL request detected but not modifying to avoid 422 errors');
+        
+        // If this is a form submission, update field values before the request
+        if(url.includes('surveys/submit') || url.includes('forms/submit')) {
+          console.log('[DEBUG] Form submission detected via fetch, updating field values');
+          updateFieldValuesWithPlaceData();
+        }
       }
       
       return originalFetch.apply(this, [url, options]);
@@ -1073,6 +1079,12 @@ const CONFIG = {
           updateFieldValuesWithPlaceData();
         }
       }
+    }, true);
+
+    // Backup: Listen for form submission events
+    document.addEventListener('submit', (e) => {
+      console.log('[DEBUG] Form submit event detected');
+      updateFieldValuesWithPlaceData();
     }, true);
 
     window.__stepTwoSubmitValidation = true;
@@ -1345,13 +1357,8 @@ const CONFIG = {
           formattedAddress: place.formatted_address
         });
         
-        // Immediately update the field value to the full place name
-        if(place.name && el.value !== place.name) {
-          console.log(`[DEBUG] Updating field value immediately for ${el.getAttribute('data-q')} from "${el.value}" to "${place.name}"`);
-          el.value = place.name;
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        // Don't update field value immediately to avoid autocomplete reopening
+        // We'll update it only when the form is submitted
         
         // Let Google handle the dropdown closing naturally - no manual intervention needed
       });
