@@ -23,6 +23,13 @@
   function waitForCFG() {
     return new Promise((resolve) => {
       const checkCFG = () => {
+        console.log('[Tours][BlockC] Checking CFG:', {
+          exists: !!window.CFG,
+          hasDataUrl: !!(window.CFG && window.CFG.DATA_URL),
+          dataUrl: window.CFG?.DATA_URL,
+          keys: window.CFG ? Object.keys(window.CFG) : 'no CFG'
+        });
+        
         if (window.CFG && window.CFG.DATA_URL) {
           console.log('[Tours][BlockC] CFG found:', window.CFG);
           resolve(window.CFG);
