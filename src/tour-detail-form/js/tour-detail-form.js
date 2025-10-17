@@ -964,16 +964,34 @@ const CONFIG = {
   }
 
   function wireAutocomplete(rootDoc){
-    if(!window.google?.maps?.places) return;
-    const sels=['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
+    if(!window.google?.maps?.places) {
+      console.log('[TourForm] Google Maps Places not available yet');
+      return;
+    }
+    const sels=[
+      'input[data-q="pickup_location"]',
+      'input[data-q="drop-off_location"]',
+      'input[data-q="dropoff_location"]',
+      'input[name="pickup_location"]',
+      'input[name="drop-off_location"]',
+      'input[name="dropoff_location"]'
+    ];
     for(const sel of sels){
       const el=rootDoc.querySelector(sel);
-      if(!el || el.dataset.placesWired==='1') continue;
+      if(!el) {
+        console.log(`[TourForm] Field not found: ${sel}`);
+        continue;
+      }
+      if(el.dataset.placesWired==='1') {
+        console.log(`[TourForm] Field already wired: ${sel}`);
+        continue;
+      }
       
       // Skip if truly hidden (type="hidden" only, not display:none which might be temporary)
 	    if (el.type === 'hidden') continue;
     
       el.dataset.placesWired='1';
+      console.log(`[TourForm] Wiring autocomplete for: ${sel}`);
       let ac;
       try {
         
@@ -988,6 +1006,7 @@ const CONFIG = {
 	       }
         
 				ac = new google.maps.places.Autocomplete(el, acOpts);
+				console.log(`[TourForm] Autocomplete created successfully for: ${sel}`);
       } catch(err){ console.error('[Maps] Autocomplete init failed:', err); continue; }
 
       ac.addListener('place_changed',()=>{
