@@ -58,13 +58,21 @@
 
   // ---------- Slug / utils ----------
   function getSlug() {
-    if (CFG.SLUG) return String(CFG.SLUG).trim().toLowerCase();
+    if (CFG.SLUG) {
+      console.log('[Tours][BlockC] Using CFG.SLUG:', CFG.SLUG);
+      return String(CFG.SLUG).trim().toLowerCase();
+    }
     const qp = new URLSearchParams(location.search);
     const qs = (qp.get('slug') || '').trim().toLowerCase();
-    if (qs) return qs;
+    if (qs) {
+      console.log('[Tours][BlockC] Using query param slug:', qs);
+      return qs;
+    }
     const parts = (location.pathname || '/').split('/').filter(Boolean);
     const i = parts.indexOf('tours');
-    return (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
+    const slug = (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
+    console.log('[Tours][BlockC] Detected slug from URL:', slug, 'Path parts:', parts);
+    return slug;
   }
   
   const SLUG = getSlug();
@@ -104,18 +112,23 @@
   /** Wait for Block A/B to publish current tour data */
   function waitForCurrentTour(slug, timeoutMs = 1200) {
     slug = norm(slug);
+    console.log('[Tours][BlockC] Waiting for tour data for slug:', slug);
     return new Promise((resolve) => {
       if (window.__TOUR_DATA__ && window.__TOUR_DATA__[slug]) {
+        console.log('[Tours][BlockC] Found tour data immediately:', window.__TOUR_DATA__[slug].name);
         return resolve(window.__TOUR_DATA__[slug]);
       }
 
       let settled = false;
       const onReady = (e) => {
         const evSlug = norm(e?.detail?.slug || '');
+        console.log('[Tours][BlockC] tour:ready event received for slug:', evSlug);
         if (evSlug === slug && !settled) {
           settled = true;
           cleanup();
-          resolve(window.__TOUR_DATA__?.[slug] || e.detail?.tour || null);
+          const tour = window.__TOUR_DATA__?.[slug] || e.detail?.tour || null;
+          console.log('[Tours][BlockC] Resolved tour from event:', tour?.name);
+          resolve(tour);
         }
       };
       
@@ -123,6 +136,7 @@
 
       const poll = setInterval(() => {
         if (window.__TOUR_DATA__ && window.__TOUR_DATA__[slug]) {
+          console.log('[Tours][BlockC] Found tour data via polling:', window.__TOUR_DATA__[slug].name);
           clearInterval(poll);
           cleanup();
           settled = true;
@@ -132,6 +146,7 @@
 
       const timer = setTimeout(() => {
         if (!settled) {
+          console.warn('[Tours][BlockC] Timeout waiting for tour data');
           cleanup();
           resolve(null);
         }
@@ -148,21 +163,25 @@
   // ---------- Fetch all tours ----------
   async function fetchAllTours() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
+    console.log('[Tours][BlockC] Fetching all tours from:', url);
 
     // 1) CacheStorage
     const cached = await cacheGet(url);
     if (cached && Array.isArray(cached.tours)) {
+      console.log('[Tours][BlockC] Using cached tours:', cached.tours.length);
       return { version: cached.version || '', tours: cached.tours, _source: 'cache' };
     }
 
     // 2) Network
     try {
+      console.log('[Tours][BlockC] Fetching from network...');
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       cachePut(url, json);
       const tours = Array.isArray(json.tours) ? json.tours : [];
       const version = json.version || '';
+      console.log('[Tours][BlockC] Network fetch successful:', tours.length, 'tours');
       return { version, tours, _source: 'net' };
     } catch (e) {
       console.error('[Tours][BlockC] fetchAllTours error:', e);
@@ -173,17 +192,22 @@
   // ---------- Filter related tours ----------
   function getRelatedTours(currentTour, allTours, maxResults = 3) {
     if (!currentTour || !currentTour.type || !Array.isArray(allTours)) {
+      console.log('[Tours][BlockC] Invalid tour data for filtering:', { currentTour, allTours: allTours?.length });
       return [];
     }
 
     const currentType = norm(currentTour.type);
     const currentSlug = norm(currentTour.slug);
+    console.log('[Tours][BlockC] Filtering related tours for type:', currentType, 'excluding slug:', currentSlug);
 
-    return allTours
+    const related = allTours
       .filter(tour => {
         return norm(tour.type) === currentType && norm(tour.slug) !== currentSlug;
       })
       .slice(0, maxResults);
+
+    console.log('[Tours][BlockC] Found', related.length, 'related tours:', related.map(t => t.name));
+    return related;
   }
 
   // ---------- Create tour card HTML ----------
@@ -271,26 +295,31 @@
 
   // ---------- Boot ----------
   (async function boot() {
+    console.log('[Tours][BlockC] Starting with slug:', SLUG);
+    
     // Wait for current tour from Block A/B
     const currentTour = await waitForCurrentTour(SLUG, 1200);
     
     if (!currentTour) {
-      // Hide section if no current tour found
+      console.warn('[Tours][BlockC] No current tour found, hiding section');
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
+
+    console.log('[Tours][BlockC] Current tour:', currentTour.name, 'Type:', currentTour.type);
 
     // Fetch all tours
     const result = await fetchAllTours();
     
     if (!result || !result.tours) {
-      // Hide section if no tours data
+      console.warn('[Tours][BlockC] No tours data available, hiding section');
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
+    console.log('[Tours][BlockC] Loaded', result.tours.length, 'tours from', result._source);
     render(currentTour, result.tours);
 
     // Listen for updates from Block A/B
