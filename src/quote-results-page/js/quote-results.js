@@ -94,16 +94,6 @@ function injectStyles() {
           // Update CONFIG with client-specific settings from core config
           if (clientConfig.QUOTE_RESULTS_CONFIG) {
             CONFIG = { ...CONFIG, ...clientConfig.QUOTE_RESULTS_CONFIG };
-            // Force override with new pricing bands
-            CONFIG.bands = [
-              { maxMi: 50,  pricePP: 30 },
-              { maxMi: 60,  pricePP: 40 },
-              { maxMi: 70,  pricePP: 50 },
-              { maxMi: 999, pricePP: 80 }
-            ];
-            CONFIG.MINIMUM_PASSENGERS = 2;
-            CONFIG.MINIMUM_CHARGE_MESSAGE = "Minimum 2 passengers required. Price shown is for up to 2 people.";
-            CONFIG.defaultPassengers = 2;
           } else if (clientConfig.PRICING_RATES) {
             convertPricingRatesToConfig(clientConfig.PRICING_RATES);
           }
