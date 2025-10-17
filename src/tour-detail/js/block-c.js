@@ -25,8 +25,14 @@
     CLIENT: 'tour-driver'
   };
   
+  console.log('[Tours][BlockC] CFG object:', CFG);
+  console.log('[Tours][BlockC] window.CFG:', window.CFG);
+  
   const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
+  
+  console.log('[Tours][BlockC] DATA_URL:', DATA_URL);
+  console.log('[Tours][BlockC] CLIENT:', CLIENT);
   
   if (!DATA_URL) {
     console.error('[Tours] Missing CFG.DATA_URL');
