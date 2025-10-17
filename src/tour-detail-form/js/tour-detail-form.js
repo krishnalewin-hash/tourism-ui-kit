@@ -974,10 +974,10 @@ const CONFIG = {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('pac-container')) {
                 console.log('[DEBUG] Pac-container appeared:', node);
-                // Check if any field has placeSelected flag
-                const lockedFields = document.querySelectorAll('[data-place-selected="true"]');
-                if (lockedFields.length > 0) {
-                  console.log('[DEBUG] Blocking pac-container due to locked fields');
+                // Only block if the pac-container is associated with a locked field
+                const activeInput = document.activeElement;
+                if (activeInput && activeInput.dataset.placeSelected === 'true') {
+                  console.log('[DEBUG] Blocking pac-container for locked field:', activeInput.getAttribute('data-q'));
                   node.style.display = 'none';
                   node.style.visibility = 'hidden';
                 }
