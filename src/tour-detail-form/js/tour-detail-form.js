@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       width: 100vw !important;
       height: 100vh !important;
       background: rgba(0, 0, 0, 0.85) !important;
-      z-index: 2147483647 !important; /* above popovers */
+      z-index: 999999 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -129,7 +129,7 @@ async function loadClientConfig() {
   if (window.CFG?.configLoaded) return window.CFG;
   
   const client = window.CFG?.client || 'demo';
-  const baseUrl = window.CFG?.baseUrl || `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main`;
+  const baseUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main`;
   
   try {
     const response = await fetch(`${baseUrl}/clients/${client}/core/config.json`);
@@ -145,9 +145,11 @@ async function loadClientConfig() {
       };
       console.log(`[TourForm] Loaded config for ${client}, API key: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
       
+      // Update CONFIG object after loading
+      CONFIG.googleApiKey = window.CFG.GMAPS_KEY || '';
+      CONFIG.countries = window.CFG.COUNTRIES ? (Array.isArray(window.CFG.COUNTRIES) ? window.CFG.COUNTRIES.map(x => String(x).toLowerCase()) : [String(window.CFG.COUNTRIES).toLowerCase()]) : null;
+      
       return window.CFG;
-    } else {
-      console.warn(`[TourForm] Failed to load config for ${client}: HTTP ${response.status}`);
     }
   } catch (error) {
     console.warn(`[TourForm] Failed to load config for ${client}:`, error);
@@ -161,30 +163,21 @@ if (window.CFG?.client) {
   configPromise = loadClientConfig();
 }
 
-// Initialize CONFIG with defaults, will be updated when config loads
 const CONFIG = {
-  googleApiKey: '',
-  region: '',
-  countries: null,
-  geolocationTimeoutMs: 8000,
-  mapsLoadTimeoutMs: 10000,
+  googleApiKey:
+    (window.CFG && (window.CFG.GMAPS_KEY || window.CFG.PLACES_API_KEY)) || '',
+  region: (window.CFG && (window.CFG.REGION || window.CFG.region)) || '',
+  countries: (() => {
+    const c =
+      (window.CFG && (window.CFG.COUNTRIES ?? window.CFG.COUNTRY)) ?? null;
+    if (!c) return null;
+    if (Array.isArray(c)) return c.map(x => String(x).toLowerCase());
+    return [String(c).toLowerCase()];
+  })(),
+  geolocationTimeoutMs: 8000,   // <-- restore
+  mapsLoadTimeoutMs: 10000,     // <-- restore
   time: { start: '00:00', end: '23:59', stepMinutes: 15, format12: true }
 };
-
-// Update CONFIG when client config loads
-if (configPromise) {
-  configPromise.then((cfg) => {
-    if (cfg) {
-      CONFIG.googleApiKey = cfg.GMAPS_KEY || cfg.PLACES_API_KEY || '';
-      CONFIG.region = cfg.REGION || cfg.region || '';
-      CONFIG.countries = cfg.COUNTRIES ? 
-        (Array.isArray(cfg.COUNTRIES) ? cfg.COUNTRIES.map(x => String(x).toLowerCase()) : [String(cfg.COUNTRIES).toLowerCase()]) : 
-        null;
-    }
-  }).catch((error) => {
-    console.error('[TourForm] Config loading failed:', error);
-  });
-}
 
   /* ===== Section 3: Google Maps Loader (dynamic include + readiness poll)
     Purpose: Loads Places library if not already present; polls until available.
@@ -195,49 +188,32 @@ if (configPromise) {
   function loadGoogleMaps(callback){
     // First ensure config is loaded
     const loadMapsWithConfig = async () => {
-      try {
-        if (configPromise) {
-          await configPromise;
-        }
-        
-        if (window.google?.maps?.places) return callback();
-        if (document.querySelector('script[data-gmaps-loader]')){
-          const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
-          setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
-          return;
-        }
-        
-        const apiKey = CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || '';
-        console.log(`[TourForm] Loading Google Maps with API key: ${apiKey?.substring(0, 10)}...`);
-        
-        if (!apiKey) {
-          console.error('[TourForm] No Google Maps API key found. Location autocomplete will not work.');
-          // Still call callback to allow form to function without autocomplete
-          callback();
-          return;
-        }
-        
-        const s = document.createElement('script');
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
-        s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
-        s.onerror = () => {
-          console.error('[Maps] Failed to load Google Maps JS. Location autocomplete will not work.');
-          // Still call callback to allow form to function without autocomplete
-          callback();
-        };
-        document.head.appendChild(s);
-        const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
-        setTimeout(()=>{
-          clearInterval(poll);
-          if (!window.google?.maps?.places) {
-            console.warn('[TourForm] Google Maps failed to load within timeout. Location autocomplete may not work.');
-            callback(); // Still allow form to function
-          }
-        }, CONFIG.mapsLoadTimeoutMs);
-      } catch (error) {
-        console.error('[TourForm] Error loading Google Maps:', error);
-        callback(); // Still allow form to function
+      if (configPromise) {
+        await configPromise;
       }
+      
+      if (window.google?.maps?.places) return callback();
+      if (document.querySelector('script[data-gmaps-loader]')){
+        const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+        setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
+        return;
+      }
+      
+      const apiKey = CONFIG.googleApiKey || window.CFG?.GMAPS_KEY || '';
+      console.log(`[TourForm] Loading Google Maps with API key: ${apiKey?.substring(0, 10)}...`);
+      
+      if (!apiKey) {
+        console.error('[TourForm] No Google Maps API key found in CONFIG.googleApiKey or window.CFG.GMAPS_KEY');
+        return;
+      }
+      
+      const s = document.createElement('script');
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
+      s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
+      s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
+      document.head.appendChild(s);
+      const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+      setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
     };
     
     loadMapsWithConfig();
@@ -294,18 +270,11 @@ if (configPromise) {
     function enforce(){
       const d=parseLocalDate(input.value);
       if(!d){ input.setCustomValidity(''); return; }
-      if (d < todayStart()) {
-        input.setCustomValidity('Please choose today or a future date.'); 
-        input.value = '';
-        input.setAttribute('value', ''); 
-        input.reportValidity?.(); 
-    }
+      if(d<todayStart()){ input.setCustomValidity('Please choose today or a future date.'); input.value=''; input.reportValidity?.(); }
       else {
         input.setCustomValidity('');
         // Format immediately for user-friendly display
-        const pretty = formatDisplay(d);
-        input.value = pretty;
-        input.setAttribute('value', pretty);
+        input.value = formatDisplay(d);
       }
     }
     input.addEventListener('blur',enforce);
@@ -323,24 +292,19 @@ if (configPromise) {
     observer.observe(input, { attributes: true, attributeFilter: ['value'] });
     
     // Also use a periodic check to catch any missed updates
-    const pollId = setInterval(() => {
+    setInterval(() => {
       if (input.value !== lastValue && input.value.length >= 6) {
         lastValue = input.value;
         enforce();
       }
     }, 500);
-    // cleanup if the element is detached
-    const cleanup = () => { try { observer.disconnect(); } catch(_){} clearInterval(pollId); };
-    const ro = new MutationObserver(() => {
-      if (!document.body.contains(input)) { cleanup(); ro.disconnect(); }
-    });
-    ro.observe(document.body, { childList:true, subtree:true });
-
+    
     // Remove the wrapper-based event handling that's causing issues
     // const wrapper=input.closest('.vdpWithInput, .vdpComponent, .date-picker-field-survey');
     // if(wrapper) wrapper.addEventListener('click',()=>{ startWatch(); setTimeout(enforce,50); });
   }
 
+  // (Time input logic removed at user request)
   /* ===== Section 5: Custom Time Picker (singleton popover)
     Purpose: Replaces native time input with a keyboard/mouse friendly popover supporting 12/24h.
     Remove to revert to native <input type="time"> (also strip attachPickupTimePicker calls & CSS).
@@ -401,31 +365,13 @@ if (configPromise) {
       ({h:state.h,m:state.m} = clamp(state.h,state.m));
       updateDisplay();
     }
-    function openFor(input){
-        const cfg = cfgRef();
-        state.input = input;
-        const cur = (parse(input.value) && parse(input.value)) || parse(cfg.start) || { h:6, m:0 };
-        state.h = cur.h; state.m = cur.m;
-        ({ h:state.h, m:state.m } = clamp(state.h, state.m));
-        // Snap minutes to nearest step
-        const step = cfg.stepMinutes || 15;
-        state.m = Math.floor(state.m / step) * step;
-        updateDisplay();
-        const r = input.getBoundingClientRect();
-        root.style.display='block';
-        root.style.top = window.scrollY + r.bottom + 6 + 'px';
-        root.style.left = window.scrollX + r.left + 'px';
-        state.open = true;
-        setTimeout(()=>{ document.addEventListener('mousedown', outside, true); document.addEventListener('keydown', keyNav, true); },0);
-    }
+    function openFor(input){ const cfg=cfgRef(); state.input=input; const cur=parse(input.value)&&parse(input.value) || parse(cfg.start) || {h:6,m:0}; state.h=cur.h; state.m=cur.m; ({h:state.h,m:state.m}=clamp(state.h,state.m)); updateDisplay(); const r=input.getBoundingClientRect(); root.style.display='block'; root.style.top=window.scrollY + r.bottom + 6 + 'px'; root.style.left=window.scrollX + r.left + 'px'; state.open=true; setTimeout(()=>{ document.addEventListener('mousedown', outside, true); document.addEventListener('keydown', keyNav, true); },0); }
     function close(){ if(!state.open) return; state.open=false; root.style.display='none'; document.removeEventListener('mousedown', outside, true); document.removeEventListener('keydown', keyNav, true); }
     function outside(e){ if(root.contains(e.target) || e.target===state.input) return; close(); }
     function keyNav(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } else if(e.key==='Enter'){ commit(); } }
     function commit(){
       if(!state.input) return;
-      const step = (cfgRef().stepMinutes || 15);
-      state.m = Math.floor(state.m / step) * step;
-      const val = fmt(state.h, state.m);
+      const val = fmt(state.h,state.m);
       state.input.value = val;
       state.input.setAttribute('value', val);
       // Fire both input & change so GHL autosave logic captures value regardless of listener type
@@ -1008,129 +954,121 @@ if (configPromise) {
   let jmBounds, AIRPORT_CODES, airportBounds;
 
   function normalizeSafely(el, obs){
-  if (obs) obs.disconnect();
-
-  // Never touch these if we’re in a freeze window
-  const locked = el.dataset.acLock === '1';
-
-  el.classList.remove('pac-target-input','disabled','is-disabled');
-  if (el.getAttribute('aria-disabled') === 'true') el.removeAttribute('aria-disabled');
-
-  // IMPORTANT: don't force autocomplete back "on" while locked
-  if (!locked) {
-    // Leave whatever the current autocomplete state is. If you MUST set it:
-    // if (el.getAttribute('autocomplete') == null) el.setAttribute('autocomplete','on');
+    if (obs) obs.disconnect();
+    el.classList.remove('pac-target-input','disabled','is-disabled');
+    el.removeAttribute('readonly');
+    if (el.getAttribute('aria-disabled') === 'true') el.removeAttribute('aria-disabled');
+    if (el.getAttribute('autocomplete') !== 'on') el.setAttribute('autocomplete','on');
+    if (el.style.opacity) el.style.opacity='';
+    if (obs) obs.observe(el,{attributes:true,attributeFilter:['class','readonly','aria-disabled','autocomplete','style'],attributeOldValue:true});
   }
-
-  // Also: only remove readonly if NOT locked
-  if (!locked && el.hasAttribute('readonly')) el.removeAttribute('readonly');
-
-  if (el.style.opacity) el.style.opacity='';
-
-  if (obs) obs.observe(el,{
-    attributes:true,
-    attributeFilter:['class','readonly','aria-disabled','autocomplete','style'],
-    attributeOldValue:true
-  });
-}
-
-function forceCloseDropdown() {
-  // Simple and clean approach - just hide PAC containers without aggressive DOM manipulation
-  document.querySelectorAll('.pac-container').forEach(pc => {
-    pc.style.display = 'none';
-    pc.style.visibility = 'hidden';
-  });
-}
 
   function wireAutocomplete(rootDoc){
-  if(!window.google?.maps?.places) return;
-
-  const sels = ['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
-
-  for(const sel of sels){
-    const el = rootDoc.querySelector(sel);
-    if(!el || el.dataset.placesWired === '1') continue;
-
-    // Skip hidden/invisible inputs
-    let cs;
-    try { cs = el.ownerDocument.defaultView.getComputedStyle(el); } catch(_) {}
-    if (el.type === 'hidden' || cs?.display === 'none' || cs?.visibility === 'hidden') continue;
-
-    el.dataset.placesWired = '1';
-
-    let ac;
-    try {
-      const acOpts = {
-        fields: ["place_id","formatted_address","geometry","name","types"],
-        strictBounds: false,
-        // include addresses & POIs
-        types: ["geocode","establishment"]
-      };
-      if (jmBounds) acOpts.bounds = jmBounds;
-      if (Array.isArray(CONFIG.countries) && CONFIG.countries.length > 0) {
-        acOpts.componentRestrictions = { country: CONFIG.countries };
-      }
-      ac = new google.maps.places.Autocomplete(el, acOpts);
-    } catch(err){
-      console.error('[Maps] Autocomplete init failed:', err);
-      continue;
-    }
-
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (!place?.place_id || !place.geometry) return;
-
-      // --- compute display (airport code postfix if we know it) ---
-      const isAirport = (place.types || []).includes('airport');
-      let display = '';
-      if (isAirport && place.name) {
-        const code = AIRPORT_CODES?.[place.name];
-        display = code ? `${place.name} (${code})` : place.name;
-      } else if (place.name) {
-        display = place.name;
-      } else if (place.formatted_address) {
-        display = place.formatted_address;
-      }
-
-      // Set the value and close dropdown
-      el.value = display;
-      el.setAttribute('value', display);
+    if(!window.google?.maps?.places) return;
+    const sels=['input[data-q="pickup_location"]','input[data-q="drop-off_location"]'];
+    for(const sel of sels){
+      const el=rootDoc.querySelector(sel);
+      if(!el || el.dataset.placesWired==='1') continue;
       
-      // Close dropdown cleanly
-      forceCloseDropdown();
-      
-      // Dispatch events
-      const inputEvent = new Event('input', { bubbles: true });
-      const changeEvent = new Event('change', { bubbles: true });
-      el.dispatchEvent(inputEvent);
-      el.dispatchEvent(changeEvent);
-      
-      // Brief lock to prevent immediate reopening
-      el.dataset.placeSelected = 'true';
-      setTimeout(() => {
-        delete el.dataset.placeSelected;
-      }, 500);
-    });
+      // Skip if hidden/invisible (drop-off is hidden on this page)
+	    const cs = el.ownerDocument.defaultView.getComputedStyle(el);
+	    if (el.type === 'hidden' || cs.display === 'none' || cs.visibility === 'hidden') continue;
+    
+      el.dataset.placesWired='1';
+      let ac;
+      try {
+        
+        const acOpts = {
+	        fields:["place_id","formatted_address","geometry","name","types"], 
+	        strictBounds:false, 
+	        types: ["establishment"]
+	       };
+	        if (jmBounds) acOpts.bounds = jmBounds;
+	        if (Array.isArray(CONFIG.countries) && CONFIG.countries.length > 0) {
+	        acOpts.componentRestrictions = { country: CONFIG.countries };
+	       }
+        
+				ac = new google.maps.places.Autocomplete(el, acOpts);
+      } catch(err){ console.error('[Maps] Autocomplete init failed:', err); continue; }
 
-    // Focus handler: set bounds to airports if empty
-    el.addEventListener('focus', (e) => {
-        if (!el.value && typeof airportBounds === 'function') {
-            ac.setBounds(airportBounds());
+      ac.addListener('place_changed',()=>{
+        const place=ac.getPlace(); if(!place?.place_id || !place.geometry) return;
+        const isAirport=(place.types||[]).includes('airport');
+        let display='';
+        if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
+        else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
+        
+        // Immediate aggressive close before value setting
+        function forceCloseDropdown() {
+          // Hide all pac-containers immediately
+          document.querySelectorAll('.pac-container').forEach(pc => {
+            pc.style.display = 'none !important';
+            pc.style.visibility = 'hidden !important';
+            pc.style.opacity = '0 !important';
+            pc.style.pointerEvents = 'none !important';
+            pc.style.zIndex = '-1 !important';
+          });
+          
+          // Add temporary global style to ensure it stays hidden
+          if (!document.getElementById('pac-force-hide')) {
+            const forceHideStyle = document.createElement('style');
+            forceHideStyle.id = 'pac-force-hide';
+            forceHideStyle.textContent = `
+              .pac-container { 
+                display: none !important; 
+                visibility: hidden !important; 
+                opacity: 0 !important; 
+                pointer-events: none !important; 
+                z-index: -1 !important; 
+              }
+            `;
+            document.head.appendChild(forceHideStyle);
+            
+            // Remove the force-hide style after a delay
+            setTimeout(() => {
+              if (document.getElementById('pac-force-hide')) {
+                document.getElementById('pac-force-hide').remove();
+              }
+            }, 1000);
+          }
         }
-    }, true);
+        
+        // Force close immediately
+        forceCloseDropdown();
+        
+        // Defer value mutation to next tick
+        setTimeout(()=>{
+          el.value = display;
+          el.setAttribute('value', display);
+          el.dispatchEvent(new Event('input', { bubbles:true }));
+          el.dispatchEvent(new Event('change', { bubbles:true }));
+          
+          // Additional closing techniques
+          try { el.blur(); } catch(_) {}
+          try { el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); } catch(_) {}
+          try { el.dispatchEvent(new KeyboardEvent('keyup',{key:'Escape',bubbles:true})); } catch(_) {}
+          
+          // Force close again after value setting
+          forceCloseDropdown();
+          
+          // Multiple delayed attempts to ensure it stays closed
+          [50, 100, 200, 400, 800].forEach(delay => {
+            setTimeout(forceCloseDropdown, delay);
+          });
+        },0);
+      });
 
-    // Input handler: clear selection flag when user types
-    el.addEventListener('input', (e) => {
-        if (!e.isProgrammatic && el.dataset.placeSelected === 'true') {
-            delete el.dataset.placeSelected;
-        }
-    }, true);
+      el.addEventListener('focus', ()=>{
+			  if(!el.value && typeof airportBounds === 'function') {
+			    ac.setBounds(airportBounds());
+			  }
+			}, { once:true });
 
-    // Keep the element sane if other scripts toggle attributes
-    const obs = new MutationObserver(() => { normalizeSafely(el, obs); });
-    normalizeSafely(el, obs);
+      const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
+      normalizeSafely(el, obs);
+    }  
+  
   }
-}
 
   /* ===== Section 7: Icon Injection / Visual Enhancement
     Purpose: Wrap targeted inputs with a container and prepend inline SVG icon.
@@ -1272,15 +1210,6 @@ function forceCloseDropdown() {
         
         // Also add loading class to button for visual feedback
         btn.classList.add('bf-loading');
-         // clear on nav
-        window.addEventListener('beforeunload', removeOverlayOnce, { once:true });
-        // fallback timeout
-        const to = setTimeout(removeOverlayOnce, 20000);
-        function removeOverlayOnce(){
-        clearTimeout(to);
-        loadingOverlay?.remove();
-        btn.classList.remove('bf-loading');
-        }
       });
       
       btn.dataset.bfCtaWired = '1';
@@ -1381,20 +1310,28 @@ function autofillHiddenDropOff(rootDoc) {
   if (!el) return;
   if (el.dataset.dropAutoFilled === '1') return;
 
-  // Only set if empty (don't overwrite anything user/system already put in)
+  // Only set if empty (don’t overwrite anything user/system already put in)
   const current = (el.value || '').trim();
   if (current) { el.dataset.dropAutoFilled = '1'; return; }
 
   const title = getBestTitle();
   if (!title) return;
 
-  // Only auto-fill for transfer forms (hidden field)
-  // For tour forms, leave the field visible and empty for user input
-  if (window.CFG?.formType === 'transfer') {
-    try { 
+  // Ensure it's hidden if that's your intent (won’t hurt if already hidden)
+  try { 
+    // Only hide the field if formType is explicitly 'transfer' or if it's already hidden
+    // For tour forms or when no formType is specified, leave the field visible
+    const shouldHide = window.CFG?.formType === 'transfer' || el.type === 'hidden';
+    if (shouldHide && el.type !== 'hidden') {
+      el.type = 'hidden';
+    }
+    
+    // Only auto-fill the value if the field is hidden (for transfer forms)
+    // For visible fields (tour forms), leave empty for user input
+    if (el.type === 'hidden') {
       setInputValue(el, title);
-    } catch(_) {}
-  }
+    }
+  } catch(_) {}
 
   el.dataset.dropAutoFilled = '1';
 }
@@ -1405,38 +1342,17 @@ autofillHiddenDropOff(document);
 // Keep in sync if the title changes later (useful for SPAs / lazy title updates)
 (function watchTitleChanges(){
   let last = document.title;
-  let titleWatcher = null;
-  
-  const startWatching = () => {
-    if (titleWatcher) return; // Already watching
-    
-    titleWatcher = setInterval(() => {
-      if (document.title !== last) {
-        last = document.title;
-        // Allow re-fill if it was never filled (don't override if already set)
-        const el = document.querySelector('input[data-q="drop-off_location"]');
-        if (el && !(el.value || '').trim()) {
-          el.dataset.dropAutoFilled = ''; // allow another try
-          autofillHiddenDropOff(document);
-        }
+  setInterval(() => {
+    if (document.title !== last) {
+      last = document.title;
+      // Allow re-fill if it was never filled (don’t override if already set)
+      const el = document.querySelector('input[data-q="drop-off_location"]');
+      if (el && !(el.value || '').trim()) {
+        el.dataset.dropAutoFilled = ''; // allow another try
+        autofillHiddenDropOff(document);
       }
-    }, 1000);
-  };
-  
-  const stopWatching = () => {
-    if (titleWatcher) {
-      clearInterval(titleWatcher);
-      titleWatcher = null;
     }
-  };
-  
-  startWatching();
-  
-  // Clean up on page unload
-  window.addEventListener('beforeunload', stopWatching);
-  
-  // Expose cleanup function for manual use
-  window.__stopTitleWatcher = stopWatching;
+  }, 1000);
 })();
 
 // Hook into your existing late-field observer: call inside your observer where you
@@ -1450,16 +1366,21 @@ autofillHiddenDropOff(document);
   // Hide drop-off field for tour forms
   function hideDropOffField() {
     if (window.CFG?.formType === 'tour') {
-      // Find and hide drop-off field containers
+      // Hide the entire drop-off container including the icon
+      const dropOffContainer = document.getElementById('el_pmkaWAYqmvey4VusfPvF_Ff2mstR1InquK2d7G2hX_2');
+      if (dropOffContainer) {
+        dropOffContainer.style.display = 'none';
+        console.log('[TourForm] Hidden drop-off container for tour form');
+      }
+      
+      // Also hide any other drop-off field containers that might exist
       const dropOffInputs = document.querySelectorAll('input[data-q="drop-off_location"]');
       dropOffInputs.forEach(input => {
         // Find the closest form field wrapper
         const wrapper = input.closest('.form-builder--item') || 
                        input.closest('.ghl-question') || 
                        input.closest('.icon-field-wrapper') ||
-                       input.closest('[id*="el_"]') ||
-                       input.closest('.form-field') ||
-                       input.closest('.question-wrapper');
+                       input.closest('[id*="el_"]');
         if (wrapper) {
           wrapper.style.display = 'none';
           console.log('[TourForm] Hidden drop-off field wrapper');
@@ -1503,14 +1424,7 @@ autofillHiddenDropOff(document);
     'number_of_passengers','full_name','email','phone'
   ];
 
-  // Track which elements have been enhanced to avoid duplicate work
-  const enhancedElements = new WeakSet();
-
   const obs = new MutationObserver(muts=>{
-    let needsEnhancement = false;
-    let needsMapsWiring = false;
-    let needsButtonEnhancement = false;
-
     for(const m of muts){
       if(!m.addedNodes) continue;
 
@@ -1523,41 +1437,60 @@ autofillHiddenDropOff(document);
 
         candidates.forEach(el=>{
           const q = el.getAttribute('data-q');
-          if(q && targetAttrs.includes(q) && !enhancedElements.has(el)){
-            enhancedElements.add(el);
-            needsEnhancement = true;
+          if(q && targetAttrs.includes(q)){
+            // Visual & button enhancements (idempotent)
+            enhanceVisual(document);
+            enhanceNextButtonMobile(document);
+            enhanceSubmitButton(document);
+
+            // Prefill attempts (idempotent; guarded internally)
+            applyPrefillBasic(document);
+            if(window.google?.maps) applyPrefillMaps(document);
+
+            // Late Maps wiring for location fields
+            if((q === 'pickup_location' || q === 'drop-off_location') &&
+               window.google?.maps?.places){
+              try { wireAutocomplete(document); } catch(_) {}
+            }
             
-            if(q === 'pickup_location' || q === 'drop-off_location') {
-              needsMapsWiring = true;
+            if (q === 'drop-off_location') {
+					  try { autofillHiddenDropOff(document); } catch(_) {}
+						}
+
+            // Late date field: guard + popup attach
+            if(q === 'pickup_date'){
+              try { attachPickupDateGuard(document); } catch(_) {}
+              try { window.__pickupDatePicker?.attach(document); } catch(_) {}
+            }
+
+            // Late time field: time picker attachment  
+            if(q === 'pickup_time'){
+              try { attachPickupTimePicker(document, el); } catch(_) {}
+            }
+
+            // Late passenger field: dropdown select
+            if(q === 'number_of_passengers'){
+              try { 
+                if (window.__passengerSelect && window.__passengerSelect.attach) {
+                  window.__passengerSelect.attach(document);
+                }
+              } catch(_) {}
             }
           }
         });
 
-        // Check for buttons
+        // If a SUBMIT button was inserted
         if(node.matches?.('.ghl-btn.ghl-submit-btn') ||
-           node.querySelector?.('.ghl-btn.ghl-submit-btn') ||
-           node.matches?.('.ghl-btn.ghl-footer-next') ||
+           node.querySelector?.('.ghl-btn.ghl-submit-btn')){
+          enhanceSubmitButton(document);
+        }
+
+        // If a NEXT button was inserted
+        if(node.matches?.('.ghl-btn.ghl-footer-next') ||
            node.querySelector?.('.ghl-btn.ghl-footer-next')){
-          needsButtonEnhancement = true;
+          enhanceNextButtonMobile(document);
         }
       });
-    }
-
-    // Batch enhancements to avoid multiple DOM queries
-    if(needsEnhancement) {
-      enhanceVisual(document);
-      applyPrefillBasic(document);
-      if(window.google?.maps) applyPrefillMaps(document);
-    }
-
-    if(needsMapsWiring && window.google?.maps?.places) {
-      try { wireAutocomplete(document); } catch(_) {}
-      try { autofillHiddenDropOff(document); } catch(_) {}
-    }
-
-    if(needsButtonEnhancement) {
-      enhanceNextButtonMobile(document);
-      enhanceSubmitButton(document);
     }
   });
 
@@ -1611,28 +1544,11 @@ autofillHiddenDropOff(document);
     // Retry wiring in case inputs mount after maps load (GHL async rendering)
     (function retryWireAutocomplete(){
       const start=Date.now();
-      let retryInterval = null;
-      
-      const retry = () => {
+      const interval=setInterval(()=>{
         try { wireAutocomplete(document); } catch(_) {}
         const allWired=['pickup_location','drop-off_location'].every(q=> document.querySelector(`input[data-q="${q}"]`)?.dataset.placesWired==='1');
-        if(allWired || Date.now()-start>12000){ 
-          if (retryInterval) {
-            clearInterval(retryInterval);
-            retryInterval = null;
-          }
-        }
-      };
-      
-      retryInterval = setInterval(retry, 450);
-      
-      // Clean up on page unload
-      window.addEventListener('beforeunload', () => {
-        if (retryInterval) {
-          clearInterval(retryInterval);
-          retryInterval = null;
-        }
-      });
+        if(allWired || Date.now()-start>12000){ clearInterval(interval); }
+      },450);
     })();
 	    applyPrefillMaps(document);
 
@@ -1663,14 +1579,10 @@ autofillHiddenDropOff(document);
     const items = [...container.querySelectorAll('.pac-item')];
     if (!items.length) return;
 
-    const toRemove = [];
     items.forEach(el => {
       const txt = (el.textContent || '').trim();
-      if (!isSpecificEnough(txt)) toRemove.push(el); // drop “Montego Bay”-type areas
+      if (!isSpecificEnough(txt)) el.remove(); // drop “Montego Bay”-type areas
     });
-        if (toRemove.length) {
-        toRemove.forEach(el => el.remove());
-        }
 
     const left = [...container.querySelectorAll('.pac-item')];
     if (left.length < 2) return;
@@ -1706,22 +1618,16 @@ autofillHiddenDropOff(document);
   hook();
 }
 
-attach();
-})(); // Close the installPredictionFilterAndPriority IIFE
+  attach();
+})();
 
-  }); // Close loadGoogleMaps callback
-
-// Debug helper: window.__tpFix() to reposition time popover manually
-window.__tpFix = function(){
-  const p=document.getElementById('pickup-time-popover'); 
-  const i=document.querySelector('input[data-q="pickup_time"]');
-  if(!p||!i) return 'missing element';
-  const r=i.getBoundingClientRect();
-  Object.assign(p.style,{
-    top:(window.scrollY+r.bottom+4)+'px', 
-    left:(window.scrollX+r.left)+'px'
+  // Debug helper: window.__tpFix() to reposition time popover manually
+    window.__tpFix = function(){
+      const p=document.getElementById('pickup-time-popover'); const i=document.querySelector('input[data-q="pickup_time"]');
+      if(!p||!i) return 'missing element';
+      const r=i.getBoundingClientRect();
+      Object.assign(p.style,{top:(window.scrollY+r.bottom+4)+'px', left:(window.scrollX+r.left)+'px'});
+      return 'repositioned';
+    };
   });
-  return 'repositioned';
-};
-
-}); // Close DOMContentLoaded event listener
+});
