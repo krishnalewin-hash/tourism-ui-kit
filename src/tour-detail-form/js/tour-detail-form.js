@@ -919,7 +919,7 @@ const CONFIG = {
       console.log('[DEBUG] Fetch called:', url);
       
       // If this looks like a GHL form submission, try to add place data
-      if(url && (url.includes('surveys/submit') || url.includes('forms/submit') || url.includes('leadconnectorhq.com'))) {
+      if(url && (url.includes('surveys/submit') || url.includes('forms/submit'))) {
         console.log('[DEBUG] Potential GHL form submission detected via fetch');
         
         // Try to add place data to the request
@@ -951,6 +951,9 @@ const CONFIG = {
             console.log('[DEBUG] Could not parse fetch body as JSON');
           }
         }
+      } else if(url && url.includes('leadconnectorhq.com')) {
+        // For other GHL requests, just log but don't modify to avoid breaking them
+        console.log('[DEBUG] GHL request detected but not modifying to avoid 422 errors');
       }
       
       return originalFetch.apply(this, [url, options]);
@@ -1063,6 +1066,34 @@ const CONFIG = {
       if(btn && (btn.textContent?.toLowerCase().includes('submit') || btn.value?.toLowerCase().includes('submit'))) {
         console.log('[DEBUG] Submit button detected, adding place data to fields');
         addPlaceDataToFields();
+      }
+    }, true);
+
+    // More targeted approach - try to modify the actual form field values
+    function updateFieldValuesWithPlaceData() {
+      console.log('[DEBUG] Updating field values with place data');
+      const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
+      autocompleteFields.forEach(field => {
+        if(field.dataset.placeId && field.value !== field.dataset.placeName) {
+          console.log(`[DEBUG] Updating field value for ${field.getAttribute('data-q')} from "${field.value}" to "${field.dataset.placeName}"`);
+          // Update the field value to include place data
+          const originalValue = field.value;
+          const placeData = `${originalValue} | Place ID: ${field.dataset.placeId} | Name: ${field.dataset.placeName} | Address: ${field.dataset.placeFormattedAddress}`;
+          field.value = placeData;
+          
+          // Trigger change event to notify GHL
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    }
+
+    // Try to update field values before form submission
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
+      if(btn && (btn.textContent?.toLowerCase().includes('submit') || btn.value?.toLowerCase().includes('submit'))) {
+        console.log('[DEBUG] Submit button detected, updating field values with place data');
+        updateFieldValuesWithPlaceData();
       }
     }, true);
 
