@@ -1386,19 +1386,23 @@ function autofillHiddenDropOff(rootDoc) {
   const title = getBestTitle();
   if (!title) return;
 
-  // Ensure it's hidden if that's your intent (won’t hurt if already hidden)
+  // Auto-fill the drop-off field for both tour forms (hidden via CSS) and transfer forms (hidden via input type)
   try { 
-    // Only hide the field if formType is explicitly 'transfer' or if it's already hidden
-    // For tour forms or when no formType is specified, leave the field visible
-    const shouldHide = window.CFG?.formType === 'transfer' || el.type === 'hidden';
-    if (shouldHide && el.type !== 'hidden') {
-      el.type = 'hidden';
+    // For tour forms, the field is hidden via CSS but should still be auto-filled
+    // For transfer forms, the field is hidden via input type
+    const isTourForm = window.CFG?.formType === 'tour';
+    const isTransferForm = window.CFG?.formType === 'transfer';
+    const isHiddenInput = el.type === 'hidden';
+    
+    // Auto-fill for tour forms (hidden via CSS) or transfer forms (hidden via input type)
+    if (isTourForm || isHiddenInput) {
+      setInputValue(el, title);
+      console.log('[TourForm] Auto-filled drop-off field with title:', title);
     }
     
-    // Only auto-fill the value if the field is hidden (for transfer forms)
-    // For visible fields (tour forms), leave empty for user input
-    if (el.type === 'hidden') {
-      setInputValue(el, title);
+    // For transfer forms, also ensure the field is hidden via input type
+    if (isTransferForm && el.type !== 'hidden') {
+      el.type = 'hidden';
     }
   } catch(_) {}
 
