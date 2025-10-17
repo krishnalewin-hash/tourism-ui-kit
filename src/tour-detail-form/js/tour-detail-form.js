@@ -930,27 +930,53 @@ const CONFIG = {
       if(url && url.includes('leadconnectorhq.com')) {
         console.log('[DEBUG] GHL request detected but not modifying to avoid 422 errors');
         
-        // If this is a form submission, update field values before the request
+        // If this is a form submission, modify the request body
         if(url.includes('surveys/submit') || url.includes('forms/submit')) {
-          console.log('[DEBUG] Form submission detected via fetch, updating field values BEFORE request');
-          updateFieldValuesWithPlaceData();
+          console.log('[DEBUG] Form submission detected, modifying request body');
           
-          // Debug: Log the request body to see what GHL is sending
-          console.log('[DEBUG] Fetch request body:', options.body);
+          // Clone the options to avoid mutating the original
+          const modifiedOptions = { ...options };
+          
+          // Parse and modify the FormData
           if(options.body instanceof FormData) {
-            console.log('[DEBUG] FormData contents:');
+            const formDataObj = {};
             for(let [key, value] of options.body.entries()) {
-              console.log(`[DEBUG] ${key}: "${value}"`);
+              formDataObj[key] = value;
             }
-          } else if(typeof options.body === 'string') {
-            console.log('[DEBUG] String body:', options.body);
-            try {
-              const jsonData = JSON.parse(options.body);
-              console.log('[DEBUG] JSON body:', jsonData);
-            } catch(e) {
-              console.log('[DEBUG] Body is not JSON');
+            
+            // Parse the nested formData JSON string
+            if(formDataObj.formData) {
+              const parsedFormData = JSON.parse(formDataObj.formData);
+              
+              // Find and replace field values with place data
+              const pickupField = document.querySelector('input[data-q="pickup_location"]');
+              const dropoffField = document.querySelector('input[data-q="drop-off_location"]');
+              
+              // Replace with stored place names
+              for(let fieldId in parsedFormData) {
+                if(pickupField && pickupField.name === fieldId && pickupField.dataset.placeName) {
+                  console.log(`[DEBUG] Replacing pickup field ${fieldId}: "${parsedFormData[fieldId]}" -> "${pickupField.dataset.placeName}"`);
+                  parsedFormData[fieldId] = pickupField.dataset.placeName;
+                }
+                if(dropoffField && dropoffField.name === fieldId && dropoffField.dataset.placeName) {
+                  console.log(`[DEBUG] Replacing dropoff field ${fieldId}: "${parsedFormData[fieldId]}" -> "${dropoffField.dataset.placeName}"`);
+                  parsedFormData[fieldId] = dropoffField.dataset.placeName;
+                }
+              }
+              
+              // Update the formData string
+              formDataObj.formData = JSON.stringify(parsedFormData);
+              
+              // Rebuild FormData
+              const newFormData = new FormData();
+              for(let key in formDataObj) {
+                newFormData.append(key, formDataObj[key]);
+              }
+              modifiedOptions.body = newFormData;
             }
           }
+          
+          return originalFetch.apply(this, [url, modifiedOptions]);
         }
       }
       
@@ -1067,74 +1093,9 @@ const CONFIG = {
       }
     }, true);
 
-    // More targeted approach - try to modify the actual form field values
-    function updateFieldValuesWithPlaceData() {
-      console.log('[DEBUG] Updating field values with place data');
-      const autocompleteFields = document.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
-      autocompleteFields.forEach(field => {
-        if(field.dataset.placeId && field.dataset.placeName) {
-          console.log(`[DEBUG] Updating field value for ${field.getAttribute('data-q')} from "${field.value}" to "${field.dataset.placeName}"`);
-          // Update the field value to the full place name instead of the abbreviated version
-          field.value = field.dataset.placeName;
-          
-          // Don't dispatch events to avoid triggering autocomplete reopening
-          // GHL will pick up the value change during form submission
-        }
-      });
-      
-      // Debug: Log all form field values after update
-      console.log('[DEBUG] All form field values after update:');
-      document.querySelectorAll('input, select, textarea').forEach(field => {
-        if(field.name || field.getAttribute('data-q')) {
-          console.log(`[DEBUG] Field ${field.name || field.getAttribute('data-q')}: "${field.value}"`);
-        }
-      });
-    }
-
-    // Try to update field values before form submission
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
-      if(btn) {
-        console.log('[DEBUG] Button clicked:', btn.textContent || btn.value || btn.className);
-        // Check for various submit button patterns
-        const isSubmitButton = (
-          btn.textContent?.toLowerCase().includes('submit') ||
-          btn.value?.toLowerCase().includes('submit') ||
-          btn.className?.includes('submit') ||
-          btn.getAttribute('type') === 'submit' ||
-          btn.getAttribute('data-ghl-submit') ||
-          btn.classList.contains('ghl-submit')
-        );
-        
-        if(isSubmitButton) {
-          console.log('[DEBUG] Submit button detected, updating field values with place data');
-          updateFieldValuesWithPlaceData();
-        }
-      }
-    }, true);
-
-    // More aggressive approach - update field values on any button click that might trigger form submission
-    document.addEventListener('mousedown', (e) => {
-      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
-      if(btn) {
-        console.log('[DEBUG] Button mousedown:', btn.textContent || btn.value || btn.className);
-        // Update field values on any button mousedown to be safe
-        updateFieldValuesWithPlaceData();
-      }
-    }, true);
-
-    // Backup: Listen for form submission events
-    document.addEventListener('submit', (e) => {
-      console.log('[DEBUG] Form submit event detected');
-      updateFieldValuesWithPlaceData();
-      
-      // Debug: Log form data at submission time
-      console.log('[DEBUG] Form submission - logging all form data:');
-      const formData = new FormData(e.target);
-      for(let [key, value] of formData.entries()) {
-        console.log(`[DEBUG] FormData ${key}: "${value}"`);
-      }
-    }, true);
+    // Note: Field value updates are now handled immediately in the place_changed listener
+    // No need for separate updateFieldValuesWithPlaceData function since we dispatch
+    // input/change events immediately when autocomplete selection happens
 
     window.__stepTwoSubmitValidation = true;
   })();
@@ -1386,7 +1347,7 @@ const CONFIG = {
         
         console.log(`[DEBUG] Place selected for ${el.getAttribute('data-q')}: ${display}`);
         
-        // Set the value immediately
+        // IMMEDIATELY update the input value with the full place name
         el.value = display;
         el.setAttribute('value', display);
         
@@ -1406,10 +1367,19 @@ const CONFIG = {
           formattedAddress: place.formatted_address
         });
         
-        // Don't update field value immediately to avoid autocomplete reopening
-        // We'll update it only when the form is submitted
+        // CRITICAL: Dispatch events to trigger GHL's capture mechanism
+        console.log(`[DEBUG] Dispatching input/change events for ${el.getAttribute('data-q')} to trigger GHL capture`);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
         
-        // Let Google handle the dropdown closing naturally - no manual intervention needed
+        // Add a small delay to ensure GHL processes the events
+        setTimeout(() => {
+          // Verify the value is still correct
+          if (el.value !== display) {
+            console.log(`[DEBUG] Value changed after events, restoring: "${el.value}" -> "${display}"`);
+            el.value = display;
+          }
+        }, 50);
       });
 
       el.addEventListener('focus', ()=>{
