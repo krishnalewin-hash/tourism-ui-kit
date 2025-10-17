@@ -1007,11 +1007,8 @@ const CONFIG = {
         el.value = display;
         el.setAttribute('value', display);
         
-        // Close the dropdown cleanly
-        document.querySelectorAll('.pac-container').forEach(pc => {
-          pc.style.display = 'none';
-          pc.style.visibility = 'hidden';
-        });
+        // Close the dropdown by blurring the current field
+        el.blur();
         
         // Dispatch events
         el.dispatchEvent(new Event('input', { bubbles: true }));
