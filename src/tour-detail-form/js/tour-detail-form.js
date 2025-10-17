@@ -998,71 +998,42 @@ const CONFIG = {
         if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
         else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
         
-        // Immediate aggressive close before value setting
-        function forceCloseDropdown() {
-          // Hide all pac-containers immediately
-          document.querySelectorAll('.pac-container').forEach(pc => {
-            pc.style.display = 'none !important';
-            pc.style.visibility = 'hidden !important';
-            pc.style.opacity = '0 !important';
-            pc.style.pointerEvents = 'none !important';
-            pc.style.zIndex = '-1 !important';
-          });
-          
-          // Add temporary global style to ensure it stays hidden
-          if (!document.getElementById('pac-force-hide')) {
-            const forceHideStyle = document.createElement('style');
-            forceHideStyle.id = 'pac-force-hide';
-            forceHideStyle.textContent = `
-              .pac-container { 
-                display: none !important; 
-                visibility: hidden !important; 
-                opacity: 0 !important; 
-                pointer-events: none !important; 
-                z-index: -1 !important; 
-              }
-            `;
-            document.head.appendChild(forceHideStyle);
-            
-            // Remove the force-hide style after a delay
-            setTimeout(() => {
-              if (document.getElementById('pac-force-hide')) {
-                document.getElementById('pac-force-hide').remove();
-              }
-            }, 1000);
-          }
-        }
+        // Set a flag to prevent autocomplete from reopening
+        el.dataset.placeSelected = 'true';
         
-        // Force close immediately
-        forceCloseDropdown();
+        // Set the value immediately
+        el.value = display;
+        el.setAttribute('value', display);
         
-        // Defer value mutation to next tick
-        setTimeout(()=>{
-          el.value = display;
-          el.setAttribute('value', display);
-          el.dispatchEvent(new Event('input', { bubbles:true }));
-          el.dispatchEvent(new Event('change', { bubbles:true }));
-          
-          // Additional closing techniques
-          try { el.blur(); } catch(_) {}
-          try { el.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); } catch(_) {}
-          try { el.dispatchEvent(new KeyboardEvent('keyup',{key:'Escape',bubbles:true})); } catch(_) {}
-          
-          // Force close again after value setting
-          forceCloseDropdown();
-          
-          // Multiple delayed attempts to ensure it stays closed
-          [50, 100, 200, 400, 800].forEach(delay => {
-            setTimeout(forceCloseDropdown, delay);
-          });
-        },0);
+        // Close the dropdown cleanly
+        document.querySelectorAll('.pac-container').forEach(pc => {
+          pc.style.display = 'none';
+          pc.style.visibility = 'hidden';
+        });
+        
+        // Dispatch events
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // Remove the lock after a short delay to allow normal autocomplete behavior later
+        setTimeout(() => {
+          delete el.dataset.placeSelected;
+        }, 1000);
       });
 
       el.addEventListener('focus', ()=>{
-			  if(!el.value && typeof airportBounds === 'function') {
-			    ac.setBounds(airportBounds());
-			  }
-			}, { once:true });
+        // Don't reopen autocomplete if a place was just selected
+        if (el.dataset.placeSelected === 'true') return;
+        
+        if(!el.value && typeof airportBounds === 'function') {
+          ac.setBounds(airportBounds());
+        }
+      });
+      
+      el.addEventListener('input', ()=>{
+        // Don't trigger autocomplete if a place was just selected
+        if (el.dataset.placeSelected === 'true') return;
+      });
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
       normalizeSafely(el, obs);
