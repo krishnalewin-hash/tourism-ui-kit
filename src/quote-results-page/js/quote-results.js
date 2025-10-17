@@ -174,9 +174,16 @@ function injectStyles() {
   const fmtMin = secs => Math.round((secs||0)/60) + " minutes";
 
   function pickBandPrice(miles){
+    console.log(`[quote-calc] pickBandPrice called with miles: ${miles}`);
+    console.log(`[quote-calc] CONFIG.bands:`, CONFIG.bands);
     for (const b of CONFIG.bands) {
-      if (miles < b.maxMi) return b.pricePP;
+      console.log(`[quote-calc] Checking band: maxMi=${b.maxMi}, pricePP=${b.pricePP}, ${miles} < ${b.maxMi} = ${miles < b.maxMi}`);
+      if (miles < b.maxMi) {
+        console.log(`[quote-calc] Match found! Returning $${b.pricePP}`);
+        return b.pricePP;
+      }
     }
+    console.log(`[quote-calc] No band matched, returning last band: $${CONFIG.bands[CONFIG.bands.length - 1].pricePP}`);
     return CONFIG.bands[CONFIG.bands.length - 1].pricePP;
   }
 
