@@ -1010,6 +1010,26 @@ const CONFIG = {
         // Close the dropdown by blurring the current field
         el.blur();
         
+        // Hide all pac-containers briefly to prevent reopening, then restore others
+        const allPacContainers = document.querySelectorAll('.pac-container');
+        allPacContainers.forEach(pc => {
+          pc.style.display = 'none';
+          pc.style.visibility = 'hidden';
+        });
+        
+        // After a short delay, restore pac-containers for other fields
+        setTimeout(() => {
+          allPacContainers.forEach(pc => {
+            // Only restore if this container is not associated with the current field
+            const isCurrentField = pc.querySelector(`input[data-q="${el.getAttribute('data-q')}"]`) ||
+                                  pc.getAttribute('data-field') === el.getAttribute('data-q');
+            if (!isCurrentField) {
+              pc.style.display = '';
+              pc.style.visibility = '';
+            }
+          });
+        }, 100);
+        
         // Dispatch events
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
