@@ -965,6 +965,29 @@ const CONFIG = {
 
   function wireAutocomplete(rootDoc){
     if(!window.google?.maps?.places) return;
+    
+    // Add global observer to detect pac-container appearances
+    if (!window.__pacObserver) {
+      window.__pacObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE && node.classList?.contains('pac-container')) {
+                console.log('[DEBUG] Pac-container appeared:', node);
+                // Check if any field has placeSelected flag
+                const lockedFields = document.querySelectorAll('[data-place-selected="true"]');
+                if (lockedFields.length > 0) {
+                  console.log('[DEBUG] Blocking pac-container due to locked fields');
+                  node.style.display = 'none';
+                  node.style.visibility = 'hidden';
+                }
+              }
+            });
+          }
+        });
+      });
+      window.__pacObserver.observe(document.body, { childList: true, subtree: true });
+    }
     const sels=[
       'input[data-q="pickup_location"]',
       'input[data-q="drop-off_location"]'
@@ -1000,6 +1023,8 @@ const CONFIG = {
         if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
         else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
         
+        console.log(`[DEBUG] Place selected for ${el.getAttribute('data-q')}: ${display}`);
+        
         // Set a flag to prevent autocomplete from reopening
         el.dataset.placeSelected = 'true';
         
@@ -1012,10 +1037,13 @@ const CONFIG = {
         el.dispatchEvent(new Event('change', { bubbles: true }));
         
         // Force close the dropdown with multiple methods
+        console.log(`[DEBUG] Closing dropdown for ${el.getAttribute('data-q')}`);
         el.blur();
         
         // Hide all pac-containers
-        document.querySelectorAll('.pac-container').forEach(pc => {
+        const pacContainers = document.querySelectorAll('.pac-container');
+        console.log(`[DEBUG] Found ${pacContainers.length} pac-containers to hide`);
+        pacContainers.forEach(pc => {
           pc.style.display = 'none';
           pc.style.visibility = 'hidden';
           pc.style.opacity = '0';
@@ -1032,6 +1060,7 @@ const CONFIG = {
         
         // Remove the lock and temporary style after a longer delay
         setTimeout(() => {
+          console.log(`[DEBUG] Releasing lock for ${el.getAttribute('data-q')}`);
           delete el.dataset.placeSelected;
           const tempStyle = document.getElementById('pac-force-hide-temp');
           if (tempStyle) {
@@ -1041,8 +1070,10 @@ const CONFIG = {
       });
 
       el.addEventListener('focus', ()=>{
+        console.log(`[DEBUG] Focus event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
         // Don't reopen autocomplete if a place was just selected
         if (el.dataset.placeSelected === 'true') {
+          console.log(`[DEBUG] Blocking focus for ${el.getAttribute('data-q')} - place just selected`);
           el.blur();
           return;
         }
@@ -1053,8 +1084,10 @@ const CONFIG = {
       });
       
       el.addEventListener('input', ()=>{
+        console.log(`[DEBUG] Input event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
         // Don't trigger autocomplete if a place was just selected
         if (el.dataset.placeSelected === 'true') {
+          console.log(`[DEBUG] Blocking input for ${el.getAttribute('data-q')} - place just selected`);
           // Force close any pac-containers that might have opened
           document.querySelectorAll('.pac-container').forEach(pc => {
             pc.style.display = 'none';
@@ -1065,8 +1098,10 @@ const CONFIG = {
       });
       
       el.addEventListener('click', ()=>{
+        console.log(`[DEBUG] Click event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
         // Don't reopen autocomplete if a place was just selected
         if (el.dataset.placeSelected === 'true') {
+          console.log(`[DEBUG] Blocking click for ${el.getAttribute('data-q')} - place just selected`);
           el.blur();
           return;
         }
