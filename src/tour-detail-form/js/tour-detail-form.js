@@ -826,14 +826,9 @@ const CONFIG = {
       }
     }, true);
 
-    // Handle form submission to ensure place data is sent
-    document.addEventListener('submit', (e)=>{
-      const form = e.target;
-      if(!form) return;
-      
-      console.log('[DEBUG] Form submission detected');
-      
-      // Find all autocomplete fields and ensure their place data is included
+    // Function to add place data to form
+    function addPlaceDataToForm(form) {
+      console.log('[DEBUG] Adding place data to form');
       const autocompleteFields = form.querySelectorAll('input[data-q="pickup_location"], input[data-q="drop-off_location"]');
       console.log('[DEBUG] Found autocomplete fields:', autocompleteFields.length);
       
@@ -865,18 +860,6 @@ const CONFIG = {
           placeAddressInput.value = field.dataset.placeFormattedAddress || '';
           form.appendChild(placeAddressInput);
           
-          const placeTypesInput = document.createElement('input');
-          placeTypesInput.type = 'hidden';
-          placeTypesInput.name = field.name + '_place_types';
-          placeTypesInput.value = field.dataset.placeTypes || '[]';
-          form.appendChild(placeTypesInput);
-          
-          const placeGeometryInput = document.createElement('input');
-          placeGeometryInput.type = 'hidden';
-          placeGeometryInput.name = field.name + '_place_geometry';
-          placeGeometryInput.value = field.dataset.placeGeometry || '{}';
-          form.appendChild(placeGeometryInput);
-          
           console.log(`[DEBUG] Added place data for form submission:`, {
             field: field.getAttribute('data-q'),
             placeId: field.dataset.placeId,
@@ -884,7 +867,28 @@ const CONFIG = {
           });
         }
       });
+    }
+
+    // Handle form submission to ensure place data is sent
+    document.addEventListener('submit', (e)=>{
+      console.log('[DEBUG] Form submission detected');
+      addPlaceDataToForm(e.target);
     }, true);
+
+    // Also try to catch any form action changes or navigation
+    const originalFormAction = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function() {
+      console.log('[DEBUG] Form.submit() called directly');
+      addPlaceDataToForm(this);
+      return originalFormAction.call(this);
+    };
+
+    // Catch any navigation that might be form-related
+    window.addEventListener('beforeunload', () => {
+      console.log('[DEBUG] Page unloading - checking for forms');
+      const forms = document.querySelectorAll('form');
+      forms.forEach(form => addPlaceDataToForm(form));
+    });
 
     window.__stepTwoSubmitValidation = true;
   })();
