@@ -924,7 +924,7 @@ const CONFIG = {
         
         // If this is a form submission, update field values before the request
         if(url.includes('surveys/submit') || url.includes('forms/submit')) {
-          console.log('[DEBUG] Form submission detected via fetch, updating field values');
+          console.log('[DEBUG] Form submission detected via fetch, updating field values BEFORE request');
           updateFieldValuesWithPlaceData();
         }
       }
@@ -1078,6 +1078,16 @@ const CONFIG = {
           console.log('[DEBUG] Submit button detected, updating field values with place data');
           updateFieldValuesWithPlaceData();
         }
+      }
+    }, true);
+
+    // More aggressive approach - update field values on any button click that might trigger form submission
+    document.addEventListener('mousedown', (e) => {
+      const btn = e.target.closest?.('button, input[type="submit"], [role="button"]');
+      if(btn) {
+        console.log('[DEBUG] Button mousedown:', btn.textContent || btn.value || btn.className);
+        // Update field values on any button mousedown to be safe
+        updateFieldValuesWithPlaceData();
       }
     }, true);
 
