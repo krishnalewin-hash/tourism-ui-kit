@@ -1007,42 +1007,45 @@ const CONFIG = {
         el.value = display;
         el.setAttribute('value', display);
         
-        // Close the dropdown by blurring the current field
-        el.blur();
-        
-        // Hide all pac-containers briefly to prevent reopening, then restore others
-        const allPacContainers = document.querySelectorAll('.pac-container');
-        allPacContainers.forEach(pc => {
-          pc.style.display = 'none';
-          pc.style.visibility = 'hidden';
-        });
-        
-        // After a short delay, restore pac-containers for other fields
-        setTimeout(() => {
-          allPacContainers.forEach(pc => {
-            // Only restore if this container is not associated with the current field
-            const isCurrentField = pc.querySelector(`input[data-q="${el.getAttribute('data-q')}"]`) ||
-                                  pc.getAttribute('data-field') === el.getAttribute('data-q');
-            if (!isCurrentField) {
-              pc.style.display = '';
-              pc.style.visibility = '';
-            }
-          });
-        }, 100);
-        
         // Dispatch events
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
         
-        // Remove the lock after a short delay to allow normal autocomplete behavior later
+        // Force close the dropdown with multiple methods
+        el.blur();
+        
+        // Hide all pac-containers
+        document.querySelectorAll('.pac-container').forEach(pc => {
+          pc.style.display = 'none';
+          pc.style.visibility = 'hidden';
+          pc.style.opacity = '0';
+          pc.style.pointerEvents = 'none';
+        });
+        
+        // Add a temporary style to force hide pac-containers
+        if (!document.getElementById('pac-force-hide-temp')) {
+          const style = document.createElement('style');
+          style.id = 'pac-force-hide-temp';
+          style.textContent = '.pac-container { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }';
+          document.head.appendChild(style);
+        }
+        
+        // Remove the lock and temporary style after a longer delay
         setTimeout(() => {
           delete el.dataset.placeSelected;
-        }, 1000);
+          const tempStyle = document.getElementById('pac-force-hide-temp');
+          if (tempStyle) {
+            tempStyle.remove();
+          }
+        }, 2000);
       });
 
       el.addEventListener('focus', ()=>{
         // Don't reopen autocomplete if a place was just selected
-        if (el.dataset.placeSelected === 'true') return;
+        if (el.dataset.placeSelected === 'true') {
+          el.blur();
+          return;
+        }
         
         if(!el.value && typeof airportBounds === 'function') {
           ac.setBounds(airportBounds());
@@ -1051,7 +1054,22 @@ const CONFIG = {
       
       el.addEventListener('input', ()=>{
         // Don't trigger autocomplete if a place was just selected
-        if (el.dataset.placeSelected === 'true') return;
+        if (el.dataset.placeSelected === 'true') {
+          // Force close any pac-containers that might have opened
+          document.querySelectorAll('.pac-container').forEach(pc => {
+            pc.style.display = 'none';
+            pc.style.visibility = 'hidden';
+          });
+          return;
+        }
+      });
+      
+      el.addEventListener('click', ()=>{
+        // Don't reopen autocomplete if a place was just selected
+        if (el.dataset.placeSelected === 'true') {
+          el.blur();
+          return;
+        }
       });
 
       const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
