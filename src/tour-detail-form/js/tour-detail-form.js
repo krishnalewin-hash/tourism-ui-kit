@@ -994,7 +994,15 @@ const CONFIG = {
     ];
     for(const sel of sels){
       const el=rootDoc.querySelector(sel);
-      if(!el || el.dataset.placesWired==='1') continue;
+      if(!el) {
+        console.log(`[DEBUG] Field not found: ${sel}`);
+        continue;
+      }
+      if(el.dataset.placesWired==='1') {
+        console.log(`[DEBUG] Field already wired: ${sel}`);
+        continue;
+      }
+      console.log(`[DEBUG] Wiring autocomplete for: ${sel}`);
       
       // Skip if truly hidden (type="hidden" only, not display:none which might be temporary)
 	    if (el.type === 'hidden') continue;
@@ -1014,6 +1022,7 @@ const CONFIG = {
 	       }
         
 				ac = new google.maps.places.Autocomplete(el, acOpts);
+				console.log(`[DEBUG] Autocomplete created successfully for: ${sel}`);
       } catch(err){ console.error('[Maps] Autocomplete init failed:', err); continue; }
 
       ac.addListener('place_changed',()=>{
@@ -1050,22 +1059,10 @@ const CONFIG = {
           pc.style.pointerEvents = 'none';
         });
         
-        // Add a temporary style to force hide pac-containers
-        if (!document.getElementById('pac-force-hide-temp')) {
-          const style = document.createElement('style');
-          style.id = 'pac-force-hide-temp';
-          style.textContent = '.pac-container { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }';
-          document.head.appendChild(style);
-        }
-        
-        // Remove the lock and temporary style after a longer delay
+        // Remove the lock after a longer delay
         setTimeout(() => {
           console.log(`[DEBUG] Releasing lock for ${el.getAttribute('data-q')}`);
           delete el.dataset.placeSelected;
-          const tempStyle = document.getElementById('pac-force-hide-temp');
-          if (tempStyle) {
-            tempStyle.remove();
-          }
         }, 2000);
       });
 
