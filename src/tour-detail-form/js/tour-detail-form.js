@@ -1034,9 +1034,6 @@ const CONFIG = {
         
         console.log(`[DEBUG] Place selected for ${el.getAttribute('data-q')}: ${display}`);
         
-        // Set a flag to prevent autocomplete from reopening
-        el.dataset.placeSelected = 'true';
-        
         // Set the value immediately
         el.value = display;
         el.setAttribute('value', display);
@@ -1045,38 +1042,44 @@ const CONFIG = {
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
         
-        // Force close the dropdown with multiple methods
+        // Force close the dropdown
         console.log(`[DEBUG] Closing dropdown for ${el.getAttribute('data-q')}`);
         el.blur();
         
-        // Hide all pac-containers
+        // Hide only visible pac-containers (not all of them)
         const pacContainers = document.querySelectorAll('.pac-container');
-        console.log(`[DEBUG] Found ${pacContainers.length} pac-containers to hide`);
+        console.log(`[DEBUG] Found ${pacContainers.length} pac-containers to check`);
         pacContainers.forEach(pc => {
-          pc.style.display = 'none';
-          pc.style.visibility = 'hidden';
-          pc.style.opacity = '0';
-          pc.style.pointerEvents = 'none';
+          // Only hide if it's actually visible
+          if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
+            pc.style.display = 'none';
+            pc.style.visibility = 'hidden';
+            console.log(`[DEBUG] Hiding visible pac-container`);
+          }
         });
         
-        // Remove the lock after a shorter delay since we're not blocking user input
+        // Set a very short flag to prevent immediate reopening (only for this field)
+        el.dataset.placeSelected = 'true';
+        console.log(`[DEBUG] Set placeSelected=true for ${el.getAttribute('data-q')}`);
         setTimeout(() => {
           console.log(`[DEBUG] Releasing lock for ${el.getAttribute('data-q')}`);
           delete el.dataset.placeSelected;
-        }, 500);
+          console.log(`[DEBUG] Cleared placeSelected for ${el.getAttribute('data-q')}`);
+        }, 200); // Much shorter delay
       });
 
       el.addEventListener('focus', ()=>{
         console.log(`[DEBUG] Focus event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // If a place was just selected, just close any pac-containers but allow focus
+        // Only close pac-containers if this specific field just had a place selected
         if (el.dataset.placeSelected === 'true') {
           console.log(`[DEBUG] Closing pac-containers on focus for ${el.getAttribute('data-q')} - place just selected`);
-          // Force close any pac-containers that might have opened
+          // Only close visible pac-containers
           document.querySelectorAll('.pac-container').forEach(pc => {
-            pc.style.display = 'none';
-            pc.style.visibility = 'hidden';
+            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
+              pc.style.display = 'none';
+              pc.style.visibility = 'hidden';
+            }
           });
-          // Don't return - allow focus to continue for user editing
         }
         
         if(!el.value && typeof airportBounds === 'function') {
@@ -1086,29 +1089,37 @@ const CONFIG = {
       
       el.addEventListener('input', ()=>{
         console.log(`[DEBUG] Input event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // If a place was just selected, just close any pac-containers but don't block user input
+        // Only close pac-containers if this specific field just had a place selected
         if (el.dataset.placeSelected === 'true') {
           console.log(`[DEBUG] Closing pac-containers for ${el.getAttribute('data-q')} - place just selected`);
-          // Force close any pac-containers that might have opened
+          // Only close visible pac-containers
           document.querySelectorAll('.pac-container').forEach(pc => {
-            pc.style.display = 'none';
-            pc.style.visibility = 'hidden';
+            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
+              pc.style.display = 'none';
+              pc.style.visibility = 'hidden';
+            }
           });
-          // Don't return - allow the input event to continue for user editing
+        }
+        
+        // If user is actively typing (not just programmatic input), clear any stale placeSelected flag
+        if (el.value.length > 0 && el.dataset.placeSelected === 'true') {
+          console.log(`[DEBUG] User typing detected, clearing stale placeSelected flag for ${el.getAttribute('data-q')}`);
+          delete el.dataset.placeSelected;
         }
       });
       
       el.addEventListener('click', ()=>{
         console.log(`[DEBUG] Click event on ${el.getAttribute('data-q')}, placeSelected: ${el.dataset.placeSelected}`);
-        // If a place was just selected, just close any pac-containers but allow click
+        // Only close pac-containers if this specific field just had a place selected
         if (el.dataset.placeSelected === 'true') {
           console.log(`[DEBUG] Closing pac-containers on click for ${el.getAttribute('data-q')} - place just selected`);
-          // Force close any pac-containers that might have opened
+          // Only close visible pac-containers
           document.querySelectorAll('.pac-container').forEach(pc => {
-            pc.style.display = 'none';
-            pc.style.visibility = 'hidden';
+            if (pc.style.display !== 'none' && pc.style.visibility !== 'hidden') {
+              pc.style.display = 'none';
+              pc.style.visibility = 'hidden';
+            }
           });
-          // Don't return - allow click to continue for user editing
         }
       });
 
