@@ -1,6 +1,6 @@
 /* ===== Block C: Related Tours Section JavaScript ===== */
 
-(function() {
+(async function() {
   'use strict';
 
   // Initialize inline tour data if present
@@ -19,25 +19,33 @@
     console.warn('[Tours] inline JSON parse failed', e);
   }
 
-  // Use existing CFG from Block A, with fallback
-  const CFG = window.CFG || {
+  // Wait for CFG to be available (timing issue fix)
+  function waitForCFG() {
+    return new Promise((resolve) => {
+      const checkCFG = () => {
+        if (window.CFG && window.CFG.DATA_URL) {
+          console.log('[Tours][BlockC] CFG found:', window.CFG);
+          resolve(window.CFG);
+        } else {
+          console.log('[Tours][BlockC] Waiting for CFG...', window.CFG);
+          setTimeout(checkCFG, 100);
+        }
+      };
+      checkCFG();
+    });
+  }
+
+  // Use CFG with fallback, but wait for it to be available
+  const CFG = await waitForCFG() || {
     DATA_URL: 'https://tour-driver-data-proxy.krishna-0a3.workers.dev',
     CLIENT: 'tour-driver'
   };
   
-  console.log('[Tours][BlockC] CFG object:', CFG);
-  console.log('[Tours][BlockC] window.CFG:', window.CFG);
-  
   const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
-  console.log('[Tours][BlockC] DATA_URL:', DATA_URL);
-  console.log('[Tours][BlockC] CLIENT:', CLIENT);
-  
-  if (!DATA_URL) {
-    console.error('[Tours] Missing CFG.DATA_URL');
-    return;
-  }
+  console.log('[Tours][BlockC] Using DATA_URL:', DATA_URL);
+  console.log('[Tours][BlockC] Using CLIENT:', CLIENT);
 
   // ---------- CacheStorage helpers ----------
   async function cacheGet(url) {
