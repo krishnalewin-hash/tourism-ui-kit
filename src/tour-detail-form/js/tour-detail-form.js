@@ -1052,9 +1052,8 @@ const CONFIG = {
           // Update the field value to the full place name instead of the abbreviated version
           field.value = field.dataset.placeName;
           
-          // Trigger change event to notify GHL
-          field.dispatchEvent(new Event('input', { bubbles: true }));
-          field.dispatchEvent(new Event('change', { bubbles: true }));
+          // Don't dispatch events to avoid triggering autocomplete reopening
+          // GHL will pick up the value change during form submission
         }
       });
     }
