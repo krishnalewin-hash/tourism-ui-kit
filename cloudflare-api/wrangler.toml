@@ -1,0 +1,40 @@
+name = "tourism-api"
+main = "src/index.js"
+compatibility_date = "2025-01-23"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "tourism-db"
+database_id = "" # Will be filled after creating database
+
+# R2 Storage Binding (for images)
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "tour-images"
+
+# Environment Variables
+[vars]
+ALLOWED_ORIGINS = "https://funtriptoursinjamaica.com,https://kamartoursjamaica.com"
+API_VERSION = "1.0.0"
+
+# Staging Environment
+[env.staging]
+name = "tourism-api-staging"
+vars = { ENVIRONMENT = "staging" }
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "tourism-db-staging"
+database_id = "" # Will be filled after creating staging database
+
+# Production Environment
+[env.production]
+name = "tourism-api-production"
+vars = { ENVIRONMENT = "production" }
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "tourism-db-production"
+database_id = "" # Will be filled after creating production database
+
