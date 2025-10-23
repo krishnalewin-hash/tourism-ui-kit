@@ -49,7 +49,7 @@
       const res = new Response(JSON.stringify(obj), {
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=604800'
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=3600'
         }
       });
       await cache.put(url, res);
