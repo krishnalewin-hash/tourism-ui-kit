@@ -59,16 +59,25 @@
 
   // ---------- Slug detection ----------
   function getSlug() {
-    if (CFG.SLUG) return String(CFG.SLUG).trim().toLowerCase();
+    if (CFG.SLUG) {
+      console.log('[BlockA] Using CFG.SLUG:', CFG.SLUG);
+      return String(CFG.SLUG).trim().toLowerCase();
+    }
     const qp = new URLSearchParams(location.search);
     const qs = (qp.get('slug') || '').trim().toLowerCase();
-    if (qs) return qs;
+    if (qs) {
+      console.log('[BlockA] Using query param slug:', qs);
+      return qs;
+    }
     const parts = (location.pathname || '/').split('/').filter(Boolean);
     const i = parts.indexOf('tours');
-    return (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
+    const detected = (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
+    console.log('[BlockA] Detected slug from URL:', detected, '(pathname:', location.pathname, ')');
+    return detected;
   }
   
   const SLUG = getSlug();
+  console.log('[BlockA] Final SLUG:', SLUG);
 
   // ---------- Utils ----------
   const norm = s => String(s || '').trim().toLowerCase();
@@ -324,25 +333,36 @@
   // ---------- Fetch (Cache → Net), with versioned URL ----------
   async function fetchFresh() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
+    console.log('[BlockA] Fetching tour data from:', url);
 
     // 1) CacheStorage
     const cached = await cacheGet(url);
     if (cached && Array.isArray(cached.tours)) {
       const picked = cached.tours.find(t => norm(t.slug) === SLUG) || null;
       if (picked) {
+        console.log('[BlockA] Found tour in cache:', picked.name);
         const version = cached.version || computeVersionFromTour(picked);
         return { version, tour: picked, _source: 'cache' };
+      } else {
+        console.log('[BlockA] Tour not found in cached tours. Looking for:', SLUG, 'in', cached.tours.map(t => t.slug));
       }
     }
 
     // 2) Network
     try {
+      console.log('[BlockA] Fetching from network...');
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
+      console.log('[BlockA] API returned', json.tours?.length || 0, 'tours');
       cachePut(url, json); // write-through
       const list = Array.isArray(json.tours) ? json.tours : [];
       const picked = list.find(t => norm(t.slug) === SLUG) || null;
+      if (picked) {
+        console.log('[BlockA] Found tour:', picked.name);
+      } else {
+        console.warn('[BlockA] Tour not found in API response. Looking for:', SLUG, 'Available slugs:', list.map(t => t.slug));
+      }
       const version = json.version || (picked ? computeVersionFromTour(picked) : '');
       return { version, tour: picked, _source: 'net' };
     } catch (e) {
