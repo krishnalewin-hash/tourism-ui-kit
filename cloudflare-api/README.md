@@ -1,209 +1,128 @@
-# Tourism UI Kit - Cloudflare API
+# Tourism API - Cloudflare Workers
 
-Fast, scalable API for tour management built on Cloudflare Workers + D1.
+Modern, fast API backend for tourism data using Cloudflare Workers + D1 database.
 
-## 🚀 Zero-Downtime Migration Plan
+## 🚀 Quick Start
 
-### Phase 1: Setup & Testing (Week 1)
-
-**Day 1-2: Infrastructure**
+### 1. Install Dependencies
 ```bash
-# Install dependencies
+cd cloudflare-api
 npm install
-
-# Login to Cloudflare (if not already)
-npx wrangler login
-
-# Create D1 databases
-npx wrangler d1 create tourism-db-staging
-npx wrangler d1 create tourism-db-production
-
-# Update wrangler.toml with database IDs (printed above)
-
-# Run migrations
-npx wrangler d1 migrations apply tourism-db-staging
 ```
 
-**Day 3-4: Data Migration**
+### 2. Create D1 Databases
 ```bash
-# Generate migration SQL from Google Sheets
-node scripts/migrate-from-sheets.js
+# Create staging database
+wrangler d1 create tourism-db-staging
 
-# Review generated SQL
-cat migrations/0002_data_import.sql
-
-# Import data to staging
-npx wrangler d1 execute tourism-db-staging --file=migrations/0002_data_import.sql
-
-# Verify data
-npx wrangler d1 execute tourism-db-staging --command="SELECT COUNT(*) FROM tours"
+# Create production database
+wrangler d1 create tourism-db-production
 ```
 
-**Day 5-7: Testing**
+Copy the database IDs from the output and update `wrangler.toml`.
+
+### 3. Run Migrations
+```bash
+# Run schema migration on staging
+wrangler d1 execute tourism-db-staging --file=migrations/0001_initial_schema.sql
+
+# Generate seed data from Google Sheets
+npm run migrate
+
+# Import seed data
+wrangler d1 execute tourism-db-staging --file=migrations/0002_seed_data.sql
+```
+
+### 4. Test Locally
+```bash
+npm run dev
+```
+
+Visit `http://localhost:8787/health` to verify.
+
+### 5. Deploy
 ```bash
 # Deploy to staging
 npm run deploy:staging
 
-# Test endpoints
-curl https://tourism-api-staging.your-subdomain.workers.dev/health
-curl "https://tourism-api-staging.your-subdomain.workers.dev/api/tours?client=funtrip-tours"
+# Test staging
+curl https://tourism-api-staging.YOUR-SUBDOMAIN.workers.dev/health
+
+# Deploy to production
+npm run deploy:prod
 ```
 
-### Phase 2: Parallel Running (Week 2)
-
-**Frontend supports BOTH APIs:**
-
-```javascript
-// In block-a.js
-const DATA_URL = CFG.USE_CLOUDFLARE 
-  ? 'https://tourism-api.your-subdomain.workers.dev/api/tours'
-  : 'https://script.google.com/macros/s/.../exec';
-```
-
-**Test on a single page:**
-```html
-<script>
-window.CFG = {
-  USE_CLOUDFLARE: true,  // ← Enable Cloudflare API for testing
-  CLIENT: 'funtrip-tours'
-};
-</script>
-```
-
-**Google Sheets stays active as fallback!**
-
-### Phase 3: Gradual Migration (Week 3)
-
-**Migrate clients one by one:**
-
-1. **FunTrip Tours** (Day 1-2)
-   - Enable Cloudflare on test page
-   - Verify all data loads correctly
-   - Check performance (should be 50ms vs 3-5s)
-   - Enable for all pages
-
-2. **Kamar Tours** (Day 3-4)
-   - Same process
-   - Monitor for issues
-
-3. **Keep Google Sheets running** for 2 more weeks as backup
-
-### Phase 4: Full Cutover (Week 4)
-
-```javascript
-// Default to Cloudflare for all clients
-const DATA_URL = CFG.DATA_URL || 'https://tourism-api.your-subdomain.workers.dev/api/tours';
-```
-
-**Decommission Google Sheets after 30 days of successful operation.**
-
-## 📊 API Endpoints
+## 📡 API Endpoints
 
 ### Health Check
-```bash
+```
 GET /health
-
-Response:
-{
-  "status": "healthy",
-  "timestamp": "2025-01-23T12:00:00Z",
-  "version": "1.0.0",
-  "database": "connected"
-}
 ```
 
 ### Get All Tours
-```bash
-GET /api/tours?client=funtrip-tours
-
-Response:
-{
-  "version": "2025-01-23T12:00:00Z",
-  "client": "funtrip-tours",
-  "tours": [...]
-}
+```
+GET /api/tours?client=kamar-tours
 ```
 
-### Get Tour by Slug
-```bash
-GET /api/tours/blue-hole-adventure?client=funtrip-tours
-
-Response:
-{
-  "version": "2025-01-23T12:00:00Z",
-  "client": "funtrip-tours",
-  "tours": [{...}]
-}
+### Get Single Tour
+```
+GET /api/tours/blue-hole-secret-falls-adventure?client=kamar-tours
 ```
 
-**API is 100% compatible with Google Sheets format!** No frontend changes needed.
+## 🔄 Data Migration
 
-## 🔧 Development
+The migration script pulls data from Google Sheets and generates SQL:
 
 ```bash
-# Install
-npm install
-
-# Run locally
-npm run dev
-
-# Test locally
-curl http://localhost:8787/health
-
-# Deploy to staging
-npm run deploy:staging
-
-# Deploy to production
-npm run deploy:production
+npm run migrate
 ```
 
-## 📦 Database Schema
+This creates `migrations/0002_seed_data.sql` which you can execute against D1.
 
-See `migrations/0001_initial_schema.sql` for full schema.
+## 🏗️ Project Structure
 
-**Key tables:**
-- `clients` - Client accounts (funtrip-tours, kamar-tours, etc.)
-- `tours` - Tour listings
+```
+cloudflare-api/
+├── src/
+│   ├── index.js           # Worker entry point
+│   ├── router.js          # Request routing
+│   ├── cors.js            # CORS handling
+│   └── handlers/
+│       ├── health.js      # Health check
+│       └── tours.js       # Tours API
+├── migrations/
+│   ├── 0001_initial_schema.sql
+│   └── 0002_seed_data.sql (generated)
+├── scripts/
+│   └── migrate-from-sheets.js
+├── package.json
+└── wrangler.toml
+```
 
-## 🎯 Performance
+## 🔧 Configuration
 
-**Current (Google Sheets):**
-- Response time: 3-5 seconds
-- Cold start: 5-10 seconds
-- Cache: 7 days (jsDelivr)
+Edit `wrangler.toml` to configure your Worker:
+- Database bindings
+- Environment variables
+- Custom domains
 
-**New (Cloudflare):**
-- Response time: 30-50ms (60-100x faster!)
-- No cold starts
-- Cache: 5 minutes (configurable)
-- Global edge network
+## 📊 Performance
 
-## 🔒 Security
+- **Global edge network**: Sub-50ms responses worldwide
+- **D1 caching**: Built-in SQLite performance
+- **CDN caching**: 5-minute cache + stale-while-revalidate
+- **Zero cold starts**: Always-on Workers
 
-- CORS enabled for allowed domains
-- Row-level security (clients only see their data)
-- API keys for admin access (coming in Phase 2)
+## 🔐 Security
 
-## 📝 Rollback Plan
+- CORS enabled for all origins
+- SQL injection protection via prepared statements
+- Client-based data isolation
+- Rate limiting (via Cloudflare dashboard)
 
-If anything goes wrong:
+## 📝 Notes
 
-1. **Immediate rollback** (< 1 minute):
-   ```javascript
-   window.CFG.USE_CLOUDFLARE = false;  // Back to Google Sheets
-   ```
-
-2. **No data loss** - Google Sheets stays active during migration
-
-3. **Cloudflare stays available** for future attempts
-
-## 🆘 Support
-
-Questions? Issues? Contact Krishna.
-
-## 📋 Next Steps
-
-After API is stable:
-1. Build admin panel (Phase 2)
-2. Add booking management (Phase 3)
-3. Migrate WiPay integration (Phase 4)
+- D1 is SQLite-compatible
+- Max 25MB database size (free tier)
+- 5GB database size (paid tier)
+- See [D1 docs](https://developers.cloudflare.com/d1/) for limits

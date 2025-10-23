@@ -26,18 +26,13 @@
     CLIENT: 'tour-driver'
   };
   
-  // Support both Google Sheets and Cloudflare APIs
-  const USE_CLOUDFLARE = CFG.USE_CLOUDFLARE || false;
-  const CLOUDFLARE_API = CFG.CLOUDFLARE_API || 'https://tourism-api-staging.krishna-0a3.workers.dev/api/tours';
-  const DATA_URL = USE_CLOUDFLARE ? CLOUDFLARE_API : CFG.DATA_URL;
+  const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
   if (!DATA_URL) {
     console.error('[Tours] Missing CFG.DATA_URL');
     return;
   }
-  
-  console.log('[BlockA] Using API:', USE_CLOUDFLARE ? 'Cloudflare' : 'Google Sheets', '→', DATA_URL);
 
   // ---------- CacheStorage helpers (SWR) ----------
   async function cacheGet(url) {
@@ -64,25 +59,16 @@
 
   // ---------- Slug detection ----------
   function getSlug() {
-    if (CFG.SLUG) {
-      console.log('[BlockA] Using CFG.SLUG:', CFG.SLUG);
-      return String(CFG.SLUG).trim().toLowerCase();
-    }
+    if (CFG.SLUG) return String(CFG.SLUG).trim().toLowerCase();
     const qp = new URLSearchParams(location.search);
     const qs = (qp.get('slug') || '').trim().toLowerCase();
-    if (qs) {
-      console.log('[BlockA] Using query param slug:', qs);
-      return qs;
-    }
-    const parts = (location.pathname || '/').trim().split('/').filter(Boolean);
+    if (qs) return qs;
+    const parts = (location.pathname || '/').split('/').filter(Boolean);
     const i = parts.indexOf('tours');
-    const detected = (i >= 0 && parts[i + 1]) ? parts[i + 1].trim().toLowerCase() : (parts[parts.length - 1] || '').trim().toLowerCase();
-    console.log('[BlockA] Detected slug from URL:', detected, '(pathname:', location.pathname, ')');
-    return detected;
+    return (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
   }
   
   const SLUG = getSlug();
-  console.log('[BlockA] Final SLUG:', SLUG);
 
   // ---------- Utils ----------
   const norm = s => String(s || '').trim().toLowerCase();
@@ -128,22 +114,12 @@
 
   // ---------- Build API URL ----------
   function buildApiURL(knownVersion) {
-    if (USE_CLOUDFLARE) {
-      // Cloudflare API format: /api/tours/:slug?client=xxx
-      const baseURL = CLOUDFLARE_API.replace(/\/api\/tours$/, '');
-      const u = new URL(`${baseURL}/api/tours/${SLUG}`);
-      u.searchParams.set('client', CLIENT);
-      if (knownVersion) u.searchParams.set('v', knownVersion);
-      return u.toString();
-    } else {
-      // Google Sheets format: ?client=xxx&mode=slug&value=xxx
-      const u = new URL(DATA_URL);
-      u.searchParams.set('client', CLIENT);
-      u.searchParams.set('mode', 'slug');
-      u.searchParams.set('value', SLUG);
-      if (knownVersion) u.searchParams.set('v', knownVersion);
-      return u.toString();
-    }
+    const u = new URL(DATA_URL);
+    u.searchParams.set('client', CLIENT);
+    u.searchParams.set('mode', 'slug');
+    u.searchParams.set('value', SLUG);
+    if (knownVersion) u.searchParams.set('v', knownVersion);
+    return u.toString();
   }
 
   // ---------- Early JSON preload ----------
@@ -348,36 +324,25 @@
   // ---------- Fetch (Cache → Net), with versioned URL ----------
   async function fetchFresh() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
-    console.log('[BlockA] Fetching tour data from:', url);
 
     // 1) CacheStorage
     const cached = await cacheGet(url);
     if (cached && Array.isArray(cached.tours)) {
       const picked = cached.tours.find(t => norm(t.slug) === SLUG) || null;
       if (picked) {
-        console.log('[BlockA] Found tour in cache:', picked.name);
         const version = cached.version || computeVersionFromTour(picked);
         return { version, tour: picked, _source: 'cache' };
-      } else {
-        console.log('[BlockA] Tour not found in cached tours. Looking for:', SLUG, 'in', cached.tours.map(t => t.slug));
       }
     }
 
     // 2) Network
     try {
-      console.log('[BlockA] Fetching from network...');
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
-      console.log('[BlockA] API returned', json.tours?.length || 0, 'tours');
       cachePut(url, json); // write-through
       const list = Array.isArray(json.tours) ? json.tours : [];
       const picked = list.find(t => norm(t.slug) === SLUG) || null;
-      if (picked) {
-        console.log('[BlockA] Found tour:', picked.name);
-      } else {
-        console.warn('[BlockA] Tour not found in API response. Looking for:', SLUG, 'Available slugs:', list.map(t => t.slug));
-      }
       const version = json.version || (picked ? computeVersionFromTour(picked) : '');
       return { version, tour: picked, _source: 'net' };
     } catch (e) {
@@ -403,11 +368,8 @@
 
   // ---------- Boot: SWR ----------
   (async function boot() {
-    console.log('[BlockA] Boot starting...');
-    
     // Reuse global
     if (window.__TOUR_DATA__ && window.__TOUR_DATA__[SLUG]) {
-      console.log('[BlockA] Using existing global tour data');
       const t = window.__TOUR_DATA__[SLUG];
       const imgs = imagesFromTour(t);
       renderTop(t, imgs);
@@ -419,7 +381,6 @@
     // LocalStorage → paint instantly, then revalidate
     const cached = readCache(); // { version, tour }
     if (cached?.tour) {
-      console.log('[BlockA] Using localStorage cached tour:', cached.tour.name);
       window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
       window.__TOUR_DATA__[SLUG] = cached.tour;
       window.__TOUR_VERSION__ = cached.version || '';
@@ -430,15 +391,12 @@
     }
 
     // Cache/Network
-    console.log('[BlockA] No cache, fetching fresh...');
     const fresh = await fetchFresh();
     if (!fresh || !fresh.tour) {
-      console.error('[BlockA] No tour data returned from fetch');
       showNotFound();
       return;
     }
 
-    console.log('[BlockA] Rendering fresh tour:', fresh.tour.name);
     window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
     window.__TOUR_DATA__[SLUG] = fresh.tour;
     window.__TOUR_VERSION__ = fresh.version || '';

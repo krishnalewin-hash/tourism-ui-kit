@@ -1,55 +1,65 @@
-/**
- * API Router
- */
+import { handleHealth } from './handlers/health';
+import { getAllTours, getTourBySlug } from './handlers/tours';
 
-import { getToursHandler, getTourBySlugHandler } from './handlers/tours';
-import { healthCheckHandler } from './handlers/health';
-
-export async function handleRequest(request, env, ctx) {
-  const url = new URL(request.url);
-  const path = url.pathname;
-  const method = request.method;
-
-  // Health check
-  if (path === '/health' || path === '/') {
-    return healthCheckHandler(request, env);
+class Router {
+  constructor() {
+    this.routes = [];
   }
 
-  // API routes
-  if (path.startsWith('/api/')) {
-    
-    // GET /api/tours - Get all tours for a client
-    if (path === '/api/tours' && method === 'GET') {
-      return getToursHandler(request, env);
-    }
-    
-    // GET /api/tours/:slug - Get a specific tour
-    const tourSlugMatch = path.match(/^\/api\/tours\/([^\/]+)$/);
-    if (tourSlugMatch && method === 'GET') {
-      return getTourBySlugHandler(request, env, tourSlugMatch[1]);
-    }
-    
-    // No matching route
-    return jsonResponse({ error: 'Not Found' }, 404);
+  get(pattern, handler) {
+    this.routes.push({ method: 'GET', pattern, handler });
   }
 
-  // Fallback 404
-  return jsonResponse({ error: 'Not Found' }, 404);
+  async handle(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const method = request.method;
+
+    for (const route of this.routes) {
+      if (route.method !== method) continue;
+
+      const match = this.matchRoute(path, route.pattern);
+      if (match) {
+        return route.handler(request, env, match.params);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ error: 'Not found' }),
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  matchRoute(path, pattern) {
+    // Simple pattern matching: /api/tours/:slug
+    const patternParts = pattern.split('/').filter(Boolean);
+    const pathParts = path.split('/').filter(Boolean);
+
+    if (patternParts.length !== pathParts.length) {
+      return null;
+    }
+
+    const params = {};
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i].startsWith(':')) {
+        params[patternParts[i].slice(1)] = pathParts[i];
+      } else if (patternParts[i] !== pathParts[i]) {
+        return null;
+      }
+    }
+
+    return { params };
+  }
 }
 
-// Helper to create JSON responses
-export function jsonResponse(data, status = 200, cacheControl = null) {
-  const headers = {
-    'Content-Type': 'application/json'
-  };
-  
-  if (cacheControl) {
-    headers['Cache-Control'] = cacheControl;
-  }
-  
-  return new Response(JSON.stringify(data), {
-    status,
-    headers
-  });
-}
+const router = new Router();
+
+// Health check
+router.get('/health', handleHealth);
+
+// Tours endpoints
+router.get('/api/tours', getAllTours);
+router.get('/api/tours/:slug', getTourBySlug);
+
+export { router };
 

@@ -1,140 +1,143 @@
 /**
- * Migration Script: Google Sheets → Cloudflare D1
+ * Migration script: Google Sheets → Cloudflare D1
  * 
- * Usage: node scripts/migrate-from-sheets.js
+ * This script:
+ * 1. Fetches data from Google Sheets API
+ * 2. Generates SQL INSERT statements
+ * 3. Outputs to migration.sql file
+ * 
+ * Usage:
+ *   node scripts/migrate-from-sheets.js
  */
+
+const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 
 const GOOGLE_SHEETS_API = 'https://script.google.com/macros/s/AKfycbwH_2Pbdzmh3apj-CtR47yaq7-9cWCEKv-El5IDn1HlaKpNvNPOcppTPXsDeji2On-Cpw/exec';
 
 const CLIENTS = [
-  { slug: 'funtrip-tours', name: 'FunTrip Tours in Jamaica', email: 'info@funtriptoursinjamaica.com' },
-  { slug: 'kamar-tours', name: 'Kamar Tours Jamaica', email: 'info@kamartoursjamaica.com' }
+  { name: 'kamar-tours', displayName: 'Kamar Tours Jamaica' },
+  { name: 'funtrip-tours', displayName: 'FunTrip Tours Jamaica' },
 ];
 
-async function fetchToursFromSheets(clientSlug) {
-  const url = `${GOOGLE_SHEETS_API}?client=${clientSlug}`;
-  console.log(`Fetching tours from Google Sheets for ${clientSlug}...`);
-  
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch: ${response.statusText}`);
-  }
-  
-  const data = await response.json();
-  return data.tours || [];
+/**
+ * Escape SQL strings
+ */
+function escapeSql(str) {
+  if (str === null || str === undefined) return 'NULL';
+  if (typeof str === 'number') return str;
+  return `'${String(str).replace(/'/g, "''")}'`;
 }
 
-function generateInsertSQL(client, tours) {
-  let sql = '';
-  
-  // Insert client
-  sql += `-- Insert client: ${client.name}\n`;
-  sql += `INSERT INTO clients (slug, name, email, status) VALUES ('${client.slug}', '${client.name}', '${client.email}', 'active');\n\n`;
-  
-  // Insert tours
-  tours.forEach((tour, index) => {
-    sql += `-- Tour ${index + 1}: ${tour.name}\n`;
-    sql += `INSERT INTO tours (\n`;
-    sql += `  client_id,\n`;
-    sql += `  slug,\n`;
-    sql += `  name,\n`;
-    sql += `  excerpt,\n`;
-    sql += `  description_html,\n`;
-    sql += `  image,\n`;
-    sql += `  gallery,\n`;
-    sql += `  location,\n`;
-    sql += `  type,\n`;
-    sql += `  duration,\n`;
-    sql += `  duration_minutes,\n`;
-    sql += `  from_price,\n`;
-    sql += `  highlights,\n`;
-    sql += `  itinerary,\n`;
-    sql += `  inclusions,\n`;
-    sql += `  exclusions,\n`;
-    sql += `  faqs,\n`;
-    sql += `  tags,\n`;
-    sql += `  status\n`;
-    sql += `) VALUES (\n`;
-    sql += `  (SELECT id FROM clients WHERE slug = '${client.slug}'),\n`;
-    sql += `  '${escapeSQL(tour.slug)}',\n`;
-    sql += `  '${escapeSQL(tour.name)}',\n`;
-    sql += `  '${escapeSQL(tour.excerpt || '')}',\n`;
-    sql += `  '${escapeSQL(tour.descriptionHTML || tour.description_html || '')}',\n`;
-    sql += `  '${escapeSQL(tour.image || '')}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.gallery)))}',\n`;
-    sql += `  '${escapeSQL(tour.location || '')}',\n`;
-    sql += `  '${escapeSQL(tour.type || '')}',\n`;
-    sql += `  '${escapeSQL(tour.duration || '')}',\n`;
-    sql += `  ${parseInt(tour.durationMinutes || tour.duration_minutes || 0)},\n`;
-    sql += `  ${parseFloat(tour.fromPrice || tour.from_price || 0)},\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.highlights)))}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.itinerary)))}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.inclusions)))}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.exclusions)))}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.faqs)))}',\n`;
-    sql += `  '${escapeSQL(JSON.stringify(ensureArray(tour.tags)))}',\n`;
-    sql += `  'active'\n`;
-    sql += `);\n\n`;
-  });
-  
-  return sql;
+/**
+ * Convert array to JSON string for DB storage
+ */
+function arrayToJson(arr) {
+  if (!arr || !Array.isArray(arr)) return 'NULL';
+  return escapeSql(JSON.stringify(arr));
 }
 
-function escapeSQL(str) {
-  if (!str) return '';
-  return String(str).replace(/'/g, "''");
-}
-
-function ensureArray(value) {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string' && value.trim().startsWith('[')) {
-    try {
-      const parsed = JSON.parse(value.replace(/,\s*$/, ''));
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
+/**
+ * Fetch tours from Google Sheets for a client
+ */
+async function fetchToursFromSheets(clientName) {
+  const url = `${GOOGLE_SHEETS_API}?client=${clientName}`;
+  console.log(`Fetching tours for ${clientName}...`);
+  
+  try {
+    const response = await fetch(url, { follow: 20 });
+    const data = await response.json();
+    
+    if (!data.tours || !Array.isArray(data.tours)) {
+      console.error(`No tours found for ${clientName}`);
       return [];
     }
+    
+    console.log(`✓ Found ${data.tours.length} tours for ${clientName}`);
+    return data.tours;
+  } catch (error) {
+    console.error(`Error fetching tours for ${clientName}:`, error.message);
+    return [];
   }
-  return [];
 }
 
-async function main() {
-  console.log('🚀 Starting migration from Google Sheets to Cloudflare D1...\n');
-  
-  let fullSQL = `-- Migration from Google Sheets to Cloudflare D1
--- Generated: ${new Date().toISOString()}
--- 
--- Usage: 
---   wrangler d1 execute tourism-db --file=migrations/0002_data_import.sql
--- 
+/**
+ * Generate SQL for a tour
+ */
+function generateTourSql(tour, clientId) {
+  const values = [
+    clientId,
+    escapeSql(tour.slug),
+    escapeSql(tour.name),
+    escapeSql(tour.excerpt),
+    escapeSql(tour.descriptionHTML || tour.description_html),
+    escapeSql(tour.image),
+    arrayToJson(tour.gallery),
+    escapeSql(tour.location),
+    escapeSql(tour.type),
+    escapeSql(tour.duration),
+    tour.durationMinutes || tour.duration_minutes || 'NULL',
+    escapeSql(tour.pricingType || tour.pricing_type),
+    tour.fromPrice || tour.from_price || 'NULL',
+    arrayToJson(tour.highlights),
+    arrayToJson(tour.itinerary),
+    arrayToJson(tour.inclusions),
+    arrayToJson(tour.exclusions),
+    arrayToJson(tour.faqs),
+    arrayToJson(tour.tags),
+  ].join(', ');
 
-`;
-  
-  for (const client of CLIENTS) {
-    try {
-      const tours = await fetchToursFromSheets(client.slug);
-      console.log(`✅ Fetched ${tours.length} tours for ${client.name}`);
-      
-      const sql = generateInsertSQL(client, tours);
-      fullSQL += sql;
-      
-    } catch (error) {
-      console.error(`❌ Error fetching ${client.slug}:`, error.message);
+  return `INSERT INTO tours (client_id, slug, name, excerpt, description_html, image, gallery, location, type, duration, duration_minutes, pricing_type, from_price, highlights, itinerary, inclusions, exclusions, faqs, tags) VALUES (${values});`;
+}
+
+/**
+ * Main migration function
+ */
+async function migrate() {
+  console.log('🚀 Starting migration from Google Sheets to D1...\n');
+
+  let sql = '-- Migration from Google Sheets to Cloudflare D1\n';
+  sql += `-- Generated: ${new Date().toISOString()}\n\n`;
+
+  // Insert clients
+  sql += '-- Insert clients\n';
+  CLIENTS.forEach((client, index) => {
+    const clientId = index + 1;
+    sql += `INSERT INTO clients (id, name, status) VALUES (${clientId}, ${escapeSql(client.name)}, 'active');\n`;
+  });
+  sql += '\n';
+
+  // Fetch and insert tours for each client
+  for (let i = 0; i < CLIENTS.length; i++) {
+    const client = CLIENTS[i];
+    const clientId = i + 1;
+    
+    sql += `-- Tours for ${client.displayName}\n`;
+    
+    const tours = await fetchToursFromSheets(client.name);
+    
+    if (tours.length === 0) {
+      sql += `-- No tours found for ${client.name}\n`;
+    } else {
+      tours.forEach(tour => {
+        sql += generateTourSql(tour, clientId) + '\n';
+      });
     }
+    
+    sql += '\n';
   }
-  
+
   // Write to file
-  const fs = require('fs');
-  const path = require('path');
-  const outputPath = path.join(__dirname, '../migrations/0002_data_import.sql');
-  
-  fs.writeFileSync(outputPath, fullSQL);
+  const outputPath = path.join(__dirname, '..', 'migrations', '0002_seed_data.sql');
+  fs.writeFileSync(outputPath, sql, 'utf8');
   
   console.log(`\n✅ Migration SQL generated: ${outputPath}`);
   console.log('\nNext steps:');
-  console.log('1. Review the generated SQL file');
-  console.log('2. Run: wrangler d1 execute tourism-db --file=migrations/0002_data_import.sql');
+  console.log('1. Run: wrangler d1 execute tourism-db-staging --file=migrations/0002_seed_data.sql');
+  console.log('2. Test the staging API');
+  console.log('3. Run: wrangler d1 execute tourism-db-production --file=migrations/0002_seed_data.sql');
 }
 
-main().catch(console.error);
+migrate().catch(console.error);
 

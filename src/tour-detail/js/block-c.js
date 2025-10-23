@@ -25,10 +25,7 @@
     CLIENT: 'tour-driver'
   };
   
-  // Support both Google Sheets and Cloudflare APIs
-  const USE_CLOUDFLARE = CFG.USE_CLOUDFLARE || false;
-  const CLOUDFLARE_API = CFG.CLOUDFLARE_API || 'https://tourism-api-staging.krishna-0a3.workers.dev/api/tours';
-  const DATA_URL = USE_CLOUDFLARE ? CLOUDFLARE_API : CFG.DATA_URL;
+  const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
   if (!DATA_URL) {
@@ -97,20 +94,11 @@
 
   // ---------- Build API URL for all tours ----------
   function buildApiURL(knownVersion) {
-    if (USE_CLOUDFLARE) {
-      // Cloudflare API format: /api/tours?client=xxx (returns all tours)
-      const u = new URL(CLOUDFLARE_API);
-      u.searchParams.set('client', CLIENT);
-      if (knownVersion) u.searchParams.set('v', knownVersion);
-      return u.toString();
-    } else {
-      // Google Sheets format: ?client=xxx&mode=all
-      const u = new URL(DATA_URL);
-      u.searchParams.set('client', CLIENT);
-      u.searchParams.set('mode', 'all'); // Get all tours to filter by category
-      if (knownVersion) u.searchParams.set('v', knownVersion);
-      return u.toString();
-    }
+    const u = new URL(DATA_URL);
+    u.searchParams.set('client', CLIENT);
+    u.searchParams.set('mode', 'all'); // Get all tours to filter by category
+    if (knownVersion) u.searchParams.set('v', knownVersion);
+    return u.toString();
   }
 
   /** Wait for Block A/B to publish current tour data */
@@ -283,39 +271,31 @@
 
   // ---------- Boot ----------
   (async function boot() {
-    console.log('[BlockC] Starting, fetching tours and waiting for current tour:', SLUG);
-    
-    // Fetch tours in parallel with waiting for current tour (optimization)
-    const [currentTour, result] = await Promise.all([
-      waitForCurrentTour(SLUG, 5000),
-      fetchAllTours()
-    ]);
+    // Wait for current tour from Block A/B
+    const currentTour = await waitForCurrentTour(SLUG, 1200);
     
     if (!currentTour) {
-      console.warn('[BlockC] No current tour found after timeout');
       // Hide section if no current tour found
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
-    console.log('[BlockC] Current tour loaded:', currentTour.name);
+    // Fetch all tours
+    const result = await fetchAllTours();
     
     if (!result || !result.tours) {
-      console.warn('[BlockC] No tours data available');
       // Hide section if no tours data
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
-    console.log('[BlockC] Fetched', result.tours.length, 'tours, rendering related tours');
     render(currentTour, result.tours);
 
     // Listen for updates from Block A/B
     const onTourReady = (e) => {
       if (norm(e?.detail?.slug || '') === SLUG && window.__TOUR_DATA__?.[SLUG]) {
-        console.log('[BlockC] Tour updated, re-rendering');
         render(window.__TOUR_DATA__[SLUG], result.tours);
       }
     };

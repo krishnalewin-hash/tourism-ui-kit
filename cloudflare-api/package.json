@@ -1,23 +1,22 @@
 {
-  "name": "tourism-ui-kit-api",
+  "name": "tourism-api-cloudflare",
   "version": "1.0.0",
-  "description": "Cloudflare Workers API for Tourism UI Kit",
+  "description": "Cloudflare Workers API for tourism data",
   "main": "src/index.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
     "deploy:staging": "wrangler deploy --env staging",
-    "deploy:production": "wrangler deploy --env production",
-    "db:migrate": "wrangler d1 migrations apply tourism-db",
-    "db:migrate:staging": "wrangler d1 migrations apply tourism-db-staging",
-    "test": "vitest"
+    "deploy:prod": "wrangler deploy --env production",
+    "migrate": "node scripts/migrate-from-sheets.js"
   },
-  "keywords": ["cloudflare", "workers", "tourism", "tours", "api"],
-  "author": "Krishna Lewin",
+  "keywords": ["cloudflare", "workers", "tourism", "api"],
+  "author": "",
   "license": "MIT",
   "devDependencies": {
-    "wrangler": "^3.80.0",
-    "vitest": "^1.6.0"
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
   }
 }
 
