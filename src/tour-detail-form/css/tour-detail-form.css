@@ -286,3 +286,9 @@ body{ overflow-x: clip; overflow-y: visible !important; }  /* or overflow-y:auto
   position: sticky !important;
   top: 24px;
 }
+
+/* Hide outer wrapper when inner drop-off field is hidden (for tour forms) */
+.col-12.form-field-wrapper:has(.form-builder--item[aria-hidden="true"]),
+.col-12.form-field-wrapper:has(.form-builder--item[style*="display: none"]) {
+  display: none !important;
+}
