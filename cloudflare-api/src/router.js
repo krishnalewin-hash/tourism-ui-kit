@@ -1,5 +1,6 @@
 import { handleHealth } from './handlers/health';
 import { getAllTours, getTourBySlug } from './handlers/tours';
+import { getEmbedTourScript, getEmbedAllToursScript } from './handlers/embed';
 import { listClients, getClient, createClient, updateClient, deleteClient } from './handlers/admin-clients';
 import { listTours, getTour, createTour, updateTour, deleteTour } from './handlers/admin-tours';
 import { syncFromSheets, getSyncStatus } from './handlers/admin-sync';
@@ -76,6 +77,10 @@ router.get('/health', handleHealth);
 // Public Tours API endpoints
 router.get('/api/tours', getAllTours);
 router.get('/api/tours/:slug', getTourBySlug);
+
+// Embed endpoints (return JavaScript)
+router.get('/embed/tour/:slug', getEmbedTourScript);
+router.get('/embed/tours', getEmbedAllToursScript);
 
 // Admin Client Management (protected)
 router.get('/admin/clients', withAdminAuth(listClients));
