@@ -20,12 +20,12 @@ body, input, button, select, textarea {
 }
 
 /* Form builder input styling */
-#_builder-form .form-builder--item input[type=text][class=form-control],
-#_builder-form .form-builder--item select[class=form-control],
-#_builder-form.survey_form .form-builder--item input[type=text][class=form-control],
-#_builder-form.survey_form .form-builder--item select[class=form-control],
-.survey_form .form-builder--item select[class=form-control],
-select[data-q="number_of_passengers"],
+.hl-app #_builder-form .form-builder--item input[type=text][class=form-control],
+.hl-app #_builder-form .form-builder--item select[class=form-control],
+.hl-app #_builder-form.survey_form .form-builder--item input[type=text][class=form-control],
+.hl-app #_builder-form.survey_form .form-builder--item select[class=form-control],
+.hl-app .survey_form .form-builder--item select[class=form-control],
+.hl-app select[data-q="number_of_passengers"],
 #aWEGkxHplDFuKOJWnHSg, 
 #_builder-form .form-builder--item .date-picker-custom-style, 
 #_builder-form .form-builder--item input[type=number] {
