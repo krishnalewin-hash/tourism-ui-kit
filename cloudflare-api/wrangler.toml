@@ -2,11 +2,11 @@ name = "tourism-api"
 main = "src/index.js"
 compatibility_date = "2025-01-23"
 
-# D1 Database Binding
+# D1 Database Binding (Staging by default)
 [[d1_databases]]
 binding = "DB"
-database_name = "tourism-db"
-database_id = "" # Will be filled after creating database
+database_name = "tourism-db-staging"
+database_id = "a8e8c149-e3d1-4d0c-97ec-b5d8032a7c38"
 
 # R2 Storage Binding (for images)
 [[r2_buckets]]
@@ -26,7 +26,7 @@ vars = { ENVIRONMENT = "staging" }
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "tourism-db-staging"
-database_id = "" # Will be filled after creating staging database
+database_id = "a8e8c149-e3d1-4d0c-97ec-b5d8032a7c38"
 
 # Production Environment
 [env.production]
@@ -36,5 +36,5 @@ vars = { ENVIRONMENT = "production" }
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "tourism-db-production"
-database_id = "" # Will be filled after creating production database
+database_id = "a2473118-a81d-497a-9040-5c378a7ae432"
 
