@@ -34,28 +34,8 @@
     return;
   }
 
-  // ---------- CacheStorage helpers (SWR) ----------
-  async function cacheGet(url) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const hit = await cache.match(url);
-      if (hit) return await hit.json();
-    } catch {}
-    return null;
-  }
-  
-  async function cachePut(url, obj) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const res = new Response(JSON.stringify(obj), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=604800'
-        }
-      });
-      await cache.put(url, res);
-    } catch {}
-  }
+  // ---------- No browser caching - rely on Cloudflare edge only ----------
+  // Removed CacheStorage API - D1 is fast enough, Cloudflare edge handles caching
 
   // ---------- Slug detection ----------
   function getSlug() {
@@ -85,21 +65,8 @@
   
   const computeVersionFromTour = (tour) => hashString(JSON.stringify(tour || {}));
 
-  // ---------- LocalStorage SWR ----------
-  const STORAGE_KEY = 'tours-detail-v1::' + SLUG;
-  const readCache = () => {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-    } catch {
-      return null;
-    }
-  };
-  
-  const writeCache = (obj) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-    } catch {}
-  };
+  // ---------- No localStorage - removed for fresh data ----------
+  // With D1 + Cloudflare edge, localStorage causes stale data issues
 
   // ---------- Announce to Block B ----------
   function announceReady(tour, version) {
@@ -321,86 +288,49 @@
     return [...new Set(raw)];
   }
 
-  // ---------- Fetch (Cache → Net), with versioned URL ----------
+  // ---------- Fetch directly from API (Cloudflare edge handles caching) ----------
   async function fetchFresh() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
 
-    // 1) CacheStorage
-    const cached = await cacheGet(url);
-    if (cached && Array.isArray(cached.tours)) {
-      const picked = cached.tours.find(t => norm(t.slug) === SLUG) || null;
-      if (picked) {
-        const version = cached.version || computeVersionFromTour(picked);
-        return { version, tour: picked, _source: 'cache' };
-      }
-    }
-
-    // 2) Network
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
-      cachePut(url, json); // write-through
       const list = Array.isArray(json.tours) ? json.tours : [];
       const picked = list.find(t => norm(t.slug) === SLUG) || null;
       const version = json.version || (picked ? computeVersionFromTour(picked) : '');
-      return { version, tour: picked, _source: 'net' };
+      return { version, tour: picked, _source: 'api' };
     } catch (e) {
       console.error('[Tours][BlockA] fetchFresh error:', e);
       return null;
     }
   }
 
-  // ---------- Revalidation ----------
-  async function revalidate(currentVersion = '') {
-    const fresh = await fetchFresh();
-    if (!fresh || !fresh.tour) return;
-    const nextVersion = fresh.version || computeVersionFromTour(fresh.tour);
-    if (!currentVersion || nextVersion !== currentVersion) {
-      window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
-      window.__TOUR_DATA__[SLUG] = fresh.tour;
-      window.__TOUR_VERSION__ = nextVersion;
-      writeCache({ version: nextVersion, tour: fresh.tour });
-      renderTop(fresh.tour, imagesFromTour(fresh.tour));
-      announceReady(fresh.tour, nextVersion);
-    }
-  }
+  // ---------- No revalidation needed - always fetch fresh ----------
+  // Removed because we're no longer caching in browser
 
-  // ---------- Boot: SWR ----------
+  // ---------- Boot: Simplified (no caching) ----------
   (async function boot() {
-    // Reuse global
+    // 1) Check if data already loaded by another block
     if (window.__TOUR_DATA__ && window.__TOUR_DATA__[SLUG]) {
       const t = window.__TOUR_DATA__[SLUG];
       const imgs = imagesFromTour(t);
       renderTop(t, imgs);
       announceReady(t, window.__TOUR_VERSION__ || '');
-      revalidate(window.__TOUR_VERSION__ || '');
       return;
     }
 
-    // LocalStorage → paint instantly, then revalidate
-    const cached = readCache(); // { version, tour }
-    if (cached?.tour) {
-      window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
-      window.__TOUR_DATA__[SLUG] = cached.tour;
-      window.__TOUR_VERSION__ = cached.version || '';
-      renderTop(cached.tour, imagesFromTour(cached.tour));
-      announceReady(cached.tour, window.__TOUR_VERSION__);
-      revalidate(window.__TOUR_VERSION__);
-      return;
-    }
-
-    // Cache/Network
+    // 2) Fetch fresh from API (Cloudflare edge caches this)
     const fresh = await fetchFresh();
     if (!fresh || !fresh.tour) {
       showNotFound();
       return;
     }
 
+    // 3) Store in global and render
     window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
     window.__TOUR_DATA__[SLUG] = fresh.tour;
     window.__TOUR_VERSION__ = fresh.version || '';
-    writeCache({ version: window.__TOUR_VERSION__, tour: fresh.tour });
 
     renderTop(fresh.tour, imagesFromTour(fresh.tour));
     announceReady(fresh.tour, window.__TOUR_VERSION__);

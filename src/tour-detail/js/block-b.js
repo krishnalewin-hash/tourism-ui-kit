@@ -34,28 +34,8 @@
     return;
   }
 
-  // ---------- CacheStorage helpers ----------
-  async function cacheGet(url) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const hit = await cache.match(url);
-      if (hit) return await hit.json();
-    } catch {}
-    return null;
-  }
-  
-  async function cachePut(url, obj) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const res = new Response(JSON.stringify(obj), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=604800'
-        }
-      });
-      await cache.put(url, res);
-    } catch {}
-  }
+  // ---------- No browser caching - rely on Cloudflare edge only ----------
+  // Removed CacheStorage API - D1 is fast enough, Cloudflare edge handles caching
 
   // ---------- Slug / utils ----------
   function getSlug() {
@@ -72,21 +52,8 @@
   const norm = s => String(s || '').trim().toLowerCase();
   const rIC = window.requestIdleCallback || ((fn) => setTimeout(fn, 0));
 
-  // ---------- LocalStorage SWR ----------
-  const STORAGE_KEY = 'tours-detail-v1::' + SLUG;
-  const readCache = () => {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-    } catch {
-      return null;
-    }
-  };
-  
-  const writeCache = (obj) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-    } catch {}
-  };
+  // ---------- No localStorage - removed for fresh data ----------
+  // With D1 + Cloudflare edge, localStorage causes stale data issues
 
   function hashString(str) {
     let h = 0x811c9dc5;
@@ -159,30 +126,18 @@
     return [...new Set(raw)];
   }
 
-  // ---------- Fresh fetch (Cache → Net), versioned ----------
+  // ---------- Fetch directly from API (Cloudflare edge handles caching) ----------
   async function fetchFresh() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
 
-    // 1) CacheStorage
-    const cached = await cacheGet(url);
-    if (cached && Array.isArray(cached.tours)) {
-      const picked = cached.tours.find(t => norm(t.slug) === SLUG) || null;
-      if (picked) {
-        const version = cached.version || computeVersionFromTour(picked);
-        return { version, tour: picked, _source: 'cache' };
-      }
-    }
-
-    // 2) Network
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
-      cachePut(url, json);
       const list = Array.isArray(json.tours) ? json.tours : [];
       const picked = list.find(t => norm(t.slug) === SLUG) || null;
       const version = json.version || (picked ? computeVersionFromTour(picked) : '');
-      return { version, tour: picked, _source: 'net' };
+      return { version, tour: picked, _source: 'api' };
     } catch (e) {
       console.error('[Tours][BlockB] fetchFresh error:', e);
       return null;
@@ -286,17 +241,8 @@
     });
   }
 
-  // ---------- Revalidate if we painted from LS ----------
-  async function revalidate(currentVersion = '') {
-    const fresh = await fetchFresh();
-    if (!fresh || !fresh.tour) return;
-    const nextVersion = fresh.version || computeVersionFromTour(fresh.tour);
-    if (!currentVersion || nextVersion !== currentVersion) {
-      window.__TOUR_VERSION__ = nextVersion; // remember for versioned URLs
-      writeCache({ version: nextVersion, tour: fresh.tour });
-      render(fresh.tour);
-    }
-  }
+  // ---------- No revalidation needed - always fetch fresh ----------
+  // Removed because we're no longer caching in browser
 
   // ---------- Live updates from Block A ----------
   function wireLiveUpdates() {
@@ -309,30 +255,21 @@
     window.addEventListener('tour:ready', onReady);
   }
 
-  // ---------- Boot ----------
+  // ---------- Boot: Simplified (no caching) ----------
   (async function boot() {
-    // Prefer Block A's data
+    // 1) Wait for Block A to load the data
     let tour = await waitForTour(SLUG, 1200);
+    
+    // 2) If Block A didn't load it, fetch ourselves
     if (!tour) {
-      // LocalStorage
-      const ls = readCache();
-      if (ls?.tour) {
-        window.__TOUR_VERSION__ = window.__TOUR_VERSION__ || ls.version || ''; // share known version
-        tour = ls.tour;
-        render(tour);
-        revalidate(ls.version || '');
-        wireLiveUpdates();
-        return;
-      }
-      // Cache/Network
       const fresh = await fetchFresh();
       if (fresh?.tour) {
         window.__TOUR_VERSION__ = window.__TOUR_VERSION__ || fresh.version || '';
         tour = fresh.tour;
-        writeCache({ version: window.__TOUR_VERSION__, tour });
       }
     }
 
+    // 3) Render or show not found
     if (!tour || norm(tour.slug) !== SLUG) {
       const overviewEl = document.getElementById('overview');
       if (overviewEl) {
@@ -342,7 +279,7 @@
     }
 
     render(tour);
-    wireLiveUpdates(); // respond to Block A revalidations
+    wireLiveUpdates(); // respond to Block A updates
   })();
 
 })();

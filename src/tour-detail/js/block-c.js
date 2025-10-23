@@ -33,28 +33,8 @@
     return;
   }
 
-  // ---------- CacheStorage helpers ----------
-  async function cacheGet(url) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const hit = await cache.match(url);
-      if (hit) return await hit.json();
-    } catch {}
-    return null;
-  }
-  
-  async function cachePut(url, obj) {
-    try {
-      const cache = await caches.open('tours-json-v1');
-      const res = new Response(JSON.stringify(obj), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=3600'
-        }
-      });
-      await cache.put(url, res);
-    } catch {}
-  }
+  // ---------- No browser caching - rely on Cloudflare edge only ----------
+  // Removed CacheStorage API - D1 is fast enough, Cloudflare edge handles caching
 
   // ---------- Slug / utils ----------
   function getSlug() {
@@ -145,25 +125,17 @@
     });
   }
 
-  // ---------- Fetch all tours ----------
+  // ---------- Fetch all tours directly from API (Cloudflare edge handles caching) ----------
   async function fetchAllTours() {
     const url = buildApiURL(window.__TOUR_VERSION__ || '');
 
-    // 1) CacheStorage
-    const cached = await cacheGet(url);
-    if (cached && Array.isArray(cached.tours)) {
-      return { version: cached.version || '', tours: cached.tours, _source: 'cache' };
-    }
-
-    // 2) Network
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
-      cachePut(url, json);
       const tours = Array.isArray(json.tours) ? json.tours : [];
       const version = json.version || '';
-      return { version, tours, _source: 'net' };
+      return { version, tours, _source: 'api' };
     } catch (e) {
       console.error('[Tours][BlockC] fetchAllTours error:', e);
       return null;
