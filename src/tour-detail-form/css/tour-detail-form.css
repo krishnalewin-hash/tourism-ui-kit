@@ -20,8 +20,10 @@ body, input, button, select, textarea {
 }
 
 /* Form builder input styling */
-#_builder-form .form-builder--item input[type=text][class=form-control], 
-#aWEGkxHplDFuKOJWnHSg, #aWEGkxHplDFuKOJWnHSg, 
+#_builder-form .form-builder--item input[type=text][class=form-control],
+#_builder-form .form-builder--item select[class=form-control],
+select[data-q="number_of_passengers"],
+#aWEGkxHplDFuKOJWnHSg, 
 #_builder-form .form-builder--item .date-picker-custom-style, 
 #_builder-form .form-builder--item input[type=number] {
     font-family: 'Poppins', sans-serif !important;
@@ -30,13 +32,14 @@ body, input, button, select, textarea {
     background-color: #fff !important;
     color: #222 !important;
     border-radius: 10px !important;
-    font-size: 20px;
+    font-size: 20px !important;
     font-weight: 300;
     padding-top: 12px !important;
     padding-bottom: 12px !important;
     padding-right: 10px !important;
     padding-left: 2.1rem !important; /* Default left padding for icons */
     height: 58px !important;
+    line-height: 1.4 !important;
     box-sizing: border-box !important;
 }
 
