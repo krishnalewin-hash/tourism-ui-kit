@@ -271,31 +271,39 @@
 
   // ---------- Boot ----------
   (async function boot() {
-    // Wait for current tour from Block A/B
-    const currentTour = await waitForCurrentTour(SLUG, 1200);
+    console.log('[BlockC] Starting, waiting for tour:', SLUG);
+    
+    // Wait for current tour from Block A/B (increased timeout for slower networks)
+    const currentTour = await waitForCurrentTour(SLUG, 3000);
     
     if (!currentTour) {
+      console.warn('[BlockC] No current tour found after timeout');
       // Hide section if no current tour found
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
+    console.log('[BlockC] Current tour loaded:', currentTour.name);
+
     // Fetch all tours
     const result = await fetchAllTours();
     
     if (!result || !result.tours) {
+      console.warn('[BlockC] No tours data available');
       // Hide section if no tours data
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
+    console.log('[BlockC] Fetched', result.tours.length, 'tours, rendering related tours');
     render(currentTour, result.tours);
 
     // Listen for updates from Block A/B
     const onTourReady = (e) => {
       if (norm(e?.detail?.slug || '') === SLUG && window.__TOUR_DATA__?.[SLUG]) {
+        console.log('[BlockC] Tour updated, re-rendering');
         render(window.__TOUR_DATA__[SLUG], result.tours);
       }
     };
