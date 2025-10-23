@@ -26,13 +26,18 @@
     CLIENT: 'tour-driver'
   };
   
-  const DATA_URL = CFG.DATA_URL;
+  // Support both Google Sheets and Cloudflare APIs
+  const USE_CLOUDFLARE = CFG.USE_CLOUDFLARE || false;
+  const CLOUDFLARE_API = CFG.CLOUDFLARE_API || 'https://tourism-api-staging.krishna-0a3.workers.dev/api/tours';
+  const DATA_URL = USE_CLOUDFLARE ? CLOUDFLARE_API : CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
   if (!DATA_URL) {
     console.error('[Tours] Missing CFG.DATA_URL');
     return;
   }
+  
+  console.log('[BlockA] Using API:', USE_CLOUDFLARE ? 'Cloudflare' : 'Google Sheets', '→', DATA_URL);
 
   // ---------- CacheStorage helpers (SWR) ----------
   async function cacheGet(url) {
@@ -123,12 +128,22 @@
 
   // ---------- Build API URL ----------
   function buildApiURL(knownVersion) {
-    const u = new URL(DATA_URL);
-    u.searchParams.set('client', CLIENT);
-    u.searchParams.set('mode', 'slug');
-    u.searchParams.set('value', SLUG);
-    if (knownVersion) u.searchParams.set('v', knownVersion);
-    return u.toString();
+    if (USE_CLOUDFLARE) {
+      // Cloudflare API format: /api/tours/:slug?client=xxx
+      const baseURL = CLOUDFLARE_API.replace(/\/api\/tours$/, '');
+      const u = new URL(`${baseURL}/api/tours/${SLUG}`);
+      u.searchParams.set('client', CLIENT);
+      if (knownVersion) u.searchParams.set('v', knownVersion);
+      return u.toString();
+    } else {
+      // Google Sheets format: ?client=xxx&mode=slug&value=xxx
+      const u = new URL(DATA_URL);
+      u.searchParams.set('client', CLIENT);
+      u.searchParams.set('mode', 'slug');
+      u.searchParams.set('value', SLUG);
+      if (knownVersion) u.searchParams.set('v', knownVersion);
+      return u.toString();
+    }
   }
 
   // ---------- Early JSON preload ----------

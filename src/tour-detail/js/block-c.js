@@ -25,7 +25,10 @@
     CLIENT: 'tour-driver'
   };
   
-  const DATA_URL = CFG.DATA_URL;
+  // Support both Google Sheets and Cloudflare APIs
+  const USE_CLOUDFLARE = CFG.USE_CLOUDFLARE || false;
+  const CLOUDFLARE_API = CFG.CLOUDFLARE_API || 'https://tourism-api-staging.krishna-0a3.workers.dev/api/tours';
+  const DATA_URL = USE_CLOUDFLARE ? CLOUDFLARE_API : CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
   if (!DATA_URL) {
@@ -94,11 +97,20 @@
 
   // ---------- Build API URL for all tours ----------
   function buildApiURL(knownVersion) {
-    const u = new URL(DATA_URL);
-    u.searchParams.set('client', CLIENT);
-    u.searchParams.set('mode', 'all'); // Get all tours to filter by category
-    if (knownVersion) u.searchParams.set('v', knownVersion);
-    return u.toString();
+    if (USE_CLOUDFLARE) {
+      // Cloudflare API format: /api/tours?client=xxx (returns all tours)
+      const u = new URL(CLOUDFLARE_API);
+      u.searchParams.set('client', CLIENT);
+      if (knownVersion) u.searchParams.set('v', knownVersion);
+      return u.toString();
+    } else {
+      // Google Sheets format: ?client=xxx&mode=all
+      const u = new URL(DATA_URL);
+      u.searchParams.set('client', CLIENT);
+      u.searchParams.set('mode', 'all'); // Get all tours to filter by category
+      if (knownVersion) u.searchParams.set('v', knownVersion);
+      return u.toString();
+    }
   }
 
   /** Wait for Block A/B to publish current tour data */
