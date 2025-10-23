@@ -189,6 +189,21 @@
     }
   }
 
+  // ---------- Helper: Parse JSON string fields ----------
+  function parseArrayField(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    
+    try {
+      // Remove trailing comma and parse
+      const cleaned = value.trim().replace(/,\s*$/, '');
+      const parsed = JSON.parse(cleaned);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
   // ---------- Render (do minimum now; defer heavy parts) ----------
   function render(t) {
     // Overview
@@ -198,13 +213,14 @@
       overviewEl.innerHTML = html;
     }
 
-    // Highlights
+    // Highlights - parse if string
     const highlightsWrap = document.getElementById('highlightsWrap');
     const highlights = document.getElementById('highlights');
     const skHighlights = document.getElementById('sk-highlights');
     
-    if (Array.isArray(t?.highlights) && t.highlights.length && highlights) {
-      highlights.innerHTML = t.highlights.map(h => `<span class="chip">${h}</span>`).join('');
+    const highlightsArray = parseArrayField(t?.highlights);
+    if (highlightsArray && highlightsArray.length && highlights) {
+      highlights.innerHTML = highlightsArray.map(h => `<span class="chip">${h}</span>`).join('');
       if (highlightsWrap) highlightsWrap.style.display = '';
       if (skHighlights) skHighlights.remove();
       highlights.style.display = '';
@@ -235,7 +251,7 @@
         if (gWrap) gWrap.style.display = 'none';
       }
 
-      // Accordion
+      // Accordion - parse JSON strings
       const acc = document.getElementById('accordion');
       const skAccordion = document.getElementById('sk-accordion');
       
@@ -243,18 +259,23 @@
         const ul = arr => `<ul>${arr.map(x => `<li>${x}</li>`).join('')}</ul>`;
         let out = '';
         
-        if (Array.isArray(t?.itinerary) && t.itinerary.length) {
-          out += `<details open><summary>Itinerary</summary><div class="content">${ul(t.itinerary)}</div></details>`;
+        const itinerary = parseArrayField(t?.itinerary);
+        const inclusions = parseArrayField(t?.inclusions);
+        const exclusions = parseArrayField(t?.exclusions);
+        const faqs = parseArrayField(t?.faqs);
+        
+        if (itinerary && itinerary.length) {
+          out += `<details open><summary>Itinerary</summary><div class="content">${ul(itinerary)}</div></details>`;
         }
-        if (Array.isArray(t?.inclusions) && t.inclusions.length) {
-          out += `<details open><summary>What's Included</summary><div class="content">${ul(t.inclusions)}</div></details>`;
+        if (inclusions && inclusions.length) {
+          out += `<details open><summary>What's Included</summary><div class="content">${ul(inclusions)}</div></details>`;
         }
-        if (Array.isArray(t?.exclusions) && t.exclusions.length) {
-          out += `<details open><summary>What to Bring / Exclusions</summary><div class="content">${ul(t.exclusions)}</div></details>`;
+        if (exclusions && exclusions.length) {
+          out += `<details open><summary>What to Bring / Exclusions</summary><div class="content">${ul(exclusions)}</div></details>`;
         }
-        if (Array.isArray(t?.faqs) && t.faqs.length) {
+        if (faqs && faqs.length) {
           out += `<details open><summary>FAQs</summary><div class="content">${
-            t.faqs.map(f => `<p><strong>${f.q}</strong><br>${f.a}</p>`).join('')}
+            faqs.map(f => `<p><strong>${f.q || f.question}</strong><br>${f.a || f.answer}</p>`).join('')}
           </div></details>`;
         }
         

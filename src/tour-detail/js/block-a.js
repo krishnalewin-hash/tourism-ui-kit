@@ -299,9 +299,25 @@
     }
   }
 
+  // ---------- Helper: Parse JSON string fields ----------
+  function parseArrayField(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    
+    try {
+      // Remove trailing comma and parse
+      const cleaned = value.trim().replace(/,\s*$/, '');
+      const parsed = JSON.parse(cleaned);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
   // ---------- Build images from tour data ----------
   function imagesFromTour(tour) {
-    const raw = [tour?.image, ...(tour?.gallery || [])].filter(Boolean);
+    const gallery = parseArrayField(tour?.gallery) || [];
+    const raw = [tour?.image, ...gallery].filter(Boolean);
     return [...new Set(raw)];
   }
 
