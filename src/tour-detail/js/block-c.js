@@ -102,7 +102,7 @@
   }
 
   /** Wait for Block A/B to publish current tour data */
-  function waitForCurrentTour(slug, timeoutMs = 1200) {
+  function waitForCurrentTour(slug, timeoutMs = 6000) {
     slug = norm(slug);
     return new Promise((resolve) => {
       if (window.__TOUR_DATA__ && window.__TOUR_DATA__[slug]) {
@@ -271,26 +271,31 @@
 
   // ---------- Boot ----------
   (async function boot() {
-    // Wait for current tour from Block A/B
-    const currentTour = await waitForCurrentTour(SLUG, 1200);
+    console.log('[BlockC] Starting, fetching tours and waiting for current tour:', SLUG);
+    
+    // Run in parallel: wait for current tour AND fetch all tours
+    const [currentTour, result] = await Promise.all([
+      waitForCurrentTour(SLUG, 6000),
+      fetchAllTours()
+    ]);
     
     if (!currentTour) {
-      // Hide section if no current tour found
+      console.warn('[BlockC] No current tour found after timeout');
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
-    // Fetch all tours
-    const result = await fetchAllTours();
+    console.log('[BlockC] Current tour loaded:', currentTour.name);
     
     if (!result || !result.tours) {
-      // Hide section if no tours data
+      console.warn('[BlockC] No tours data fetched');
       const section = document.getElementById('related-tours-section');
       if (section) section.style.display = 'none';
       return;
     }
 
+    console.log('[BlockC] Fetched', result.tours.length, 'tours, rendering related tours');
     render(currentTour, result.tours);
 
     // Listen for updates from Block A/B

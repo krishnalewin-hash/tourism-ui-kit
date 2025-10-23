@@ -1,7 +1,0 @@
-node_modules/
-.wrangler/
-.dev.vars
-.env
-*.log
-migrations/0002_seed_data.sql
-
