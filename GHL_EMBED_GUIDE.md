@@ -23,6 +23,7 @@ This fetches tour data ONCE and injects it into the page before blocks load.
 <!-- Config Block -->
 <script>
   window.CFG = {
+    DATA_URL: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours', // Required for fallback
     CLIENT: 'funtrip-tours',
     SLUG: 'blue-hole-secret-falls-adventure', // Or detect from URL
     USE_CLOUDFLARE: true,
@@ -126,6 +127,7 @@ If you don't want to use the embed endpoint, this is still much faster than befo
 <!-- Config Block -->
 <script>
   window.CFG = {
+    DATA_URL: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours', // Required
     CLIENT: 'funtrip-tours',
     SLUG: 'blue-hole-secret-falls-adventure', // Or detect from URL
     USE_CLOUDFLARE: true,
@@ -222,6 +224,7 @@ Page loads → Data already in HTML → Instant render (0ms wait!)
 ```html
 <script>
   window.CFG = {
+    DATA_URL: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours', // Required!
     CLIENT: 'funtrip-tours',
     USE_CLOUDFLARE: true, // Enable Cloudflare API
     CLOUDFLARE_API: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours'
@@ -280,7 +283,27 @@ location.reload();
 
 ## 🐛 **Troubleshooting**
 
-### **1. Old price still showing**
+### **1. "Missing CFG.DATA_URL" error**
+
+**Cause:** Config block is missing `DATA_URL`  
+**Solution:**
+```javascript
+// ❌ WRONG - Missing DATA_URL
+window.CFG = {
+  CLIENT: 'funtrip-tours',
+  USE_CLOUDFLARE: true
+};
+
+// ✅ CORRECT - Include DATA_URL
+window.CFG = {
+  DATA_URL: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours', // Required!
+  CLIENT: 'funtrip-tours',
+  USE_CLOUDFLARE: true,
+  CLOUDFLARE_API: 'https://tourism-api-production.krishna-0a3.workers.dev/api/tours'
+};
+```
+
+### **2. Old price still showing**
 
 **Cause:** jsDelivr CDN or browser cache  
 **Solution:**
