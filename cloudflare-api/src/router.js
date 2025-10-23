@@ -1,5 +1,9 @@
 import { handleHealth } from './handlers/health';
 import { getAllTours, getTourBySlug } from './handlers/tours';
+import { listClients, getClient, createClient, updateClient, deleteClient } from './handlers/admin-clients';
+import { listTours, getTour, createTour, updateTour, deleteTour } from './handlers/admin-tours';
+import { syncFromSheets, getSyncStatus } from './handlers/admin-sync';
+import { withAdminAuth } from './middleware/auth';
 
 class Router {
   constructor() {
@@ -8,6 +12,18 @@ class Router {
 
   get(pattern, handler) {
     this.routes.push({ method: 'GET', pattern, handler });
+  }
+
+  post(pattern, handler) {
+    this.routes.push({ method: 'POST', pattern, handler });
+  }
+
+  put(pattern, handler) {
+    this.routes.push({ method: 'PUT', pattern, handler });
+  }
+
+  delete(pattern, handler) {
+    this.routes.push({ method: 'DELETE', pattern, handler });
   }
 
   async handle(request, env) {
@@ -57,9 +73,27 @@ const router = new Router();
 // Health check
 router.get('/health', handleHealth);
 
-// Tours endpoints
+// Public Tours API endpoints
 router.get('/api/tours', getAllTours);
 router.get('/api/tours/:slug', getTourBySlug);
+
+// Admin Client Management (protected)
+router.get('/admin/clients', withAdminAuth(listClients));
+router.get('/admin/clients/:id', withAdminAuth(getClient));
+router.post('/admin/clients', withAdminAuth(createClient));
+router.put('/admin/clients/:id', withAdminAuth(updateClient));
+router.delete('/admin/clients/:id', withAdminAuth(deleteClient));
+
+// Admin Tour Management (protected)
+router.get('/admin/tours', withAdminAuth(listTours));
+router.get('/admin/tours/:id', withAdminAuth(getTour));
+router.post('/admin/tours', withAdminAuth(createTour));
+router.put('/admin/tours/:id', withAdminAuth(updateTour));
+router.delete('/admin/tours/:id', withAdminAuth(deleteTour));
+
+// Admin Sync Tools (protected)
+router.get('/admin/sync/status', withAdminAuth(getSyncStatus));
+router.post('/admin/sync/from-sheets', withAdminAuth(syncFromSheets));
 
 export { router };
 

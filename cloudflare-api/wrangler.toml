@@ -1,0 +1,20 @@
+name = "tourism-api-production"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Production database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "tourism-db-production"
+database_id = "a2473118-a81d-497a-9040-5c378a7ae432"
+
+# R2 bucket for images (optional - uncomment and create bucket if needed)
+# [[r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "tourism-images"
+
+# Environment variables
+[env.production.vars]
+ENVIRONMENT = "production"
+# ADMIN_API_KEY will be set via: wrangler secret put ADMIN_API_KEY
+
