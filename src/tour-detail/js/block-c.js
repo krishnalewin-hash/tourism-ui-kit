@@ -271,10 +271,13 @@
 
   // ---------- Boot ----------
   (async function boot() {
-    console.log('[BlockC] Starting, waiting for tour:', SLUG);
+    console.log('[BlockC] Starting, fetching tours and waiting for current tour:', SLUG);
     
-    // Wait for current tour from Block A/B (increased timeout for slower networks)
-    const currentTour = await waitForCurrentTour(SLUG, 3000);
+    // Fetch tours in parallel with waiting for current tour (optimization)
+    const [currentTour, result] = await Promise.all([
+      waitForCurrentTour(SLUG, 5000),
+      fetchAllTours()
+    ]);
     
     if (!currentTour) {
       console.warn('[BlockC] No current tour found after timeout');
@@ -285,9 +288,6 @@
     }
 
     console.log('[BlockC] Current tour loaded:', currentTour.name);
-
-    // Fetch all tours
-    const result = await fetchAllTours();
     
     if (!result || !result.tours) {
       console.warn('[BlockC] No tours data available');
