@@ -64,7 +64,7 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 // Tab Management
-function showTab(tabName) {
+function showTab(event, tabName) {
   // Update tab buttons
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   event.target.classList.add('active');
