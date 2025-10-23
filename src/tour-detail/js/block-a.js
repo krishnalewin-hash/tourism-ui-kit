@@ -69,9 +69,9 @@
       console.log('[BlockA] Using query param slug:', qs);
       return qs;
     }
-    const parts = (location.pathname || '/').split('/').filter(Boolean);
+    const parts = (location.pathname || '/').trim().split('/').filter(Boolean);
     const i = parts.indexOf('tours');
-    const detected = (i >= 0 && parts[i + 1]) ? parts[i + 1].toLowerCase() : (parts[parts.length - 1] || '').toLowerCase();
+    const detected = (i >= 0 && parts[i + 1]) ? parts[i + 1].trim().toLowerCase() : (parts[parts.length - 1] || '').trim().toLowerCase();
     console.log('[BlockA] Detected slug from URL:', detected, '(pathname:', location.pathname, ')');
     return detected;
   }
@@ -388,8 +388,11 @@
 
   // ---------- Boot: SWR ----------
   (async function boot() {
+    console.log('[BlockA] Boot starting...');
+    
     // Reuse global
     if (window.__TOUR_DATA__ && window.__TOUR_DATA__[SLUG]) {
+      console.log('[BlockA] Using existing global tour data');
       const t = window.__TOUR_DATA__[SLUG];
       const imgs = imagesFromTour(t);
       renderTop(t, imgs);
@@ -401,6 +404,7 @@
     // LocalStorage → paint instantly, then revalidate
     const cached = readCache(); // { version, tour }
     if (cached?.tour) {
+      console.log('[BlockA] Using localStorage cached tour:', cached.tour.name);
       window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
       window.__TOUR_DATA__[SLUG] = cached.tour;
       window.__TOUR_VERSION__ = cached.version || '';
@@ -411,12 +415,15 @@
     }
 
     // Cache/Network
+    console.log('[BlockA] No cache, fetching fresh...');
     const fresh = await fetchFresh();
     if (!fresh || !fresh.tour) {
+      console.error('[BlockA] No tour data returned from fetch');
       showNotFound();
       return;
     }
 
+    console.log('[BlockA] Rendering fresh tour:', fresh.tour.name);
     window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
     window.__TOUR_DATA__[SLUG] = fresh.tour;
     window.__TOUR_VERSION__ = fresh.version || '';
