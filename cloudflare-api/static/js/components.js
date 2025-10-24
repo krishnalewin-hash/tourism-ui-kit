@@ -198,33 +198,182 @@ class TourismHero extends TourismComponent {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        .hero-wrapper { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .skeleton { animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        .sk-title { height: 40px; background: #e0e0e0; border-radius: 8px; margin-bottom: 16px; width: 60%; }
-        .sk-meta { height: 24px; background: #e0e0e0; border-radius: 6px; margin-bottom: 24px; width: 40%; }
-        .sk-gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; height: 400px; }
-        .sk-gallery-item { background: #e0e0e0; border-radius: 12px; }
-        .sk-gallery-item:first-child { grid-row: span 2; }
+        
+        /* Container */
+        .hero-wrapper {
+          max-width: 1170px;
+          margin: 0 auto;
+        }
+        
+        /* Title */
+        h1 {
+          margin: 0 0 6px;
+          font: 700 30px/1.2 "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          color: #111827;
+        }
+        
+        /* Meta info */
+        .meta-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
+          font-size: 16px;
+          color: #6b7280;
+          margin: 6px 0 10px;
+        }
+        
+        .meta-grid span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        /* Skeleton loader */
+        .skeleton { animation: sk 1.2s ease-in-out infinite; }
+        
+        @keyframes sk {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        
+        .sk-title {
+          height: 18px;
+          background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+          background-size: 200% 100%;
+          border-radius: 6px;
+          margin-bottom: 6px;
+          width: 60%;
+        }
+        
+        .sk-meta {
+          height: 18px;
+          background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+          background-size: 200% 100%;
+          border-radius: 6px;
+          margin-bottom: 8px;
+          width: 40%;
+        }
+        
+        .sk-gallery {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          grid-template-rows: 190px 190px;
+          gap: 8px;
+          border: 1px solid #ececec;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+          overflow: hidden;
+          margin: 8px 0 12px;
+          background: #fff;
+        }
+        
+        .sk-gallery-item {
+          background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+          background-size: 200% 100%;
+          animation: sk 1.2s ease-in-out infinite;
+          border-radius: 8px;
+        }
+        
+        .sk-gallery-item:first-child {
+          grid-column: 1/2;
+          grid-row: 1/3;
+        }
+        
+        /* Content */
         .content { display: none; }
         .content.visible { display: block; }
-        h1 { font-size: 2.5rem; font-weight: 700; color: #222; margin-bottom: 16px; line-height: 1.2; }
-        .meta-grid { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 24px; font-size: 1rem; color: #555; }
-        .meta-grid span { display: flex; align-items: center; gap: 8px; }
-        .gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 32px; position: relative; }
-        .gallery-item { position: relative; overflow: hidden; border-radius: 12px; cursor: pointer; background: #f5f5f5; }
-        .gallery-item:first-child { grid-row: span 2; }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
-        .gallery-item:hover img { transform: scale(1.05); }
-        .gallery-count { position: absolute; bottom: 16px; right: 16px; background: rgba(0, 0, 0, 0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; z-index: 10; }
-        .gallery-count svg { width: 18px; height: 18px; }
-        .error { padding: 40px; text-align: center; color: #e53935; font-size: 1.2rem; }
-        @media (max-width: 768px) {
-          h1 { font-size: 1.8rem; }
-          .gallery { grid-template-columns: 1fr; gap: 8px; }
-          .gallery-item:first-child { grid-row: span 1; }
-          .meta-grid { font-size: 0.9rem; gap: 12px; }
+        
+        /* Gallery */
+        .gallery {
+          position: relative;
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          grid-template-rows: 190px 190px;
+          gap: 8px;
+          border: 1px solid #ececec;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+          overflow: hidden;
+          background: #fff;
+          margin: 8px 0 12px;
+        }
+        
+        .gallery > * { min-height: 0; }
+        
+        .gallery .big,
+        .gallery .small {
+          background: #f3f3f3;
+          overflow: hidden;
+          margin: 0;
+        }
+        
+        .gallery .big {
+          grid-column: 1/2;
+          grid-row: 1/3;
+        }
+        
+        .gallery img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          cursor: pointer;
+        }
+        
+        /* Photo count badge */
+        .gallery-count {
+          position: absolute;
+          left: 12px;
+          bottom: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: #0b5a34;
+          color: #fff;
+          font-weight: 700;
+          font-size: 12px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
+        }
+        
+        .gallery-count svg {
+          width: 16px;
+          height: 16px;
+        }
+        
+        /* Error state */
+        .error {
+          padding: 40px;
+          text-align: center;
+          color: #e53935;
+          font-size: 1.2rem;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 820px) {
+          .gallery {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 150px 150px;
+          }
+          
+          .gallery-item:first-child {
+            grid-column: 1/3;
+            grid-row: 1/2;
+          }
+          
+          .sk-gallery {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 150px 150px;
+          }
+          
+          .sk-gallery-item:first-child {
+            grid-column: 1/3;
+            grid-row: 1/2;
+          }
         }
       </style>
       <div class="hero-wrapper">
@@ -310,8 +459,9 @@ class TourismHero extends TourismComponent {
       return '<div class="gallery-item"><p style="padding: 40px; text-align: center; color: #999;">No images available</p></div>';
     }
 
-    const galleryItems = images.slice(0, 4).map((img, index) => `
-      <div class="gallery-item">
+    // First image gets .big class, rest get .small
+    const galleryItems = images.slice(0, 3).map((img, index) => `
+      <div class="${index === 0 ? 'big' : 'small'}">
         <img 
           src="${this.escapeHtml(img)}" 
           alt="${this.escapeHtml(tour.name)}"
@@ -320,13 +470,13 @@ class TourismHero extends TourismComponent {
       </div>
     `).join('');
 
-    const countBadge = images.length > 4 ? `
+    const countBadge = images.length > 1 ? `
       <div class="gallery-count">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 7h3l1.2-2.4A2 2 0 0 1 10 4h4a2 2 0 0 1 1.8 1.1L17 7h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
-        <span>${images.length} Photos</span>
+        <span>${images.length}</span>
       </div>
     ` : '';
 
