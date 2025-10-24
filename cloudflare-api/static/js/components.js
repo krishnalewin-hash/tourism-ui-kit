@@ -455,6 +455,30 @@ class TourismHero extends TourismComponent {
     this.shadowRoot.getElementById('title').textContent = tour.name || 'Untitled Tour';
     this.shadowRoot.getElementById('meta').innerHTML = this.renderMeta(tour);
     this.shadowRoot.getElementById('gallery').innerHTML = this.renderGallery(tour);
+    
+    // Set page title to prevent reversion to default
+    if (tour.name) {
+      document.title = tour.name;
+      // Also set meta title for better SEO
+      const metaTitle = document.querySelector('meta[property="og:title"]');
+      if (metaTitle) {
+        metaTitle.setAttribute('content', tour.name);
+      }
+      
+      // Store the tour title globally to prevent other scripts from overriding it
+      window.__TOUR_TITLE__ = tour.name;
+      
+      // Set up a title watcher to maintain the correct title
+      if (!window.__TITLE_WATCHER__) {
+        window.__TITLE_WATCHER__ = true;
+        setInterval(() => {
+          if (window.__TOUR_TITLE__ && document.title !== window.__TOUR_TITLE__) {
+            document.title = window.__TOUR_TITLE__;
+            console.log('[TourismHero] Title corrected to:', window.__TOUR_TITLE__);
+          }
+        }, 1000);
+      }
+    }
   }
 
   renderMeta(tour) {
