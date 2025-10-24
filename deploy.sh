@@ -19,6 +19,7 @@ cp src/tour-detail/css/block-a.css cloudflare-api/static/css/
 cp src/tour-detail/css/block-b.css cloudflare-api/static/css/
 cp src/tour-detail/css/block-c.css cloudflare-api/static/css/
 cp src/tour-detail-form/css/tour-detail-form.css cloudflare-api/static/css/
+cp src/tour-category/css/cards.css cloudflare-api/static/css/
 
 # JS files
 echo "  → Copying JS files..."
@@ -26,6 +27,7 @@ cp src/tour-detail/js/block-a.js cloudflare-api/static/js/
 cp src/tour-detail/js/block-b.js cloudflare-api/static/js/
 cp src/tour-detail/js/block-c.js cloudflare-api/static/js/
 cp src/tour-detail-form/js/tour-detail-form.js cloudflare-api/static/js/
+cp src/tour-category/js/cards.js cloudflare-api/static/js/
 
 echo "  ✅ Static files synced!"
 echo ""
