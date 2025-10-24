@@ -38,12 +38,47 @@ function transformTour(dbTour) {
 }
 
 /**
- * GET /api/tours?client=xxx
- * Get all tours for a client
+ * Filter tours by mode and value (client-side filtering for JSON fields)
+ */
+function filterTours(tours, mode, value) {
+  if (!mode || !value || mode === 'all') {
+    return tours;
+  }
+
+  const normalizedValue = value.toLowerCase().trim();
+
+  return tours.filter(tour => {
+    switch (mode) {
+      case 'type':
+        return tour.type && tour.type.toLowerCase().trim() === normalizedValue;
+      
+      case 'tag':
+        return tour.tags && Array.isArray(tour.tags) && 
+               tour.tags.some(tag => tag.toLowerCase().trim() === normalizedValue);
+      
+      case 'keyword':
+        const searchableText = [
+          tour.name,
+          tour.excerpt,
+          ...(tour.tags || [])
+        ].join(' ').toLowerCase();
+        return searchableText.includes(normalizedValue);
+      
+      default:
+        return true;
+    }
+  });
+}
+
+/**
+ * GET /api/tours?client=xxx&mode=type&value=Adventure
+ * Get all tours for a client, optionally filtered
  */
 export async function getAllTours(request, env) {
   const { searchParams } = new URL(request.url);
   const clientName = searchParams.get('client');
+  const filterMode = searchParams.get('mode');
+  const filterValue = searchParams.get('value');
 
   if (!clientName) {
     return new Response(
@@ -70,13 +105,20 @@ export async function getAllTours(request, env) {
       'SELECT * FROM tours WHERE client_id = ? AND status = "active" ORDER BY name ASC'
     ).bind(client.id).all();
 
-    const tours = results.map(transformTour);
+    let tours = results.map(transformTour);
+
+    // Apply filtering if requested
+    if (filterMode && filterValue) {
+      tours = filterTours(tours, filterMode, filterValue);
+      console.log(`[API] Filtered ${results.length} tours to ${tours.length} (mode: ${filterMode}, value: ${filterValue})`);
+    }
 
     return new Response(
       JSON.stringify({
         version: new Date().toISOString(),
         client: clientName,
         tours: tours,
+        filter: filterMode && filterValue ? { mode: filterMode, value: filterValue } : null,
       }),
       {
         status: 200,
