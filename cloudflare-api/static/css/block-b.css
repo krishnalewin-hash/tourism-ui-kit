@@ -1,0 +1,222 @@
+/* ===== Block B: Tour Details Section Styles ===== */
+
+:root {
+  --card-bg: #fff;
+  --card-border: #ececec;
+  --muted: #6b7280;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .06);
+  --radius: 10px;
+  --content-max: 1170px;
+}
+
+/* Base styles for Block B */
+.tdp2-wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111827;
+}
+
+/* Section styling */
+.section {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.section + .section {
+  margin-top: 16px;
+}
+
+.section h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.section p {
+  line-height: 1.7;
+  margin: 0 0 12px 0;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+/* Highlights chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* Gallery grid */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.gallery img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.02);
+}
+
+@media (max-width: 720px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Accordion styling */
+.accordion details {
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.accordion details:hover {
+  box-shadow: var(--shadow);
+}
+
+.accordion details + details {
+  margin-top: 10px;
+}
+
+.accordion summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: #111827;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.accordion summary:hover {
+  background-color: #f9fafb;
+}
+
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.accordion .content {
+  padding: 0 14px 14px 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.accordion ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+.accordion li {
+  margin: 4px 0;
+}
+
+/* ====== Section skeletons that match final layout ====== */
+.sk {
+  animation: skA 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+  background-size: 200% 100%;
+}
+
+@keyframes skA {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skel-lines {
+  display: grid;
+  gap: 10px;
+}
+
+.skel-line {
+  height: 16px;
+  border-radius: 8px;
+}
+
+.skel-line.lg {
+  height: 20px;
+}
+
+/* Reserve realistic intrinsic sizes to eliminate layout shift */
+#overview,
+#highlightsWrap,
+#galleryWrap,
+#accordion {
+  content-visibility: auto;
+}
+
+#overview {
+  contain-intrinsic-size: 600px; /* ~2–4 paragraphs */
+}
+
+#highlightsWrap {
+  contain-intrinsic-size: 120px; /* chips row */
+}
+
+#galleryWrap {
+  contain-intrinsic-size: 420px; /* 3 cols, 4:3 thumbs */
+}
+
+#accordion {
+  contain-intrinsic-size: 600px;
+}
+
+/* Gallery skeleton grid: 3 columns (matches your real grid) */
+.gallery-skel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.gallery-skel .cell {
+  aspect-ratio: 4/3;
+  border-radius: 10px;
+}
+
+@media (max-width: 720px) {
+  .gallery-skel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tdp2-wrap {
+    padding: 0 16px;
+  }
+  
+  .section {
+    padding: 12px;
+  }
+  
+  .section h3 {
+    font-size: 16px;
+  }
+}
