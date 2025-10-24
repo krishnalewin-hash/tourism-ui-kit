@@ -503,10 +503,592 @@ class TourismHero extends TourismComponent {
   }
 }
 
+// ==================== TOURISM DETAILS COMPONENT (Block B) ====================
+
+class TourismDetails extends TourismComponent {
+  connectedCallback() {
+    this.render();
+    this.setupListeners();
+  }
+
+  setupListeners() {
+    // Listen for data from Hero component
+    this.listenForData('tour-data-loaded', (e) => {
+      if (e.detail.slug === this.slug) {
+        console.log('[TOURISM-DETAILS] Received tour data from Hero');
+        this.updateContent(e.detail.tour);
+      }
+    });
+
+    // Fallback: fetch if no data received after 2 seconds
+    setTimeout(() => {
+      if (!this._data) {
+        console.log('[TOURISM-DETAILS] No data from Hero, fetching directly');
+        this.loadData();
+      }
+    }, 2000);
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        .details-wrapper {
+          max-width: 1170px;
+          margin: 0 auto;
+          font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          color: #111827;
+        }
+        
+        /* Skeleton */
+        .skeleton { animation: sk 1.2s ease-in-out infinite; }
+        
+        @keyframes sk {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        
+        .sk-section {
+          background: #fff;
+          border: 1px solid #ececec;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+        
+        .sk-line {
+          height: 16px;
+          background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+          background-size: 200% 100%;
+          border-radius: 4px;
+          margin-bottom: 12px;
+        }
+        
+        .sk-line.lg { height: 20px; width: 40%; }
+        
+        /* Content */
+        .content { display: none; }
+        .content.visible { display: block; }
+        
+        .section {
+          background: #fff;
+          border: 1px solid #ececec;
+          border-radius: 10px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+        
+        .section h3 {
+          margin: 0 0 12px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #111827;
+        }
+        
+        .section p {
+          line-height: 1.7;
+          margin: 0 0 12px 0;
+          color: #374151;
+        }
+        
+        .section p:last-child { margin-bottom: 0; }
+        
+        /* Highlights chips */
+        .chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .chip {
+          background: #f3f4f6;
+          color: #374151;
+          font-size: 12px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          font-weight: 500;
+        }
+        
+        /* Gallery */
+        .gallery {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+        }
+        
+        .gallery img {
+          width: 100%;
+          aspect-ratio: 4/3;
+          object-fit: cover;
+          border-radius: 10px;
+          display: block;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+        
+        .gallery img:hover {
+          transform: scale(1.02);
+        }
+        
+        @media (max-width: 720px) {
+          .gallery {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        
+        /* Accordion */
+        details {
+          border: 1px solid #ececec;
+          border-radius: 10px;
+          background: #fff;
+          margin-bottom: 10px;
+          transition: all 0.2s ease;
+        }
+        
+        details:hover {
+          box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+        }
+        
+        summary {
+          cursor: pointer;
+          list-style: none;
+          padding: 12px 14px;
+          font-weight: 600;
+          color: #111827;
+          border-radius: 10px;
+          transition: background-color 0.2s ease;
+        }
+        
+        summary:hover {
+          background-color: #f9fafb;
+        }
+        
+        summary::-webkit-details-marker {
+          display: none;
+        }
+        
+        .accordion-content {
+          padding: 0 14px 14px 14px;
+          color: #374151;
+          line-height: 1.6;
+        }
+        
+        ul {
+          margin: 8px 0 0 18px;
+          padding: 0;
+        }
+        
+        li {
+          margin: 4px 0;
+        }
+        
+        .error {
+          padding: 40px;
+          text-align: center;
+          color: #e53935;
+          font-size: 1.2rem;
+        }
+      </style>
+      
+      <div class="details-wrapper">
+        <!-- Skeleton -->
+        <div id="skeleton">
+          <div class="sk-section">
+            <div class="sk-line lg"></div>
+            <div class="sk-line" style="width:95%"></div>
+            <div class="sk-line" style="width:92%"></div>
+            <div class="sk-line" style="width:88%"></div>
+          </div>
+          <div class="sk-section">
+            <div class="sk-line lg"></div>
+            <div class="sk-line" style="width:80%"></div>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div id="content" class="content">
+          <div id="overview" class="section"></div>
+          <div id="highlights-section" class="section" style="display:none;">
+            <h3>Highlights</h3>
+            <div id="highlights" class="chips"></div>
+          </div>
+          <div id="gallery-section" class="section" style="display:none;">
+            <h3>Gallery</h3>
+            <div id="gallery" class="gallery"></div>
+          </div>
+          <div id="accordion"></div>
+        </div>
+        
+        <!-- Error -->
+        <div id="error" class="error" style="display:none;"></div>
+      </div>
+    `;
+  }
+
+  async loadData() {
+    const slug = this.slug;
+    if (!slug || !this.client) return;
+    
+    const tour = await this.fetchTour(slug);
+    if (tour) {
+      this.updateContent(tour);
+    } else {
+      this.showError(this._error || 'Tour details not found');
+    }
+  }
+
+  updateContent(tour) {
+    this._data = tour;
+    
+    const skeleton = this.shadowRoot.getElementById('skeleton');
+    const content = this.shadowRoot.getElementById('content');
+    const error = this.shadowRoot.getElementById('error');
+    
+    skeleton.style.display = 'none';
+    error.style.display = 'none';
+    content.classList.add('visible');
+    
+    // Overview
+    const overview = this.shadowRoot.getElementById('overview');
+    overview.innerHTML = tour.descriptionHTML || `<p>${this.escapeHtml(tour.excerpt || '')}</p>`;
+    
+    // Highlights
+    if (tour.highlights && tour.highlights.length) {
+      const highlightsSection = this.shadowRoot.getElementById('highlights-section');
+      const highlightsDiv = this.shadowRoot.getElementById('highlights');
+      highlightsSection.style.display = 'block';
+      highlightsDiv.innerHTML = tour.highlights.map(h => 
+        `<span class="chip">${this.escapeHtml(h)}</span>`
+      ).join('');
+    }
+    
+    // Gallery
+    if (tour.gallery && tour.gallery.length) {
+      const gallerySection = this.shadowRoot.getElementById('gallery-section');
+      const galleryDiv = this.shadowRoot.getElementById('gallery');
+      gallerySection.style.display = 'block';
+      galleryDiv.innerHTML = tour.gallery.slice(0, 6).map(img => 
+        `<img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(tour.name)}" loading="lazy">`
+      ).join('');
+    }
+    
+    // Accordion
+    const accordion = this.shadowRoot.getElementById('accordion');
+    accordion.innerHTML = this.renderAccordion(tour);
+  }
+
+  renderAccordion(tour) {
+    let html = '';
+    
+    // Itinerary
+    if (tour.itinerary && tour.itinerary.length) {
+      html += `
+        <details>
+          <summary>📋 Itinerary</summary>
+          <div class="accordion-content">
+            <ul>${tour.itinerary.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+          </div>
+        </details>
+      `;
+    }
+    
+    // Inclusions
+    if (tour.inclusions && tour.inclusions.length) {
+      html += `
+        <details>
+          <summary>✅ Inclusions</summary>
+          <div class="accordion-content">
+            <ul>${tour.inclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+          </div>
+        </details>
+      `;
+    }
+    
+    // Exclusions
+    if (tour.exclusions && tour.exclusions.length) {
+      html += `
+        <details>
+          <summary>❌ Exclusions</summary>
+          <div class="accordion-content">
+            <ul>${tour.exclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+          </div>
+        </details>
+      `;
+    }
+    
+    // FAQs
+    if (tour.faqs && tour.faqs.length) {
+      html += `
+        <details>
+          <summary>❓ FAQs</summary>
+          <div class="accordion-content">
+            <ul>${tour.faqs.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+          </div>
+        </details>
+      `;
+    }
+    
+    return html;
+  }
+
+  showError(message) {
+    const skeleton = this.shadowRoot.getElementById('skeleton');
+    const content = this.shadowRoot.getElementById('content');
+    const error = this.shadowRoot.getElementById('error');
+    
+    skeleton.style.display = 'none';
+    content.style.display = 'none';
+    error.style.display = 'block';
+    error.textContent = `⚠️ ${message}`;
+  }
+}
+
+// ==================== TOURISM RELATED COMPONENT (Block C) ====================
+
+class TourismRelated extends TourismComponent {
+  connectedCallback() {
+    this.render();
+    this.setupListeners();
+  }
+
+  setupListeners() {
+    // Listen for current tour data
+    this.listenForData('tour-data-loaded', async (e) => {
+      if (e.detail.slug === this.slug) {
+        console.log('[TOURISM-RELATED] Received current tour data');
+        this.currentTour = e.detail.tour;
+        await this.loadRelated();
+      }
+    });
+
+    // Fallback: load after timeout
+    setTimeout(async () => {
+      if (!this.currentTour) {
+        console.log('[TOURISM-RELATED] No data from Hero, loading related anyway');
+        await this.loadRelated();
+      }
+    }, 3000);
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        .related-wrapper {
+          max-width: 1170px;
+          margin: 32px auto 0;
+          font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+        
+        h2 {
+          font-size: 28px;
+          font-weight: 700;
+          color: #111827;
+          margin: 0 0 8px 0;
+        }
+        
+        h3 {
+          font-size: 16px;
+          font-weight: 400;
+          color: #6b7280;
+          margin: 0 0 24px 0;
+        }
+        
+        /* Skeleton */
+        .skeleton-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        }
+        
+        .sk-card {
+          background: #fff;
+          border: 1px solid #ececec;
+          border-radius: 12px;
+          overflow: hidden;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        
+        .sk-card::before {
+          content: '';
+          display: block;
+          padding-top: 66.67%;
+          background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+          background-size: 200% 100%;
+          animation: sk 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes sk {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        
+        /* Tour grid */
+        .tour-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        }
+        
+        .tour-card {
+          background: #fff;
+          border: 1px solid #ececec;
+          border-radius: 12px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          text-decoration: none;
+          color: inherit;
+          display: block;
+        }
+        
+        .tour-card:hover {
+          box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
+          transform: translateY(-2px);
+        }
+        
+        .tour-card img {
+          width: 100%;
+          aspect-ratio: 3/2;
+          object-fit: cover;
+          display: block;
+        }
+        
+        .tour-card-content {
+          padding: 16px;
+        }
+        
+        .tour-card h4 {
+          font-size: 18px;
+          font-weight: 600;
+          color: #111827;
+          margin: 0 0 8px 0;
+          line-height: 1.3;
+        }
+        
+        .tour-card p {
+          font-size: 14px;
+          color: #6b7280;
+          line-height: 1.5;
+          margin: 0 0 12px 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        .tour-card .price {
+          font-size: 16px;
+          font-weight: 600;
+          color: #0b5a34;
+        }
+        
+        .error {
+          padding: 40px;
+          text-align: center;
+          color: #e53935;
+        }
+        
+        @media (max-width: 768px) {
+          .tour-grid, .skeleton-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      </style>
+      
+      <div class="related-wrapper">
+        <h2>Related Tours</h2>
+        <h3>Discover more amazing experiences</h3>
+        
+        <!-- Skeleton -->
+        <div id="skeleton" class="skeleton-grid">
+          <div class="sk-card"></div>
+          <div class="sk-card"></div>
+          <div class="sk-card"></div>
+        </div>
+        
+        <!-- Grid -->
+        <div id="grid" class="tour-grid" style="display:none;"></div>
+        
+        <!-- Error -->
+        <div id="error" class="error" style="display:none;"></div>
+      </div>
+    `;
+  }
+
+  async loadRelated() {
+    const allTours = await this.fetchAllTours();
+    const currentSlug = this.slug;
+    
+    // Filter out current tour
+    let related = allTours.filter(t => t.slug !== currentSlug);
+    
+    // If we have current tour type, filter by same type
+    if (this.currentTour?.type) {
+      const sameType = related.filter(t => t.type === this.currentTour.type);
+      if (sameType.length > 0) {
+        related = sameType;
+      }
+    }
+    
+    // Limit
+    const limit = parseInt(this.getAttribute('limit') || '3');
+    related = related.slice(0, limit);
+    
+    this.renderRelated(related);
+  }
+
+  renderRelated(tours) {
+    const skeleton = this.shadowRoot.getElementById('skeleton');
+    const grid = this.shadowRoot.getElementById('grid');
+    const error = this.shadowRoot.getElementById('error');
+    
+    skeleton.style.display = 'none';
+    
+    if (!tours.length) {
+      error.style.display = 'block';
+      error.textContent = 'No related tours found';
+      return;
+    }
+    
+    grid.style.display = 'grid';
+    grid.innerHTML = tours.map(tour => this.renderCard(tour)).join('');
+  }
+
+  renderCard(tour) {
+    const price = tour.fromPrice ? this.formatPrice(tour.fromPrice) : 'Price on request';
+    
+    return `
+      <a href="/${this.escapeHtml(tour.slug)}" class="tour-card">
+        <img src="${this.escapeHtml(tour.image)}" alt="${this.escapeHtml(tour.name)}" loading="lazy">
+        <div class="tour-card-content">
+          <h4>${this.escapeHtml(tour.name)}</h4>
+          <p>${this.escapeHtml(tour.excerpt || '')}</p>
+          <span class="price">From ${price}</span>
+        </div>
+      </a>
+    `;
+  }
+}
+
 // ==================== REGISTER COMPONENTS ====================
 
 customElements.define('tourism-hero', TourismHero);
+customElements.define('tourism-details', TourismDetails);
+customElements.define('tourism-related', TourismRelated);
 
 console.log('✅ Tourism UI Kit Web Components loaded successfully!');
-console.log('📦 Available components: <tourism-hero>');
+console.log('📦 Available components: <tourism-hero>, <tourism-details>, <tourism-related>');
 
