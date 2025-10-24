@@ -788,10 +788,8 @@ const CONFIG = {
       const url = args[0];
       const options = args[1] || {};
       
-      // Don't modify any GHL requests to avoid 422 errors, but update field values before submission
-      if(url && url.includes('leadconnectorhq.com')) {
-        // If this is a form submission, modify the request body
-        if(url.includes('surveys/submit') || url.includes('forms/submit')) {
+      // Only intercept GHL form submissions - let everything else pass through unchanged
+      if(url && typeof url === 'string' && url.includes('leadconnectorhq.com') && (url.includes('surveys/submit') || url.includes('forms/submit'))) {
           
           // Clone the options to avoid mutating the original
           const modifiedOptions = { ...options };
@@ -840,10 +838,10 @@ const CONFIG = {
           }
           
           return originalFetch.apply(this, [url, modifiedOptions]);
-        }
       }
       
-      return originalFetch.apply(this, [url, options]);
+      // For all other requests (including Web Components API calls), use original fetch unchanged
+      return originalFetch.apply(this, args);
     };
 
     // Note: XHR interception removed - using fetch interception instead
