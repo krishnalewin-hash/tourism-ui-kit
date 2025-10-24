@@ -804,7 +804,7 @@ class TourismDetails extends TourismComponent {
     const itinerary = this.parseArrayField(tour.itinerary);
     if (itinerary && itinerary.length) {
       html += `
-        <details>
+        <details open>
           <summary>📋 Itinerary</summary>
           <div class="accordion-content">
             <ul>${itinerary.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
@@ -817,8 +817,8 @@ class TourismDetails extends TourismComponent {
     const inclusions = this.parseArrayField(tour.inclusions);
     if (inclusions && inclusions.length) {
       html += `
-        <details>
-          <summary>✅ Inclusions</summary>
+        <details open>
+          <summary>✅ What's Included</summary>
           <div class="accordion-content">
             <ul>${inclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
@@ -830,8 +830,8 @@ class TourismDetails extends TourismComponent {
     const exclusions = this.parseArrayField(tour.exclusions);
     if (exclusions && exclusions.length) {
       html += `
-        <details>
-          <summary>❌ Exclusions</summary>
+        <details open>
+          <summary>❌ What to Bring / Exclusions</summary>
           <div class="accordion-content">
             <ul>${exclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
@@ -843,7 +843,7 @@ class TourismDetails extends TourismComponent {
     const faqs = this.parseArrayField(tour.faqs);
     if (faqs && faqs.length) {
       html += `
-        <details>
+        <details open>
           <summary>❓ FAQs</summary>
           <div class="accordion-content">
             <ul>${faqs.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
