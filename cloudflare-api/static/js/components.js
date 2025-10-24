@@ -72,6 +72,14 @@ class TourismComponent extends HTMLElement {
       }
       
       console.log(`[${this.tagName}] Fetched tour:`, tour.name);
+      
+      // Set page title immediately when tour is fetched
+      if (tour.name) {
+        console.log(`[${this.tagName}] Setting page title immediately to:`, tour.name);
+        document.title = tour.name;
+        window.__TOUR_TITLE__ = tour.name;
+      }
+      
       return tour;
     } catch (err) {
       console.error(`[${this.tagName}] Fetch error:`, err);
