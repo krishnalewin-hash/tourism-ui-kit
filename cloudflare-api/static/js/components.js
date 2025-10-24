@@ -458,19 +458,24 @@ class TourismHero extends TourismComponent {
     
     // Set page title to prevent reversion to default
     if (tour.name) {
+      console.log('[TourismHero] Setting page title to:', tour.name);
       document.title = tour.name;
+      
       // Also set meta title for better SEO
       const metaTitle = document.querySelector('meta[property="og:title"]');
       if (metaTitle) {
         metaTitle.setAttribute('content', tour.name);
+        console.log('[TourismHero] Updated meta title to:', tour.name);
       }
       
       // Store the tour title globally to prevent other scripts from overriding it
       window.__TOUR_TITLE__ = tour.name;
+      console.log('[TourismHero] Stored tour title globally:', window.__TOUR_TITLE__);
       
       // Set up a title watcher to maintain the correct title
       if (!window.__TITLE_WATCHER__) {
         window.__TITLE_WATCHER__ = true;
+        console.log('[TourismHero] Setting up title watcher');
         setInterval(() => {
           if (window.__TOUR_TITLE__ && document.title !== window.__TOUR_TITLE__) {
             document.title = window.__TOUR_TITLE__;
@@ -478,6 +483,8 @@ class TourismHero extends TourismComponent {
           }
         }, 1000);
       }
+    } else {
+      console.log('[TourismHero] No tour name found, cannot set title');
     }
   }
 
