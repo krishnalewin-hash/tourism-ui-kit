@@ -200,6 +200,7 @@ async function editClient(id) {
     document.getElementById('clientName').value = client.name;
     document.getElementById('clientDisplayName').value = client.display_name || '';
     document.getElementById('clientStatus').value = client.status;
+    document.getElementById('clientGoogleMapsKey').value = client.google_maps_api_key || '';
     document.getElementById('clientModal').classList.add('active');
   } catch (error) {
     showError('clientsError', `Failed to load client: ${error.message}`);
@@ -213,8 +214,9 @@ async function saveClient(event) {
   const name = document.getElementById('clientName').value.trim();
   const display_name = document.getElementById('clientDisplayName').value.trim();
   const status = document.getElementById('clientStatus').value;
+  const google_maps_api_key = document.getElementById('clientGoogleMapsKey').value.trim();
   
-  const payload = { name, display_name, status };
+  const payload = { name, display_name, status, google_maps_api_key: google_maps_api_key || null };
   
   try {
     if (id) {

@@ -39,9 +39,9 @@ export async function getEmbedTourScript(request, env, params) {
   }
 
   try {
-    // Get client ID first
+    // Get client ID and Google Maps API key
     const clientRecord = await env.DB.prepare(
-      'SELECT id FROM clients WHERE name = ? AND status = "active"'
+      'SELECT id, google_maps_api_key FROM clients WHERE name = ? AND status = "active"'
     ).bind(client).first();
 
     if (!clientRecord) {
@@ -107,12 +107,16 @@ export async function getEmbedTourScript(request, env, params) {
   
   // Initialize global storage
   window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
+  window.CFG = window.CFG || {};
   
   // Inject tour data
   window.__TOUR_DATA__["${slug}"] = ${JSON.stringify(tour)};
   
   // Set version for cache busting
   window.__TOUR_VERSION__ = "${Date.now()}";
+  
+  // Add Google Maps API key to config if available
+  ${clientRecord.google_maps_api_key ? `window.CFG.GMAPS_KEY = "${clientRecord.google_maps_api_key}";` : '// No Google Maps API key configured'}
   
   // Dispatch event for blocks that are already loaded
   if (typeof CustomEvent !== 'undefined') {

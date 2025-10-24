@@ -8,7 +8,7 @@
 export async function listClients(request, env) {
   try {
     const { results } = await env.DB.prepare(
-      'SELECT id, name, display_name, status, created_at, updated_at FROM clients ORDER BY name ASC'
+      'SELECT id, name, display_name, status, google_maps_api_key, created_at, updated_at FROM clients ORDER BY name ASC'
     ).all();
 
     return new Response(
@@ -81,7 +81,7 @@ export async function getClient(request, env, params) {
 export async function createClient(request, env) {
   try {
     const body = await request.json();
-    const { name, display_name, status = 'active' } = body;
+    const { name, display_name, status = 'active', google_maps_api_key } = body;
 
     if (!name) {
       return new Response(
@@ -104,8 +104,8 @@ export async function createClient(request, env) {
 
     // Create client
     const result = await env.DB.prepare(
-      'INSERT INTO clients (name, display_name, status) VALUES (?, ?, ?)'
-    ).bind(name, display_name || name, status).run();
+      'INSERT INTO clients (name, display_name, status, google_maps_api_key) VALUES (?, ?, ?, ?)'
+    ).bind(name, display_name || name, status, google_maps_api_key || null).run();
 
     // Get the created client
     const client = await env.DB.prepare(
@@ -139,7 +139,7 @@ export async function updateClient(request, env, params) {
 
   try {
     const body = await request.json();
-    const { name, display_name, status } = body;
+    const { name, display_name, status, google_maps_api_key } = body;
 
     // Check if client exists
     const existing = await env.DB.prepare(
@@ -168,6 +168,10 @@ export async function updateClient(request, env, params) {
     if (status) {
       updates.push('status = ?');
       values.push(status);
+    }
+    if (google_maps_api_key !== undefined) {
+      updates.push('google_maps_api_key = ?');
+      values.push(google_maps_api_key);
     }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');

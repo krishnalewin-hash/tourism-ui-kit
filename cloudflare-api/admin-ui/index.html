@@ -13,7 +13,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #F8F8F8;
       min-height: 100vh;
       padding: 20px;
     }
@@ -464,6 +464,11 @@
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+        </div>
+        <div class="form-field">
+          <label for="clientGoogleMapsKey">Google Maps API Key</label>
+          <input type="text" id="clientGoogleMapsKey" placeholder="AIzaSy...">
+          <small style="color: #666; font-size: 12px;">For form autofill with Google Places. Leave empty if not using.</small>
         </div>
         <div class="form-actions">
           <button type="button" class="btn" onclick="closeClientModal()">Cancel</button>
