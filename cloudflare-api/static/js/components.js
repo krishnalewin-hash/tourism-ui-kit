@@ -884,48 +884,57 @@ class TourismRelated extends TourismComponent {
         
         .related-wrapper {
           max-width: 1170px;
-          margin: 32px auto 0;
+          margin: 20px auto;
+          padding: 20px 0;
           font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         }
         
         h2 {
-          font-size: 28px;
-          font-weight: 700;
+          font-size: 26px;
+          font-weight: bolder;
           color: #111827;
-          margin: 0 0 8px 0;
+          margin: 0;
+          text-align: center;
         }
         
         h3 {
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 400;
-          color: #6b7280;
-          margin: 0 0 24px 0;
+          color: #111827;
+          margin: 0 0 30px 0;
+          text-align: center;
         }
         
         /* Skeleton */
         .skeleton-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+          .skeleton-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        
+        @media (max-width: 767px) {
+          .skeleton-grid {
+            grid-template-columns: 1fr;
+          }
         }
         
         .sk-card {
           background: #fff;
-          border: 1px solid #ececec;
+          border: 1px solid #e5e7eb;
           border-radius: 12px;
           overflow: hidden;
-          animation: pulse 1.5s ease-in-out infinite;
+          padding: 0;
         }
         
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-        
-        .sk-card::before {
-          content: '';
-          display: block;
-          padding-top: 66.67%;
+        .sk-card .sk-image {
+          width: 100%;
+          height: 200px;
           background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
           background-size: 200% 100%;
           animation: sk 1.2s ease-in-out infinite;
@@ -939,60 +948,146 @@ class TourismRelated extends TourismComponent {
         /* Tour grid */
         .tour-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 20px;
+          max-width: 100%;
         }
         
+        @media (min-width: 768px) {
+          .tour-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        
+        @media (max-width: 767px) {
+          .tour-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        
+        /* Tour Card */
         .tour-card {
           background: #fff;
-          border: 1px solid #ececec;
+          border: 1px solid #e5e7eb;
           border-radius: 12px;
           overflow: hidden;
           transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           text-decoration: none;
           color: inherit;
           display: block;
         }
         
         .tour-card:hover {
-          box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
-          transform: translateY(-2px);
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          border-color: #d1d5db;
         }
         
-        .tour-card img {
+        /* Tour Image */
+        .tour-card-image {
+          position: relative;
           width: 100%;
-          aspect-ratio: 3/2;
+          height: 200px;
+          overflow: hidden;
+        }
+        
+        .tour-card-image img {
+          width: 100%;
+          height: 100%;
           object-fit: cover;
-          display: block;
+          transition: transform 0.3s ease;
         }
         
+        .tour-card:hover .tour-card-image img {
+          transform: scale(1.05);
+        }
+        
+        /* Price Badge */
+        .tour-card-price {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: #0b5a34;
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 999px;
+          font-size: 14px;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Tour Content */
         .tour-card-content {
-          padding: 16px;
+          padding: 20px;
         }
         
-        .tour-card h4 {
+        .tour-card-title {
+          margin: 0 0 8px 0;
           font-size: 18px;
           font-weight: 600;
           color: #111827;
-          margin: 0 0 8px 0;
           line-height: 1.3;
-        }
-        
-        .tour-card p {
-          font-size: 14px;
-          color: #6b7280;
-          line-height: 1.5;
-          margin: 0 0 12px 0;
           display: -webkit-box;
           -webkit-line-clamp: 2;
+          line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
         
-        .tour-card .price {
-          font-size: 16px;
+        .tour-card-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin: 0 0 12px 0;
+          font-size: 14px;
+          color: #6b7280;
+        }
+        
+        .tour-card-meta span {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        
+        .tour-card-description {
+          margin: 0 0 16px 0;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #4b5563;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        /* View Details Button */
+        .tour-card-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 12px 16px;
+          background: #1f2937;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 8px;
+          font-size: 14px;
           font-weight: 600;
-          color: #0b5a34;
+          transition: all 0.2s ease;
+          border: none;
+          cursor: pointer;
+        }
+        
+        .tour-card-button:hover {
+          background: #111827;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tour-card-button:active {
+          transform: translateY(0);
         }
         
         .error {
@@ -1002,28 +1097,52 @@ class TourismRelated extends TourismComponent {
         }
         
         @media (max-width: 768px) {
-          .tour-grid, .skeleton-grid {
-            grid-template-columns: 1fr;
+          .related-wrapper {
+            padding: 16px;
+          }
+          
+          h2 {
+            font-size: 22px;
+          }
+          
+          h3 {
+            font-size: 16px;
+          }
+          
+          .tour-card-content {
+            padding: 16px;
+          }
+          
+          .tour-card-title {
+            font-size: 16px;
           }
         }
       </style>
       
       <div class="related-wrapper">
-        <h2>Related Tours</h2>
-        <h3>Discover more amazing experiences</h3>
-        
-        <!-- Skeleton -->
-        <div id="skeleton" class="skeleton-grid">
-          <div class="sk-card"></div>
-          <div class="sk-card"></div>
-          <div class="sk-card"></div>
-        </div>
-        
-        <!-- Grid -->
-        <div id="grid" class="tour-grid" style="display:none;"></div>
-        
-        <!-- Error -->
-        <div id="error" class="error" style="display:none;"></div>
+        <section class="related-tours-section">
+          <h2>Related Tours</h2>
+          <h3>Discover more amazing experiences</h3>
+          
+          <!-- Skeleton -->
+          <div id="skeleton" class="skeleton-grid">
+            <div class="sk-card">
+              <div class="sk-image"></div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-image"></div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-image"></div>
+            </div>
+          </div>
+          
+          <!-- Grid -->
+          <div id="grid" class="tour-grid" style="display:none;"></div>
+          
+          <!-- Error -->
+          <div id="error" class="error" style="display:none;"></div>
+        </section>
       </div>
     `;
   }
@@ -1070,15 +1189,29 @@ class TourismRelated extends TourismComponent {
   renderCard(tour) {
     const price = tour.fromPrice ? this.formatPrice(tour.fromPrice) : 'Price on request';
     
+    // Build meta info
+    const meta = [];
+    if (tour.duration) meta.push(`<span>⏱ ${this.escapeHtml(tour.duration)}</span>`);
+    if (tour.location) meta.push(`<span>📍 ${this.escapeHtml(tour.location)}</span>`);
+    if (tour.type) meta.push(`<span>🏷 ${this.escapeHtml(tour.type)}</span>`);
+    const metaHTML = meta.length ? `<div class="tour-card-meta">${meta.join('')}</div>` : '';
+    
+    // Build description
+    const description = tour.excerpt ? `<div class="tour-card-description">${this.escapeHtml(tour.excerpt)}</div>` : '';
+    
     return `
-      <a href="/${this.escapeHtml(tour.slug)}" class="tour-card">
-        <img src="${this.escapeHtml(tour.image)}" alt="${this.escapeHtml(tour.name)}" loading="lazy">
-        <div class="tour-card-content">
-          <h4>${this.escapeHtml(tour.name)}</h4>
-          <p>${this.escapeHtml(tour.excerpt || '')}</p>
-          <span class="price">From ${price}</span>
+      <div class="tour-card">
+        <div class="tour-card-image">
+          <img src="${this.escapeHtml(tour.image)}" alt="${this.escapeHtml(tour.name)}" loading="lazy">
+          <div class="tour-card-price">From ${price}</div>
         </div>
-      </a>
+        <div class="tour-card-content">
+          <h4 class="tour-card-title">${this.escapeHtml(tour.name)}</h4>
+          ${metaHTML}
+          ${description}
+          <a href="/${this.escapeHtml(tour.slug)}" class="tour-card-button">View Details</a>
+        </div>
+      </div>
     `;
   }
 }
