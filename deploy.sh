@@ -28,6 +28,7 @@ cp src/tour-detail/js/block-b.js cloudflare-api/static/js/
 cp src/tour-detail/js/block-c.js cloudflare-api/static/js/
 cp src/tour-detail-form/js/tour-detail-form.js cloudflare-api/static/js/
 cp src/tour-category/js/cards.js cloudflare-api/static/js/
+cp web-components/bundle.js cloudflare-api/static/js/components.js
 
 echo "  ✅ Static files synced!"
 echo ""

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tourism Hero Component - Test</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .page-header {
+      background: #266BBC;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .page-header p {
+      margin: 10px 0 0;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .test-controls {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .test-controls h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    .control-group input,
+    .control-group select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    button {
+      background: #266BBC;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #1e5a9a;
+    }
+
+    .component-wrapper {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .event-log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 30px;
+    }
+
+    .event-log h3 {
+      color: #4ec9b0;
+      margin-top: 0;
+    }
+
+    .event-log .event {
+      margin: 10px 0;
+      padding: 8px;
+      background: #2d2d2d;
+      border-left: 3px solid #569cd6;
+      border-radius: 4px;
+    }
+
+    .event-log .event-name {
+      color: #dcdcaa;
+      font-weight: bold;
+    }
+
+    .event-log .event-data {
+      color: #ce9178;
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>🧩 Tourism Hero Component Test</h1>
+    <p>Testing <code>&lt;tourism-hero&gt;</code> Web Component</p>
+  </div>
+
+  <div class="container">
+    <!-- Test Controls -->
+    <div class="test-controls">
+      <h3>Test Controls</h3>
+      
+      <div class="control-group">
+        <label for="client-input">Client:</label>
+        <input type="text" id="client-input" value="funtrip-tours" placeholder="e.g., funtrip-tours">
+      </div>
+
+      <div class="control-group">
+        <label for="slug-input">Tour Slug:</label>
+        <input type="text" id="slug-input" value="blue-hole-secret-falls-adventure" placeholder="e.g., blue-hole-secret-falls-adventure">
+      </div>
+
+      <div class="control-group">
+        <label for="api-input">API URL (optional):</label>
+        <input type="text" id="api-input" value="https://tourism-api-production.krishna-0a3.workers.dev" placeholder="Leave default for production">
+      </div>
+
+      <button onclick="updateComponent()">🔄 Update Component</button>
+      <button onclick="clearLogs()">🗑️ Clear Event Log</button>
+    </div>
+
+    <!-- Component Wrapper -->
+    <div class="component-wrapper">
+      <tourism-hero 
+        id="hero-component"
+        client="funtrip-tours" 
+        slug="blue-hole-secret-falls-adventure">
+      </tourism-hero>
+    </div>
+
+    <!-- Event Log -->
+    <div class="event-log" id="event-log">
+      <h3>📡 Event Log</h3>
+      <div id="events"></div>
+    </div>
+  </div>
+
+  <!-- Load Web Components Bundle -->
+  <script src="bundle.js"></script>
+
+  <!-- Test Script -->
+  <script>
+    // Listen for tour-data-loaded event
+    window.addEventListener('tour-data-loaded', (e) => {
+      logEvent('tour-data-loaded', e.detail);
+    });
+
+    function updateComponent() {
+      const hero = document.getElementById('hero-component');
+      const client = document.getElementById('client-input').value;
+      const slug = document.getElementById('slug-input').value;
+      const apiUrl = document.getElementById('api-input').value;
+
+      hero.setAttribute('client', client);
+      hero.setAttribute('slug', slug);
+      if (apiUrl) {
+        hero.setAttribute('api-url', apiUrl);
+      }
+
+      logEvent('Manual Update', { client, slug, apiUrl });
+    }
+
+    function logEvent(name, data) {
+      const eventsDiv = document.getElementById('events');
+      const event = document.createElement('div');
+      event.className = 'event';
+      
+      const timestamp = new Date().toLocaleTimeString();
+      
+      event.innerHTML = `
+        <div class="event-name">[${timestamp}] ${name}</div>
+        <div class="event-data">${JSON.stringify(data, null, 2)}</div>
+      `;
+      
+      eventsDiv.appendChild(event);
+      event.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function clearLogs() {
+      document.getElementById('events').innerHTML = '';
+    }
+
+    // Log initial load
+    console.log('🧪 Test page loaded');
+    console.log('📦 Web Components should be registered');
+    console.log('🎯 Hero component should fetch and render tour data');
+  </script>
+</body>
+</html>
+
