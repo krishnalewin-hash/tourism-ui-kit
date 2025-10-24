@@ -163,6 +163,19 @@ class TourismComponent extends HTMLElement {
       return `$${Math.round(num).toLocaleString()}`;
     }
   }
+  
+  parseArrayField(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    
+    try {
+      const cleaned = value.trim().replace(/,\s*$/, '');
+      const parsed = JSON.parse(cleaned);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
 
   disconnectedCallback() {
     if (this._eventHandlers) {
@@ -758,21 +771,23 @@ class TourismDetails extends TourismComponent {
     overview.innerHTML = tour.descriptionHTML || `<p>${this.escapeHtml(tour.excerpt || '')}</p>`;
     
     // Highlights
-    if (tour.highlights && tour.highlights.length) {
+    const highlights = this.parseArrayField(tour.highlights);
+    if (highlights && highlights.length) {
       const highlightsSection = this.shadowRoot.getElementById('highlights-section');
       const highlightsDiv = this.shadowRoot.getElementById('highlights');
       highlightsSection.style.display = 'block';
-      highlightsDiv.innerHTML = tour.highlights.map(h => 
+      highlightsDiv.innerHTML = highlights.map(h => 
         `<span class="chip">${this.escapeHtml(h)}</span>`
       ).join('');
     }
     
     // Gallery
-    if (tour.gallery && tour.gallery.length) {
+    const gallery = this.parseArrayField(tour.gallery);
+    if (gallery && gallery.length) {
       const gallerySection = this.shadowRoot.getElementById('gallery-section');
       const galleryDiv = this.shadowRoot.getElementById('gallery');
       gallerySection.style.display = 'block';
-      galleryDiv.innerHTML = tour.gallery.slice(0, 6).map(img => 
+      galleryDiv.innerHTML = gallery.slice(0, 6).map(img => 
         `<img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(tour.name)}" loading="lazy">`
       ).join('');
     }
@@ -786,48 +801,52 @@ class TourismDetails extends TourismComponent {
     let html = '';
     
     // Itinerary
-    if (tour.itinerary && tour.itinerary.length) {
+    const itinerary = this.parseArrayField(tour.itinerary);
+    if (itinerary && itinerary.length) {
       html += `
         <details>
           <summary>📋 Itinerary</summary>
           <div class="accordion-content">
-            <ul>${tour.itinerary.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+            <ul>${itinerary.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
         </details>
       `;
     }
     
     // Inclusions
-    if (tour.inclusions && tour.inclusions.length) {
+    const inclusions = this.parseArrayField(tour.inclusions);
+    if (inclusions && inclusions.length) {
       html += `
         <details>
           <summary>✅ Inclusions</summary>
           <div class="accordion-content">
-            <ul>${tour.inclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+            <ul>${inclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
         </details>
       `;
     }
     
     // Exclusions
-    if (tour.exclusions && tour.exclusions.length) {
+    const exclusions = this.parseArrayField(tour.exclusions);
+    if (exclusions && exclusions.length) {
       html += `
         <details>
           <summary>❌ Exclusions</summary>
           <div class="accordion-content">
-            <ul>${tour.exclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+            <ul>${exclusions.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
         </details>
       `;
     }
     
     // FAQs
-    if (tour.faqs && tour.faqs.length) {
+    const faqs = this.parseArrayField(tour.faqs);
+    if (faqs && faqs.length) {
       html += `
         <details>
           <summary>❓ FAQs</summary>
           <div class="accordion-content">
-            <ul>${tour.faqs.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
+            <ul>${faqs.map(item => `<li>${this.escapeHtml(item)}</li>`).join('')}</ul>
           </div>
         </details>
       `;
