@@ -1379,7 +1379,7 @@ function autofillHiddenDropOff(rootDoc) {
   if (!el) return;
   if (el.dataset.dropAutoFilled === '1') return;
 
-  // Only set if empty (don’t overwrite anything user/system already put in)
+  // Only set if empty (don't overwrite anything user/system already put in)
   const current = (el.value || '').trim();
   if (current) { el.dataset.dropAutoFilled = '1'; return; }
 
@@ -1398,6 +1398,14 @@ function autofillHiddenDropOff(rootDoc) {
     if (isTourForm || isHiddenInput) {
       setInputValue(el, title);
       console.log('[TourForm] Auto-filled drop-off field with title:', title);
+      
+      // Hide the field wrapper for tour forms
+      // Find the .form-builder--item parent and set aria-hidden
+      const formBuilderItem = el.closest('.form-builder--item');
+      if (formBuilderItem) {
+        formBuilderItem.setAttribute('aria-hidden', 'true');
+        console.log('[TourForm] Hidden drop-off field wrapper');
+      }
     }
     
     // For transfer forms, also ensure the field is hidden via input type
