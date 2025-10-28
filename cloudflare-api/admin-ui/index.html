@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Tourism Platform Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.0/dist/feather.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -12,23 +20,194 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: #F8F8F8;
       min-height: 100vh;
-      padding: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+  /* Sticky Header */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: 64px;
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
+  }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px 0 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .page-title-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .breadcrumb {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .breadcrumb a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .sidebar-toggle-header {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+      display: block;
+    }
+
+    .sidebar-toggle-header:hover {
+      background: #f3f4f6;
+    }
+
+    .sidebar-toggle-header .hamburger {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: #6b7280;
+      margin: 3px 0;
+      transition: all 0.3s ease;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: none;
+      gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #667eea;
+      background: #f3f4f6;
+    }
+
+    .btn-header {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5a67d8;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      padding: 20px;
     }
 
-    .header {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-content {
+        padding: 0 16px;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .header-right {
+        gap: 8px;
+      }
+      
+      .btn-header {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+
+    /* Smooth scrolling for navigation */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Section spacing for better navigation */
+    .section {
+      scroll-margin-top: 80px;
     }
 
     .header h1 {
@@ -118,10 +297,10 @@
 
     .tab-content {
       display: none;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      /* background: white; */
+      /* padding: 30px; */
+      /* border-radius: 12px; */
+      /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
     }
 
     .tab-content.active {
@@ -132,7 +311,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
       flex-wrap: wrap;
       gap: 10px;
     }
@@ -302,7 +480,9 @@
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300;
     }
 
     .form-field textarea {
@@ -310,11 +490,333 @@
       resize: vertical;
     }
 
+    .form-section {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .form-section h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .form-section .form-field {
+      margin-bottom: 20px;
+    }
+
+    .form-section .form-field:not(.textarea-field) {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .form-section .form-field label {
+      font-weight: 400;
+      color: #333;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .form-section .form-field:not(.textarea-field) label {
+      min-width: 120px;
+      margin-bottom: 0;
+    }
+
+    .form-section .form-field input,
+    .form-section .form-field select,
+    .form-section .form-field textarea {
+      flex: 1;
+      margin: 0;
+    }
+
+    .form-section .form-field:last-child {
+      margin-bottom: 0;
+    }
+
+  /* Disabled client dropdown styling */
+  #tourClient:disabled {
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  /* Image Upload Styling */
+  .image-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+  }
+
+  .image-upload-area.dragover {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+
+  .upload-zone {
+    text-align: center;
+    padding: 40px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .upload-zone:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  .upload-zone p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .image-item:hover {
+    transform: scale(1.02);
+  }
+
+  .image-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .image-item .main-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #667eea;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .image-item .remove-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .image-item .set-main-btn {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .image-item:hover .set-main-btn {
+    opacity: 1;
+  }
+
+  .image-item.main .set-main-btn {
+    display: none;
+  }
+
+  /* Upload progress styles */
+  .image-item.uploading {
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-progress {
+    text-align: center;
+    color: #666;
+  }
+
+  .upload-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 8px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Array Input Styles */
+  .array-input-container {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    background: #fafafa;
+  }
+
+  .array-list {
+    margin-bottom: 12px;
+    min-height: 20px;
+  }
+
+  .array-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .array-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .array-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .array-item-simple {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .array-item-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .array-item-description {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .array-item-remove {
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .array-item-remove:hover {
+    background: #ff3742;
+    transform: scale(1.1);
+  }
+
+  .array-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .array-input-row input,
+  .array-input-row textarea {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .array-input-row textarea {
+    resize: vertical;
+    min-height: 40px;
+  }
+
+  .array-input-row .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .array-empty {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px dashed #ddd;
+  }
+
     .form-actions {
       display: flex;
-      gap: 10px;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       margin-top: 20px;
+    }
+
+    .form-actions-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .form-actions-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
     .api-endpoint {
@@ -337,59 +839,888 @@
         flex-direction: column;
       }
 
-      .tab {
-        width: 100%;
-      }
+    .tab {
+      width: 100%;
     }
+  }
+
+  /* Sidebar Styles */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: white;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+    z-index: 1001;
+    overflow-y: auto;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-280px);
+  }
+
+  .sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    height: 64px;
+    box-sizing: border-box;
+  }
+
+  .sidebar-logo {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    text-decoration: none;
+    margin: 0;
+  }
+
+  .sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+  }
+
+  .sidebar-toggle:hover {
+    background: #f3f4f6;
+  }
+
+  .hamburger {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #6b7280;
+    margin: 3px 0;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-nav {
+    padding: 20px 0;
+  }
+
+  .sidebar-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sidebar-nav li {
+    margin: 0;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+
+  .sidebar-link:hover {
+    background: #f8f9fa;
+    color: #374151;
+  }
+
+  .sidebar-link.active {
+    background: #f0f4ff;
+    color: #667eea;
+    border-left-color: #667eea;
+  }
+
+  .sidebar-link .icon {
+    font-size: 18px;
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sidebar-link .text {
+    font-size: 14px;
+  }
+
+  /* Dropdown Styles */
+  .has-dropdown {
+    position: relative;
+  }
+
+  .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .dropdown-arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+    margin-left: auto;
+    transform: rotate(0deg);
+  }
+
+  .dropdown-toggle.active .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: #f8fafc;
+    border-left: 3px solid #667eea;
+  }
+
+  .dropdown-menu.show {
+    display: block;
+  }
+
+  .dropdown-menu .sidebar-link {
+    padding: 12px 20px 12px 40px;
+    font-size: 13px;
+    color: #6b7280;
+    border-left: none;
+  }
+
+  .dropdown-menu .sidebar-link:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  .dropdown-menu .sidebar-link.active {
+    background: #667eea;
+    color: white;
+  }
+
+  /* Main Content */
+  .main-content {
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
+    min-height: 100vh;
+  }
+
+  .main-content.sidebar-closed {
+    margin-left: 0;
+  }
+
+  .sticky-header.sidebar-closed {
+    margin-left: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar-toggle-header {
+      display: block;
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .sidebar {
+      width: 100%;
+      transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .main-content.sidebar-open {
+      margin-left: 0;
+    }
+  }
+
+  /* Enhanced Data Tables */
+  .data-table {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+  }
+
+  .data-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .data-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .data-table thead th {
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: all 0.2s ease;
+  }
+
+  .data-table tbody tr:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .data-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .data-table tbody td {
+    padding: 16px 20px;
+    vertical-align: middle;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .data-table tbody td:first-child {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  /* Badge Styles */
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* Action Buttons */
+  .data-table .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 6px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .data-table .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .data-table .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .data-table .btn-primary:hover {
+    background: #5a67d8;
+  }
+
+  .data-table .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+
+  .data-table .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  .data-table .btn-success {
+    background: #10b981;
+    color: white;
+  }
+
+  .data-table .btn-success:hover {
+    background: #059669;
+  }
+
+  .data-table .btn-secondary {
+    background: #6b7280;
+    color: white;
+  }
+
+  .data-table .btn-secondary:hover {
+    background: #4b5563;
+  }
+
+  /* Action Bar */
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  .action-bar h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .action-bar .btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .action-bar .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Loading and Error States */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 16px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #ef4444;
+    margin: 20px 0;
+    font-weight: 500;
+  }
+
+  /* Responsive Tables */
+  @media (max-width: 768px) {
+    .data-table {
+      overflow-x: auto;
+    }
+    
+    .data-table table {
+      min-width: 600px;
+    }
+    
+    .action-bar {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+    }
+    
+    .action-bar h2 {
+      text-align: center;
+    }
+  }
+
+  /* Edit Tour Tabbed Interface Styles */
+  .edit-tour-container {
+    position: fixed;
+    top: 0;
+    left: 280px;
+    width: calc(100% - 280px);
+    height: 100%;
+    z-index: 1000;
+    background: #f4f7f6; /* Match main background */
+    overflow-y: auto;
+    padding: 20px; /* Add padding like other pages */
+  }
+
+  /* Responsive edit tour container */
+  @media (max-width: 768px) {
+    .edit-tour-container {
+      left: 0;
+      width: 100%;
+    }
+  }
+
+  .edit-tour-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    border-radius: 12px 12px 0 0; /* Match form border radius */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .edit-tour-title h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+  }
+
+  .edit-tour-title .breadcrumb {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .edit-tour-title .breadcrumb a {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+
+  .edit-tour-title .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .edit-tour-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .edit-tour-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .edit-tour-content {
+    padding: 0; /* Remove padding since form has its own padding */
+    max-width: 1400px; /* Match form max-width */
+    margin: 0 auto;
+  }
+
+  /* Tab Navigation */
+  .tab-navigation {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+
+  .tab-button {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-button:hover {
+    color: #374151;
+    background: #f9fafb;
+  }
+
+  .tab-button.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+    background: #f8faff;
+  }
+
+  /* Tab Content */
+  .tab-content {
+    min-height: 600px;
+  }
+
+  /* Edit Tour Tab Content - Always visible when edit tour is open */
+  #edit-tour-container .tab-content {
+    display: block !important;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  /* Form Styles */
+  .tour-form {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 1400px; /* Match container max-width */
+    margin: 0 auto; /* Center the form */
+  }
+
+  .form-section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .form-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .form-help {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+  }
+
+  .quill-editor {
+    min-height: 120px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+  }
+
+  .image-upload-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    background: #f9fafb;
+    transition: all 0.2s;
+  }
+
+  .image-upload-zone:hover {
+    border-color: #3b82f6;
+    background: #f8faff;
+  }
+
+  .upload-placeholder {
+    color: #6b7280;
+  }
+
+  .upload-placeholder i {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .image-preview-item {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f9fafb;
+  }
+
+  .image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .image-preview-item .remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+  }
+
+  .image-preview-item .remove-image:hover {
+    background: rgba(239, 68, 68, 0.9);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 24px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+
+  .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background: #e5e7eb;
+  }
+
+  .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .edit-tour-content {
+      padding: 16px;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .tab-navigation {
+      overflow-x: auto;
+    }
+    
+    .tab-button {
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+  }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🌴 Tourism Platform Admin</h1>
-      <p>Manage clients, tours, and platform configuration</p>
-    </div>
-
-    <!-- Configuration Section -->
-    <div class="config-section" id="configSection">
-      <h3>⚙️ API Configuration</h3>
-      <div class="form-group">
-        <label for="apiUrl">API Base URL</label>
-        <input type="text" id="apiUrl" placeholder="https://tourism-api-production.krishna-0a3.workers.dev">
+  <!-- Sticky Header -->
+  <header class="sticky-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button id="sidebar-toggle-header" class="sidebar-toggle-header">
+          <span class="hamburger"></span>
+          <span class="hamburger"></span>
+          <span class="hamburger"></span>
+        </button>
+        <div class="page-title-section">
+          <h1 class="page-title" id="page-title">Dashboard</h1>
+          <div class="breadcrumb" id="page-breadcrumb">
+            <a href="#" onclick="showTab(event, 'dashboard')">Home</a> / <span id="current-page-breadcrumb">Dashboard</span>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="apiKey">Admin API Key</label>
-        <input type="password" id="apiKey" placeholder="Enter your admin API key">
+      <div class="header-right">
+        <button class="btn-header btn-secondary" onclick="showCreateTourModal()">+ New Tour</button>
+        <button class="btn-header btn-primary" onclick="showCreateClientModal()">+ New Client</button>
       </div>
-      <button class="btn-save-config" onclick="saveConfig()">Save Configuration</button>
     </div>
+  </header>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" onclick="showTab(event, 'clients')">👥 Clients</button>
-      <button class="tab" onclick="showTab(event, 'tours')">🗺️ Tours</button>
-      <button class="tab" onclick="showTab(event, 'apiDocs')">📚 API Docs</button>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="sidebar-logo">🌴 Tourism Admin</a>
     </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a href="#" onclick="showTab(event, 'dashboard')" class="sidebar-link active" data-tab="dashboard">
+            <i data-feather="home" class="icon"></i>
+            <span class="text">Dashboard</span>
+          </a>
+        </li>
+        <li class="has-dropdown">
+          <a href="#" class="sidebar-link dropdown-toggle" data-dropdown="toursDropdown">
+            <i data-feather="map-pin" class="icon"></i>
+            <span class="text">Tours</span>
+            <i data-feather="chevron-down" class="dropdown-arrow"></i>
+          </a>
+               <ul id="toursDropdown" class="dropdown-menu">
+                 <li><a href="#" onclick="showTab(event, 'tours')" class="sidebar-link" data-tab="tours">All Tours</a></li>
+                 <li><a href="#" onclick="showToursByStatus('draft')" class="sidebar-link" data-tab="tours-draft">Drafts</a></li>
+                 <li><a href="#" onclick="showToursByStatus('published')" class="sidebar-link" data-tab="tours-published">Published</a></li>
+               </ul>
+        </li>
+        <li class="has-dropdown">
+          <a href="#" class="sidebar-link dropdown-toggle" data-dropdown="clientsDropdown">
+            <i data-feather="users" class="icon"></i>
+            <span class="text">Clients</span>
+            <i data-feather="chevron-down" class="dropdown-arrow"></i>
+          </a>
+          <ul id="clientsDropdown" class="dropdown-menu">
+            <!-- Client links will be dynamically loaded here -->
+          </ul>
+        </li>
+        <li>
+          <a href="#" onclick="showTab(event, 'apiDocs')" class="sidebar-link" data-tab="apiDocs">
+            <i data-feather="settings" class="icon"></i>
+            <span class="text">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <div class="container">
+
+
 
     <!-- Clients Tab -->
-    <div id="clientsTab" class="tab-content active">
-      <div class="action-bar">
-        <h2>Clients</h2>
-        <button class="btn btn-primary" onclick="showCreateClientModal()">+ Add Client</button>
+    <div id="clientsTab" class="tab-content section">
+      <div class="section-header">
+        <button class="btn btn-primary" onclick="showClientModal()">Add New Client</button>
       </div>
-      <div id="clientsLoading" class="loading">Loading clients...</div>
-      <div id="clientsError" class="error" style="display:none;"></div>
-      <div id="clientsTable"></div>
+      <div id="clientList" class="client-list">
+        <!-- Client cards will be loaded here -->
+      </div>
     </div>
 
     <!-- Tours Tab -->
-    <div id="toursTab" class="tab-content">
+    <div id="toursTab" class="tab-content section">
       <div class="action-bar">
-        <h2>Tours</h2>
         <div>
           <select id="tourClientFilter" onchange="loadTours()" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd; margin-right: 10px;">
             <option value="">All Clients</option>
           </select>
+          <button class="btn btn-secondary" onclick="showAllTours()" id="clearFilterBtn" style="display: none; margin-right: 10px;">← All Tours</button>
           <button class="btn btn-primary" onclick="showCreateTourModal()">+ Add Tour</button>
         </div>
       </div>
@@ -398,10 +1729,29 @@
       <div id="toursTable"></div>
     </div>
 
-    <!-- API Docs Tab -->
+    <!-- Settings Tab -->
     <div id="apiDocsTab" class="tab-content">
-      <h2>API Documentation</h2>
-      <p style="margin: 20px 0; color: #666;">All admin endpoints require an <code>Authorization</code> header with your API key.</p>
+      <div class="action-bar">
+      </div>
+      
+      <!-- API Configuration Section -->
+      <div class="config-section section">
+        <h3>⚙️ API Configuration</h3>
+        <div class="form-group">
+          <label for="apiUrl">API Base URL</label>
+          <input type="text" id="apiUrl" placeholder="https://tourism-api-production.krishna-0a3.workers.dev">
+        </div>
+        <div class="form-group">
+          <label for="apiKey">Admin API Key</label>
+          <input type="password" id="apiKey" placeholder="Enter your admin API key">
+        </div>
+        <button class="btn-save-config" onclick="saveConfig()">Save Configuration</button>
+      </div>
+      
+      <!-- API Documentation Section -->
+      <div class="api-docs-section section">
+        <h3>📚 API Documentation</h3>
+        <p style="margin: 20px 0; color: #666;">All admin endpoints require an <code>Authorization</code> header with your API key.</p>
       
       <h3 style="margin: 30px 0 15px; color: #333;">Client Management</h3>
       <div class="api-endpoint">
@@ -478,52 +1828,273 @@
     </div>
   </div>
 
-  <!-- Create/Edit Tour Modal -->
-  <div id="tourModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="tourModalTitle">Add Tour</h2>
-        <button class="btn-close" onclick="closeTourModal()">&times;</button>
+  <!-- Edit Tour Tabbed Interface -->
+  <div id="edit-tour-container" class="edit-tour-container" style="display: none;">
+    <div class="edit-tour-header">
+      <div class="edit-tour-title">
+        <h2 id="edit-tour-title">Edit Tour</h2>
+        <div class="breadcrumb" id="edit-tour-breadcrumb">
+          <a href="#" onclick="hideEditTour()">Tours</a> / <span id="edit-tour-breadcrumb-text">Edit Tour</span>
+        </div>
       </div>
-      <form id="tourForm" onsubmit="saveTour(event)">
-        <input type="hidden" id="tourId">
-        <div class="form-field">
-          <label for="tourClient">Client *</label>
-          <select id="tourClient" required></select>
+      <button class="edit-tour-close" onclick="hideEditTour()">
+        <i data-feather="x"></i>
+      </button>
+    </div>
+    
+    <div class="edit-tour-content">
+      <form id="edit-tour-form" class="tour-form">
+        <!-- Tour ID (hidden) -->
+        <input type="hidden" id="editTourId" name="id">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+          <button type="button" class="tab-button active" data-tab="overview">Overview</button>
+          <button type="button" class="tab-button" data-tab="details">Details</button>
+          <button type="button" class="tab-button" data-tab="pricing">Pricing & Participants</button>
+          <button type="button" class="tab-button" data-tab="availability">Availability</button>
+          <button type="button" class="tab-button" data-tab="extras">Extras & Addons</button>
+          <button type="button" class="tab-button" data-tab="media">Media</button>
         </div>
-        <div class="form-field">
-          <label for="tourSlug">Slug *</label>
-          <input type="text" id="tourSlug" required placeholder="blue-hole-adventure">
+        
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Overview Tab -->
+          <div id="overview-tab" class="tab-pane active">
+            <div class="form-section">
+              <h3>Tour Overview</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTourSlug">Slug *</label>
+                  <input type="text" id="editTourSlug" name="slug" required>
+                  <small class="form-help">Auto-generated from tour name, but editable</small>
+                </div>
+                <div class="form-group">
+                  <label for="editTourName">Tour Name *</label>
+                  <input type="text" id="editTourName" name="name" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTourStatus">Status *</label>
+                  <select id="editTourStatus" name="status" required>
+                    <option value="draft">Draft</option>
+                    <option value="active">Published</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="editTourCategory">Category *</label>
+                  <select id="editTourCategory" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Beach">Beach</option>
+                    <option value="River">River</option>
+                    <option value="Nightlife & Entertainment">Nightlife & Entertainment</option>
+                    <option value="Culture, Wellness & Lifestyle">Culture, Wellness & Lifestyle</option>
+                    <option value="Negril & West End Experiences">Negril & West End Experiences</option>
+                    <option value="Transfers & Specialty Add-Ons">Transfers & Specialty Add-Ons</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="editTourTags">Tags</label>
+                <input type="text" id="editTourTags" name="tags" placeholder="Add keywords to help customers find this tour">
+                <small class="form-help">Add keywords to help customers find this tour</small>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTourLocation">Location *</label>
+                  <input type="text" id="editTourLocation" name="location" required>
+                  <small class="form-help">City/region where the tour takes place</small>
+                </div>
+                <div class="form-group">
+                  <label for="editTourDuration">Duration *</label>
+                  <input type="text" id="editTourDuration" name="duration" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="editTourPrice">Starting Price</label>
+                <input type="number" id="editTourPrice" name="price" step="0.01" min="0">
+                <small class="form-help">Base price for the tour (detailed pricing in Pricing & Participants)</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Details Tab -->
+          <div id="details-tab" class="tab-pane">
+            <div class="form-section">
+              <h3>Tour Details</h3>
+              <div class="form-group">
+                <label for="editTourDescription">Description *</label>
+                <div id="editTourDescription" class="quill-editor"></div>
+                <small class="form-help">Detailed description of what the tour includes and what customers can expect</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourHighlights">Highlights</label>
+                <div id="editTourHighlights" class="quill-editor"></div>
+                <small class="form-help">Key selling points and what makes this tour special</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourItinerary">Itinerary</label>
+                <div id="editTourItinerary" class="quill-editor"></div>
+                <small class="form-help">Step-by-step breakdown of the tour schedule</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourInclusions">Inclusions</label>
+                <div id="editTourInclusions" class="quill-editor"></div>
+                <small class="form-help">Everything included in the tour price</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourExclusions">Exclusions</label>
+                <div id="editTourExclusions" class="quill-editor"></div>
+                <small class="form-help">What customers need to pay for separately</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourWhatToBring">What to Bring</label>
+                <div id="editTourWhatToBring" class="quill-editor"></div>
+                <small class="form-help">Essential items customers should bring for the tour</small>
+              </div>
+              <div class="form-group">
+                <label for="editTourRestrictions">Restrictions / Requirements</label>
+                <div id="editTourRestrictions" class="quill-editor"></div>
+                <small class="form-help">Age limits, fitness requirements, accessibility information</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Pricing Tab -->
+          <div id="pricing-tab" class="tab-pane">
+            <div class="form-section">
+              <h3>Pricing & Participants</h3>
+              <div class="form-group">
+                <label for="editTourCurrency">Currency</label>
+                <select id="editTourCurrency" name="currency">
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="CAD">CAD - Canadian Dollar</option>
+                  <option value="JMD">JMD - Jamaican Dollar</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTourAdultPrice">Adult Price</label>
+                  <input type="number" id="editTourAdultPrice" name="adult_price" step="0.01" min="0">
+                  <small class="form-help">Price per adult participant</small>
+                </div>
+                <div class="form-group">
+                  <label for="editTourChildPrice">Child Price</label>
+                  <input type="number" id="editTourChildPrice" name="child_price" step="0.01" min="0">
+                  <small class="form-help">Price per child participant (usually ages 3-12)</small>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="editTourSeniorPrice">Senior Price</label>
+                <input type="number" id="editTourSeniorPrice" name="senior_price" step="0.01" min="0">
+                <small class="form-help">Price per senior participant (usually ages 65+)</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Availability Tab -->
+          <div id="availability-tab" class="tab-pane">
+            <div class="form-section">
+              <h3>Availability</h3>
+              <div class="form-group">
+                <label>Operating Days</label>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" name="operating_days" value="monday"> Monday</label>
+                  <label><input type="checkbox" name="operating_days" value="tuesday"> Tuesday</label>
+                  <label><input type="checkbox" name="operating_days" value="wednesday"> Wednesday</label>
+                  <label><input type="checkbox" name="operating_days" value="thursday"> Thursday</label>
+                  <label><input type="checkbox" name="operating_days" value="friday"> Friday</label>
+                  <label><input type="checkbox" name="operating_days" value="saturday"> Saturday</label>
+                  <label><input type="checkbox" name="operating_days" value="sunday"> Sunday</label>
+                </div>
+                <small class="form-help">Days of the week when this tour operates</small>
+              </div>
+              <div class="form-group">
+                <label>Time Slots</label>
+                <div id="time-slots-container">
+                  <!-- Time slots will be added dynamically -->
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addTimeSlot()">Add Time</button>
+                <small class="form-help">Available start times for the tour</small>
+              </div>
+              <div class="form-group">
+                <label>Blackout Dates</label>
+                <div id="blackout-dates-container">
+                  <!-- Blackout dates will be added dynamically -->
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addBlackoutDate()">Add Date</button>
+                <small class="form-help">Dates when the tour is not available</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Extras Tab -->
+          <div id="extras-tab" class="tab-pane">
+            <div class="form-section">
+              <h3>Extras & Addons</h3>
+              <div class="form-group">
+                <label>Add-on Items</label>
+                <div id="addons-container">
+                  <!-- Addons will be added dynamically -->
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addAddon()">Add</button>
+                <small class="form-help">Additional items customers can purchase with the tour</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Media Tab -->
+          <div id="media-tab" class="tab-pane">
+            <div class="form-section">
+              <h3>Media</h3>
+              <div class="form-group">
+                <label>Gallery Images</label>
+                <div id="image-upload-zone" class="image-upload-zone">
+                  <div class="upload-placeholder">
+                    <i data-feather="upload"></i>
+                    <p>Drag & drop images here or click to browse</p>
+                  </div>
+                </div>
+                <small class="form-help">First image will be used as the main image. Drag to reorder.</small>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="editTourVideoUrl">Video URL</label>
+                  <input type="url" id="editTourVideoUrl" name="video_url" placeholder="YouTube, Vimeo, or direct MP4 video URL">
+                  <small class="form-help">YouTube, Vimeo, or direct MP4 video URL</small>
+                </div>
+                <div class="form-group">
+                  <label for="editTourVideoType">Video Type</label>
+                  <select id="editTourVideoType" name="video_type">
+                    <option value="">Select Video Type</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="vimeo">Vimeo</option>
+                    <option value="mp4">MP4 File</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="form-field">
-          <label for="tourName">Name *</label>
-          <input type="text" id="tourName" required placeholder="Blue Hole Adventure">
-        </div>
-        <div class="form-field">
-          <label for="tourExcerpt">Excerpt</label>
-          <textarea id="tourExcerpt" placeholder="Short description..."></textarea>
-        </div>
-        <div class="form-field">
-          <label for="tourPrice">From Price</label>
-          <input type="number" id="tourPrice" step="0.01" placeholder="99.00">
-        </div>
-        <div class="form-field">
-          <label for="tourStatus">Status</label>
-          <select id="tourStatus">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-        <p style="color: #666; font-size: 14px; margin: 15px 0;">Note: Additional fields (highlights, itinerary, etc.) can be added via API</p>
+        
+        <!-- Form Actions -->
         <div class="form-actions">
-          <button type="button" class="btn" onclick="closeTourModal()">Cancel</button>
-          <button type="submit" class="btn btn-success">Save Tour</button>
+          <button type="button" class="btn btn-secondary" onclick="hideEditTour()">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="deleteEditTour()" id="delete-edit-tour-btn">Permanently delete</button>
+          <button type="submit" class="btn btn-primary">Save Tour</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script src="admin.js"></script>
+  <script src="js/sidebar-component.js?v=7"></script>
+  <script src="js/admin.js?v=7"></script>
 </body>
 </html>
 
