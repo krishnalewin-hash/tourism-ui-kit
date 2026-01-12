@@ -1,3 +1,35 @@
+function capturePageDefaults() {
+  try {
+    const selectors = 'script[data-default-pickup], script[data-default-pickup-place-id], script[data-default-dropoff], script[data-default-dropoff-place-id]';
+    const nodes = document.querySelectorAll(selectors);
+    const current = document.currentScript || (nodes.length ? nodes[nodes.length - 1] : null);
+    if (!current || !current.dataset) return;
+
+    window.CFG = window.CFG || {};
+    window.CFG.PAGE_DEFAULTS = window.CFG.PAGE_DEFAULTS || {};
+
+    const store = window.CFG.PAGE_DEFAULTS;
+    const ds = current.dataset;
+
+    if (ds.defaultPickup && !store.defaultPickup) {
+      store.defaultPickup = ds.defaultPickup;
+    }
+    if (ds.defaultDropoff && !store.defaultDropoff) {
+      store.defaultDropoff = ds.defaultDropoff;
+    }
+    if (ds.defaultPickupPlaceId && !store.defaultPickupPlaceId) {
+      store.defaultPickupPlaceId = ds.defaultPickupPlaceId;
+    }
+    if (ds.defaultDropoffPlaceId && !store.defaultDropoffPlaceId) {
+      store.defaultDropoffPlaceId = ds.defaultDropoffPlaceId;
+    }
+  } catch (err) {
+    console.warn('[TourForm] Failed to capture page defaults', err);
+  }
+}
+
+capturePageDefaults();
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Section 1: Minimal Inline Styles (baseline field & icon styling)
@@ -7,14 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Minimal baseline styles (keep date stable; no layout experiments)
   (function injectMinimalStyles(){
     if(document.getElementById('booking-form-minimal-styles')) return;
-  const css = `/* Core icon wrapper + input padding */\n.icon-field-wrapper{position:relative;display:block;width:100%;}\n.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}\n.icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n/* Hide passenger field icon initially to prevent flash during input->select conversion */\n.icon-field-wrapper .field-icon[data-for="number_of_passengers"]{opacity:0;transition:opacity 0.3s ease;}\n/* Show passenger icon when wrapper has 'select-ready' class */\n.icon-field-wrapper.select-ready .field-icon[data-for="number_of_passengers"]{opacity:1;}\n.icon-field-wrapper > input[data-iconized='1'][data-q],.icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.1rem !important;}\n/* Baseline field styling (added for pickup/drop-off/time) */\ninput[data-q],input[data-q='pickup_location'],input[data-q='drop-off_location'],input[data-q='pickup_time']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\ninput[data-q='pickup_date']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\n/* Unified text color across all data-q inputs/selects */\ninput[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}\n/* Larger Google Places Autocomplete dropdown (single-line) */\n.pac-container{font-size:16px !important; line-height:1.35 !important;}\n.pac-item{padding:10px 14px !important; font-size:15px !important;}\n.pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}\n.pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}\n/* Date picker popover */\n#pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}\n#pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}\n#pickup-date-popover button.dp-nav{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}\n#pickup-date-popover button.dp-nav:hover{background:#f2f2f2;}\n#pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}\n#pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}\n#pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}\n#pickup-date-popover .dp-day:hover{background:#eee;}\n#pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}\n#pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}\n#pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}\n`;
+  const css = `/* Core icon wrapper + input padding */\n.icon-field-wrapper{position:relative;display:block;width:100%;}\n.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}\n.icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n/* Hide passenger field icon initially to prevent flash during input->select conversion */\n.icon-field-wrapper .field-icon[data-for="number_of_passengers"]{opacity:0;transition:opacity 0.3s ease;}\n/* Show passenger icon when wrapper has 'select-ready' class */\n.icon-field-wrapper.select-ready .field-icon[data-for="number_of_passengers"]{opacity:1;}\n.icon-field-wrapper > input[data-iconized='1'][data-q],.icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.1rem !important;}\n/* Baseline field styling (added for pickup/drop-off/time) - exclude checkboxes */\ninput[data-q]:not([type='checkbox']),input[data-q='pickup_location'],input[data-q='drop-off_location'],input[data-q='pickup_time'],input[data-q='return_time']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\ninput[data-q='pickup_date'],input[data-q='return_date']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\n/* Checkbox styling - reset to normal checkbox appearance */\ninput[type='checkbox'][data-q]{display:inline-block !important;width:auto !important;min-width:auto !important;padding:0 !important;border:1px solid #ccc !important;background:#fff !important;line-height:normal !important;min-height:auto !important;height:18px !important;width:18px !important;margin:0 8px 0 0 !important;vertical-align:middle !important;cursor:pointer !important;}\n/* Hide return date/time fields by default, show when round trip is checked */\n.icon-field-wrapper:has(input[data-q='return_date']),\n.icon-field-wrapper:has(input[data-q='return_time']){display:none !important;}\n.icon-field-wrapper.round-trip-active:has(input[data-q='return_date']),\n.icon-field-wrapper.round-trip-active:has(input[data-q='return_time']){display:block !important;}\n/* Unified text color across all data-q inputs/selects (exclude checkboxes) */\ninput[data-q]:not([type='checkbox']), select[data-q], .icon-field-wrapper input:not([type='checkbox']), .icon-field-wrapper select{color:#222 !important;}\n/* Larger Google Places Autocomplete dropdown (single-line) */\n.pac-container{font-size:16px !important; line-height:1.35 !important;}\n.pac-item{padding:10px 14px !important; font-size:15px !important;}\n.pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}\n.pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}\n/* Date picker popover */\n#pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}\n#pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}\n#pickup-date-popover button.dp-nav{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}\n#pickup-date-popover button.dp-nav:hover{background:#f2f2f2;}\n#pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}\n#pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}\n#pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}\n#pickup-date-popover .dp-day:hover{background:#eee;}\n#pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}\n#pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}\n#pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}\n`;
     const s=document.createElement('style'); s.id='booking-form-minimal-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
   // Inject validation styles (error state + shake + inline message)
   (function injectValidationStyles(){
     if(document.getElementById('booking-form-validation-styles')) return;
-  const css = `/* Validation visuals */\n.input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important;}\n/* Wrapper may shake but shouldn't show red border */\n.icon-field-wrapper.input-error{border-radius:6px;}\n.field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}\n@keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}\n.shake{animation:bf-shake 400ms ease-in-out;}\n\n/* Equalize border radius for step-1 inputs (normal + error states) */\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],\ninput[data-q='pickup_location'],\ninput[data-q='drop-off_location'],\ninput[data-q='pickup_date'],\ninput[data-q='pickup_time'],\ninput[data-q='number_of_passengers'],\ninput[data-q='pickup_location'][aria-invalid='true'],\ninput[data-q='drop-off_location'][aria-invalid='true'],\ninput[data-q='pickup_date'][aria-invalid='true'],\ninput[data-q='pickup_time'][aria-invalid='true'],\ninput[data-q='number_of_passengers'][aria-invalid='true'],\ninput[data-q='pickup_location'].input-error,\ninput[data-q='drop-off_location'].input-error,\ninput[data-q='pickup_date'].input-error,\ninput[data-q='pickup_time'].input-error,\ninput[data-q='number_of_passengers'].input-error {\n  border-radius: 4px !important;\n}\n`;
+  const css = `/* Validation visuals */\n.input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important;}\n/* Wrapper may shake but shouldn't show red border */\n.icon-field-wrapper.input-error{border-radius:6px;}\n.field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}\n@keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}\n.shake{animation:bf-shake 400ms ease-in-out;}\n\n/* Equalize border radius for step-1 inputs (normal + error states) */\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='return_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='return_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],\ninput[data-q='pickup_location'],\ninput[data-q='drop-off_location'],\ninput[data-q='pickup_date'],\ninput[data-q='pickup_time'],\ninput[data-q='return_date'],\ninput[data-q='return_time'],\ninput[data-q='number_of_passengers'],\ninput[data-q='pickup_location'][aria-invalid='true'],\ninput[data-q='drop-off_location'][aria-invalid='true'],\ninput[data-q='pickup_date'][aria-invalid='true'],\ninput[data-q='pickup_time'][aria-invalid='true'],\ninput[data-q='return_date'][aria-invalid='true'],\ninput[data-q='return_time'][aria-invalid='true'],\ninput[data-q='number_of_passengers'][aria-invalid='true'],\ninput[data-q='pickup_location'].input-error,\ninput[data-q='drop-off_location'].input-error,\ninput[data-q='pickup_date'].input-error,\ninput[data-q='pickup_time'].input-error,\ninput[data-q='return_date'].input-error,\ninput[data-q='return_time'].input-error,\ninput[data-q='number_of_passengers'].input-error {\n  border-radius: 4px !important;\n}\n`;
     const s=document.createElement('style'); s.id='booking-form-validation-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
@@ -124,11 +156,156 @@ document.addEventListener('DOMContentLoaded', () => {
   
   ===================================================== */
   
+const DEFAULT_API_BASE = 'https://tourism-api-production.krishna-0a3.workers.dev';
+
+const BLOCKED_SCRIPT_ORIGINS = new Set([
+  'https://static.cloudflareinsights.com',
+  'https://static.cloudflareanalytics.com',
+  'https://static.cloudflareinsights.net'
+]);
+
+const BLOCKED_PAGE_ORIGINS = new Set([
+  'https://tourismbizacademy.com'
+]);
+
+function cleanOrigin(value) {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  let candidate = value.trim();
+  if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(candidate)) {
+    candidate = `https://${candidate.replace(/^\/*/, '')}`;
+  }
+  try {
+    const url = new URL(candidate);
+    return url.origin.replace(/\/$/, '');
+  } catch (_) {
+    return null;
+  }
+}
+
+function resolveApiBase() {
+  const cfg = window.CFG || {};
+  const candidates = [
+    cfg.API_BASE,
+    cfg.apiBase,
+    cfg.API_ORIGIN,
+    cfg.apiOrigin,
+    cfg.API_URL,
+    cfg.apiUrl,
+    cfg.BASE_URL,
+    cfg.baseUrl,
+    cfg.BASE,
+    cfg.base,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      const origin = cleanOrigin(value);
+      if (origin) return origin;
+    }
+  }
+
+  const urlLikeCandidates = [
+    cfg.DATA_URL,
+    cfg.dataUrl,
+    cfg.CLOUDFLARE_API,
+    cfg.cloudflareApi,
+    cfg.API,
+    cfg.api,
+    cfg.API_ENDPOINT,
+    cfg.apiEndpoint
+  ];
+
+  for (const value of urlLikeCandidates) {
+    const origin = cleanOrigin(value);
+    if (origin) return origin;
+  }
+
+  // Try to find the tour-detail-form.js script specifically
+  try {
+    const scripts = Array.from(document.getElementsByTagName('script'));
+    // Look for the script that contains tour-detail-form in its src
+    const formScript = scripts.find(s => s.src && s.src.includes('tour-detail-form.js'));
+    if (formScript?.src) {
+      const url = new URL(formScript.src, window.location.href);
+      if (!BLOCKED_SCRIPT_ORIGINS.has(url.origin)) {
+        console.log('[TourForm] Detected API base from script:', url.origin);
+        return url.origin;
+      }
+    }
+    // Fallback: try currentScript or last script
+    const currentScript = document.currentScript || scripts[scripts.length - 1];
+    if (currentScript?.src) {
+      const url = new URL(currentScript.src, window.location.href);
+      if (!BLOCKED_SCRIPT_ORIGINS.has(url.origin)) {
+        console.log('[TourForm] Detected API base from script (fallback):', url.origin);
+        return url.origin;
+      }
+    }
+  } catch (err) {
+    console.warn('[TourForm] Failed to derive API base from script tag:', err);
+  }
+
+  // Only use page origin if it's a known API domain, otherwise use default
+  const pageOrigin = window.location.origin;
+  const isKnownApiDomain = pageOrigin.includes('tourism-api') || 
+                           pageOrigin.includes('workers.dev') ||
+                           pageOrigin.includes('cloudflare');
+  
+  if (!BLOCKED_PAGE_ORIGINS.has(pageOrigin) && isKnownApiDomain) {
+    const origin = cleanOrigin(pageOrigin);
+    if (origin) {
+      console.log('[TourForm] Using page origin as API base:', origin);
+      return origin;
+    }
+  }
+
+  console.log('[TourForm] Using default API base:', DEFAULT_API_BASE);
+  return DEFAULT_API_BASE;
+}
+
 // Load client configuration if not already loaded
 async function loadClientConfig() {
   if (window.CFG?.configLoaded) return window.CFG;
   
-  const client = window.CFG?.client || 'demo';
+  const client = window.CFG?.client || window.CFG?.CLIENT || 'demo';
+  const apiBase = resolveApiBase();
+
+  try {
+    const apiUrl = `${apiBase.replace(/\/$/, '')}/api/client-config/${encodeURIComponent(client)}`;
+    console.log(`[TourForm] Fetching config via API: ${apiUrl}`);
+    const apiResponse = await fetch(apiUrl, { cache: 'no-store' });
+    if (apiResponse.ok) {
+      const config = await apiResponse.json();
+      const formConfig = config.FORM_CONFIG || {};
+
+      const gmapsKey = formConfig.GMAPS_KEY || formConfig.PLACES_API_KEY || window.CFG?.GMAPS_KEY;
+      const countries = formConfig.COUNTRIES ? (Array.isArray(formConfig.COUNTRIES) ? formConfig.COUNTRIES : [formConfig.COUNTRIES]) : null;
+
+      window.CFG = {
+        ...window.CFG,
+        ...formConfig,
+        API_BASE: apiBase,
+        client,
+        GMAPS_KEY: gmapsKey,
+        PLACES_API_KEY: gmapsKey,
+        COUNTRIES: countries,
+        core_config: config,
+        configLoaded: true,
+        loadedFrom: 'api'
+      };
+
+      CONFIG.googleApiKey = gmapsKey || '';
+      CONFIG.countries = countries ? countries.map(x => String(x).toLowerCase()) : null;
+      CONFIG.region = formConfig.REGION || formConfig.region || CONFIG.region;
+
+      console.log(`[TourForm] Loaded config from API for ${client}`);
+      return window.CFG;
+    }
+    console.warn(`[TourForm] API config request returned ${apiResponse.status}`);
+  } catch (error) {
+    console.warn('[TourForm] API config fetch failed:', error);
+  }
+
   const baseUrl = `https://cdn.jsdelivr.net/gh/krishnalewin-hash/tourism-ui-kit@main`;
   
   try {
@@ -141,19 +318,26 @@ async function loadClientConfig() {
         GMAPS_KEY: config.FORM_CONFIG?.GMAPS_KEY,
         PLACES_API_KEY: config.FORM_CONFIG?.GMAPS_KEY,
         COUNTRIES: config.FORM_CONFIG?.COUNTRIES,
-        configLoaded: true
+        configLoaded: true,
+        loadedFrom: 'cdn'
       };
-      console.log(`[TourForm] Loaded config for ${client}, API key: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
+      console.log(`[TourForm] Loaded config for ${client} from CDN, API key: ${window.CFG.GMAPS_KEY?.substring(0, 10)}...`);
       
-      // Update CONFIG object after loading
       CONFIG.googleApiKey = window.CFG.GMAPS_KEY || '';
       CONFIG.countries = window.CFG.COUNTRIES ? (Array.isArray(window.CFG.COUNTRIES) ? window.CFG.COUNTRIES.map(x => String(x).toLowerCase()) : [String(window.CFG.COUNTRIES).toLowerCase()]) : null;
       
       return window.CFG;
     }
   } catch (error) {
-    console.warn(`[TourForm] Failed to load config for ${client}:`, error);
+    console.warn(`[TourForm] Failed to load CDN config for ${client}:`, error);
   }
+
+  window.CFG = {
+    ...(window.CFG || {}),
+    API_BASE: apiBase,
+    client,
+  };
+
   return window.CFG;
 }
 
@@ -179,6 +363,203 @@ const CONFIG = {
   time: { start: '00:00', end: '23:59', stepMinutes: 15, format12: true }
 };
 
+let placesLibraryPromise = null;
+function ensurePlacesLibrary(){
+  if (placesLibraryPromise) return placesLibraryPromise;
+  if (window.google?.maps?.importLibrary) {
+    placesLibraryPromise = window.google.maps.importLibrary('places').catch(err => {
+      console.warn('[TourForm] Failed to import places library via importLibrary:', err);
+      return {};
+    });
+  } else {
+    placesLibraryPromise = Promise.resolve({});
+  }
+  return placesLibraryPromise;
+}
+
+function onPlacesLibraryReady(callback){
+  try {
+    const result = ensurePlacesLibrary();
+    if (!result || typeof result.then !== 'function') {
+      callback?.();
+      return;
+    }
+    result.then(() => {
+      try { callback?.(); } catch (err) { console.error('[TourForm] Places callback error:', err); }
+    }).catch(err => {
+      console.warn('[TourForm] Places library failed to initialize:', err);
+    });
+  } catch (err) {
+    console.error('[TourForm] Failed to queue places callback:', err);
+  }
+}
+
+function runMaybeAsyncCallback(fn){
+  if (typeof fn !== 'function') return;
+  try {
+    const maybePromise = fn();
+    if (maybePromise && typeof maybePromise.then === 'function') {
+      maybePromise.catch(err => console.error('[TourForm] Async callback error:', err));
+    }
+  } catch (err) {
+    console.error('[TourForm] Callback execution error:', err);
+  }
+}
+
+function latLngBoundsToBias(bounds){
+  if (!bounds || typeof bounds.getSouthWest !== 'function' || typeof bounds.getNorthEast !== 'function') {
+    return null;
+  }
+  const sw = bounds.getSouthWest();
+  const ne = bounds.getNorthEast();
+  if (!sw || !ne) return null;
+  try {
+    return {
+      south: typeof sw.lat === 'function' ? sw.lat() : sw.lat,
+      west: typeof sw.lng === 'function' ? sw.lng() : sw.lng,
+      north: typeof ne.lat === 'function' ? ne.lat() : ne.lat,
+      east: typeof ne.lng === 'function' ? ne.lng() : ne.lng
+    };
+  } catch (err) {
+    console.warn('[TourForm] Failed to convert bounds to location bias:', err);
+    return null;
+  }
+}
+
+function coercePlaceName(place){
+  if (!place) return '';
+  return (
+    place.name ||
+    place.displayName?.text ||
+    place.displayName ||
+    place.primaryText ||
+    ''
+  );
+}
+
+function coercePlaceAddress(place){
+  if (!place) return '';
+  return (
+    place.formatted_address ||
+    place.formattedAddress ||
+    place.address?.formattedAddress ||
+    place.address?.formatted ||
+    place.secondaryText ||
+    ''
+  );
+}
+
+function extractPlaceTypes(place){
+  if (!place) return [];
+  const types = [];
+  if (Array.isArray(place.types)) {
+    types.push(...place.types);
+  }
+  if (place.primaryType) types.push(place.primaryType);
+  if (place.primaryTypeDisplayName) types.push(place.primaryTypeDisplayName);
+  return [...new Set(types.filter(Boolean))];
+}
+
+function extractPlaceLocation(place){
+  if (!place) return null;
+  const candidates = [
+    place.geometry?.location,
+    place.geometry?.viewport?.getCenter?.(),
+    place.location,
+    place.displayLocation,
+    place.locationLatLng,
+    place.coordinate,
+    place.position
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      if (typeof candidate.lat === 'function' && typeof candidate.lng === 'function') {
+        return { lat: candidate.lat(), lng: candidate.lng() };
+      }
+      if (typeof candidate.lat === 'number' && typeof candidate.lng === 'number') {
+        return { lat: candidate.lat, lng: candidate.lng };
+      }
+      if (typeof candidate.latitude === 'number' && typeof candidate.longitude === 'number') {
+        return { lat: candidate.latitude, lng: candidate.longitude };
+      }
+    } catch (_) {
+      // ignore and continue to next candidate
+    }
+  }
+  return null;
+}
+
+function normalizePlaceForDisplay(place){
+  if (!place) return { name: '', address: '', types: [], location: null };
+  const name = coercePlaceName(place);
+  const address = coercePlaceAddress(place);
+  const types = extractPlaceTypes(place);
+  const location = extractPlaceLocation(place);
+  return { name, address, types, location };
+}
+
+function createAutocompleteInstance(inputEl, options){
+  if (!inputEl) return null;
+  const placesNs = window.google?.maps?.places;
+  if (!placesNs) return null;
+
+  // Attempt legacy Autocomplete first for backward compatibility
+  if (typeof placesNs.Autocomplete === 'function') {
+    try {
+      const legacyInstance = new placesNs.Autocomplete(inputEl, options);
+      return { instance: legacyInstance, mode: 'legacy' };
+    } catch (err) {
+      console.warn('[Maps] Legacy Autocomplete init failed, falling back to PlaceAutocompleteElement:', err);
+    }
+  }
+
+  // Use new PlaceAutocompleteElement when available
+  if (typeof placesNs.PlaceAutocompleteElement === 'function') {
+    try {
+      const elementOptions = {
+        inputElement: inputEl,
+        fields: options?.fields
+      };
+      const modernInstance = new placesNs.PlaceAutocompleteElement(elementOptions);
+
+      const countryRestriction = options?.componentRestrictions?.country;
+      if (countryRestriction) {
+        const countries = Array.isArray(countryRestriction) ? countryRestriction : [countryRestriction];
+        if (typeof modernInstance.setComponentRestrictions === 'function') {
+          modernInstance.setComponentRestrictions({ country: countries });
+        } else {
+          modernInstance.componentRestrictions = { country: countries };
+        }
+      }
+
+      if (Array.isArray(options?.types) && options.types.length) {
+        if (typeof modernInstance.setTypes === 'function') {
+          modernInstance.setTypes(options.types);
+        } else {
+          modernInstance.types = options.types;
+        }
+      }
+
+      const bias = latLngBoundsToBias(options?.bounds);
+      if (bias) {
+        if (typeof modernInstance.setLocationBias === 'function') {
+          modernInstance.setLocationBias(bias);
+        } else {
+          modernInstance.locationBias = bias;
+        }
+      }
+
+      return { instance: modernInstance, mode: 'element' };
+    } catch (err) {
+      console.error('[Maps] Failed to initialize PlaceAutocompleteElement:', err);
+    }
+  }
+
+  console.warn('[Maps] No supported Autocomplete implementation available.');
+  return null;
+}
+
   /* ===== Section 3: Google Maps Loader (dynamic include + readiness poll)
     Purpose: Loads Places library if not already present; polls until available.
     Remove if you always load Google Maps via a static <script> tag before this file.
@@ -192,9 +573,9 @@ const CONFIG = {
         await configPromise;
       }
       
-      if (window.google?.maps?.places) return callback();
+      if (window.google?.maps?.places) return runMaybeAsyncCallback(callback);
       if (document.querySelector('script[data-gmaps-loader]')){
-        const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+        const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); runMaybeAsyncCallback(callback); } },150);
         setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
         return;
       }
@@ -208,11 +589,11 @@ const CONFIG = {
       }
       
       const s = document.createElement('script');
-      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&loading=async`;
       s.async = true; s.defer = true; s.setAttribute('data-gmaps-loader','1');
       s.onerror = () => console.error('[Maps] Failed to load Google Maps JS');
       document.head.appendChild(s);
-      const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); callback(); } },150);
+      const poll = setInterval(()=>{ if (window.google?.maps?.places){ clearInterval(poll); runMaybeAsyncCallback(callback); } },150);
       setTimeout(()=>clearInterval(poll), CONFIG.mapsLoadTimeoutMs);
     };
     
@@ -224,8 +605,7 @@ const CONFIG = {
     Remove if native date input validation or backend checks are sufficient.
     Caveat: Formats value (could differ from backend ISO expectations).
   ===================================================== */
-  function attachPickupDateGuard(rootDoc){
-    const input = rootDoc.querySelector('input[data-q="pickup_date"]');
+  function attachDateGuardForInput(input){
     if (!input || input.dataset.dateGuard === '1') return;
     input.dataset.dateGuard = '1';
     
@@ -234,30 +614,29 @@ const CONFIG = {
       input.style.setProperty('color', '#000', 'important');
       input.style.setProperty('background', '#fff', 'important');
       input.style.setProperty('opacity', '1', 'important');
-      // Width and padding are now handled by CSS to prevent layout shift
     } catch(_) {}
     
     const todayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     function parseLocalDate(str){
       if (!str) return null;
       let s = str.trim();
       // Remove commas & ordinal suffixes (1st/2nd/3rd/4th...)
       s = s.replace(/,/g,'').replace(/\b(\d{1,2})(st|nd|rd|th)\b/i,'$1');
-  // Remove leading weekday (full or 3‑letter) if present
-  s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
+      // Remove leading weekday (full or 3‑letter) if present
+      s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
       // YYYY-MM-DD
       let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return new Date(+m[1],+m[2]-1,+m[3]);
       // MM/DD/YYYY or M-D-YYYY
       m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
       if (m){ const a=+m[1], b=+m[2], y=+m[3]; const day=a>12?a:b, mon=a>12?b:a; return new Date(y,mon-1,day);} 
-  // Full MonthName Day Year
-  m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
+      // Full MonthName Day Year
+      m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
       if (m){ return new Date(+m[3], MONTHS.findIndex(M=>M.toLowerCase()===m[1].toLowerCase()), +m[2]); }
-  // Abbrev MonthName Day Year
-  m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
-  if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
+      // Abbrev MonthName Day Year
+      m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
+      if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
       const d=new Date(s); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
     }
     function formatDisplay(d){
@@ -265,7 +644,7 @@ const CONFIG = {
       const day = d.getDate();
       const yr = d.getFullYear();
       const weekday = WEEKDAYS[d.getDay()].slice(0,3); // Abbrev weekday
-  return `${weekday}, ${month} ${day}, ${yr}`;
+      return `${weekday}, ${month} ${day}, ${yr}`;
     }
     function enforce(){
       const d=parseLocalDate(input.value);
@@ -298,10 +677,14 @@ const CONFIG = {
         enforce();
       }
     }, 500);
+  }
+
+  function attachPickupDateGuard(rootDoc){
+    const pickupInput = rootDoc.querySelector('input[data-q="pickup_date"]');
+    const returnInput = rootDoc.querySelector('input[data-q="return_date"]');
     
-    // Remove the wrapper-based event handling that's causing issues
-    // const wrapper=input.closest('.vdpWithInput, .vdpComponent, .date-picker-field-survey');
-    // if(wrapper) wrapper.addEventListener('click',()=>{ startWatch(); setTimeout(enforce,50); });
+    if (pickupInput) attachDateGuardForInput(pickupInput);
+    if (returnInput) attachDateGuardForInput(returnInput);
   }
 
   // (Time input logic removed at user request)
@@ -391,6 +774,26 @@ const CONFIG = {
   // Wire one or more pickup time inputs to the singleton picker
   function attachPickupTimePicker(rootDoc, specificEl){
     const input = specificEl || rootDoc.querySelector('input[data-q="pickup_time"]');
+    if(!input) return;
+    if(input.dataset.timeSpinnerWired) return;
+    input.dataset.timeSpinnerWired='1';
+    input.type='text';
+    input.readOnly=true; // prevent mobile keyboard
+    input.style.cursor='pointer';
+    input.autocomplete='off';
+    input.addEventListener('click', ()=> window.__singletonTimePicker.openFor(input));
+    input.addEventListener('focus', ()=> {
+      if(window.__singletonTimePicker.suppressNextFocusOpen){
+        window.__singletonTimePicker.suppressNextFocusOpen = false; // consume flag
+        return;
+      }
+      window.__singletonTimePicker.openFor(input);
+    });
+  }
+
+  // Wire return time input to the singleton picker
+  function attachReturnTimePicker(rootDoc, specificEl){
+    const input = specificEl || rootDoc.querySelector('input[data-q="return_time"]');
     if(!input) return;
     if(input.dataset.timeSpinnerWired) return;
     input.dataset.timeSpinnerWired='1';
@@ -901,7 +1304,22 @@ const CONFIG = {
     function keyNav(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } }
     pop.addEventListener('click',e=>{ const nav=e.target.getAttribute('data-nav'); if(nav){ state.month+= +nav; if(state.month<0){ state.month=11; state.year--; } else if(state.month>11){ state.month=0; state.year++; } build(); return; } const day=e.target.getAttribute('data-day'); if(day){ const sel=new Date(state.year,state.month,+day); if(sel<todayStart()) return; const formatted=formatVerbose(sel); state.input.value=formatted; state.input.setAttribute('value',formatted); state.input.dispatchEvent(new Event('input',{bubbles:true})); state.input.dispatchEvent(new Event('change',{bubbles:true})); close(); }});
     window.addEventListener('resize',()=> position()); window.addEventListener('scroll',()=> position(), true);
-    function attach(rootDoc){ const input=rootDoc.querySelector('input[data-q="pickup_date"]'); if(!input || input.dataset.datePickerWired==='1') return; input.dataset.datePickerWired='1'; input.readOnly=true; input.addEventListener('focus',()=> openFor(input)); input.addEventListener('click',()=> openFor(input)); }
+    function attach(rootDoc){ 
+      const pickupInput=rootDoc.querySelector('input[data-q="pickup_date"]'); 
+      if(pickupInput && pickupInput.dataset.datePickerWired!=='1'){ 
+        pickupInput.dataset.datePickerWired='1'; 
+        pickupInput.readOnly=true; 
+        pickupInput.addEventListener('focus',()=> openFor(pickupInput)); 
+        pickupInput.addEventListener('click',()=> openFor(pickupInput)); 
+      }
+      const returnInput=rootDoc.querySelector('input[data-q="return_date"]'); 
+      if(returnInput && returnInput.dataset.datePickerWired!=='1'){ 
+        returnInput.dataset.datePickerWired='1'; 
+        returnInput.readOnly=true; 
+        returnInput.addEventListener('focus',()=> openFor(returnInput)); 
+        returnInput.addEventListener('click',()=> openFor(returnInput)); 
+      }
+    }
     window.__pickupDatePicker={ openFor, close, attach };
     // initial attach
     attach(document);
@@ -1056,85 +1474,142 @@ const CONFIG = {
   }
 
   function wireAutocomplete(rootDoc){
-    if(!window.google?.maps?.places) return;
-    
-    // Add global observer to detect pac-container appearances
-    // Removed global pac-container observer - letting Google handle autocomplete naturally
-    const sels=[
+    const contextDoc = rootDoc || document;
+
+    const doWire = () => {
+      const placesNs = window.google?.maps?.places;
+      if (!placesNs) {
+        console.warn('[Maps] Places namespace unavailable during wiring.');
+        return;
+      }
+
+      const selectors = [
       'input[data-q="pickup_location"]',
       'input[data-q="drop-off_location"]'
     ];
-    for(const sel of sels){
-      const el=rootDoc.querySelector(sel);
-      if(!el) {
-        console.log(`[DEBUG] Field not found: ${sel}`);
-        continue;
-      }
-      if(el.dataset.placesWired==='1') {
-        continue;
-      }
-      // Wiring autocomplete for field
-      
-      // Skip if truly hidden (type="hidden" only, not display:none which might be temporary)
-	    if (el.type === 'hidden') continue;
+
+      selectors.forEach(sel => {
+        const el = contextDoc.querySelector(sel);
+        if (!el) {
+          return;
+        }
+        if (el.type === 'hidden') return;
+        if (el.dataset.placesWired === '1' || el.dataset.placesWirePending === '1') {
+          return;
+        }
     
-      el.dataset.placesWired='1';
-      let ac;
-      try {
+        el.dataset.placesWirePending = '1';
         
         const acOpts = {
-	        fields:["place_id","formatted_address","geometry","name","types"], 
-	        strictBounds:false, 
-	        types: ["establishment"]
+          fields: ['place_id', 'formatted_address', 'geometry', 'name', 'types'],
+          strictBounds: false,
+          types: ['establishment']
 	       };
 	        if (jmBounds) acOpts.bounds = jmBounds;
 	        if (Array.isArray(CONFIG.countries) && CONFIG.countries.length > 0) {
 	        acOpts.componentRestrictions = { country: CONFIG.countries };
 	       }
         
-				ac = new google.maps.places.Autocomplete(el, acOpts);
-				// Autocomplete created successfully
-      } catch(err){ console.error('[Maps] Autocomplete init failed:', err); continue; }
+        const result = createAutocompleteInstance(el, acOpts);
+        if (!result) {
+          delete el.dataset.placesWirePending;
+          return;
+        }
 
-      ac.addListener('place_changed',()=>{
-        const place=ac.getPlace(); if(!place?.place_id || !place.geometry) return;
-        const isAirport=(place.types||[]).includes('airport');
-        let display='';
-        if(isAirport && place.name){ const code = AIRPORT_CODES[place.name]; display = code? `${place.name} (${code})` : place.name; }
-        else if(place.name) display=place.name; else if(place.formatted_address) display=place.formatted_address;
-        
-        // Place selected from autocomplete
-        
-        // IMMEDIATELY update the input value with the full place name
-        el.value = display;
-        el.setAttribute('value', display);
-        
-        // Store the full place data for form submission
-        el.dataset.placeId = place.place_id;
-        el.dataset.placeName = place.name || '';
-        el.dataset.placeFormattedAddress = place.formatted_address || '';
-        el.dataset.placeTypes = JSON.stringify(place.types || []);
-        el.dataset.placeGeometry = JSON.stringify({
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng()
-        });
-        
-        // Place data stored in dataset
-        
-        // Note: Not dispatching input/change events to avoid autocomplete reappearing
-        // GHL data capture will be handled by fetch request modification instead
-      });
+        const { instance, mode } = result;
+        el.__placesAutocomplete = instance;
+        el.__placesAutocompleteMode = mode;
 
-      el.addEventListener('focus', ()=>{
-        if(!el.value && typeof airportBounds === 'function') {
-          ac.setBounds(airportBounds());
+        const updateDatasetFromPlace = rawPlace => {
+          if (!rawPlace) return;
+          const normalized = normalizePlaceForDisplay(rawPlace);
+          const types = normalized.types || [];
+          const isAirport = types.map(t => String(t).toLowerCase()).includes('airport');
+          let displayValue = '';
+          if (isAirport && normalized.name) {
+            const code = AIRPORT_CODES?.[normalized.name];
+            displayValue = code ? `${normalized.name} (${code})` : normalized.name;
+          } else if (normalized.name) {
+            displayValue = normalized.name;
+          } else if (normalized.address) {
+            displayValue = normalized.address;
+          }
+
+          if (displayValue) {
+            el.value = displayValue;
+            el.setAttribute('value', displayValue);
+          }
+
+          const placeId = rawPlace.place_id || rawPlace.id || rawPlace.placeId || '';
+          if (placeId) {
+            el.dataset.placeId = placeId;
+          }
+          el.dataset.placeName = normalized.name || displayValue || '';
+          el.dataset.placeFormattedAddress = normalized.address || '';
+          el.dataset.placeTypes = JSON.stringify(types);
+
+          if (normalized.location) {
+            el.dataset.placeGeometry = JSON.stringify(normalized.location);
+          } else {
+            delete el.dataset.placeGeometry;
+          }
+        };
+
+        const handlePlaceChanged = event => {
+          try {
+            const placeFromEvent = event?.place || event?.detail?.place || (typeof instance.getPlace === 'function' ? instance.getPlace() : null);
+            updateDatasetFromPlace(placeFromEvent);
+          } catch (err) {
+            console.error('[Maps] Failed to process place selection:', err);
+          }
+        };
+
+        if (mode === 'legacy') {
+          instance.addListener('place_changed', () => {
+            const place = instance.getPlace();
+            updateDatasetFromPlace(place);
+          });
+          el.addEventListener('focus', () => {
+            if (!el.value && typeof airportBounds === 'function' && typeof instance.setBounds === 'function') {
+              instance.setBounds(airportBounds());
+            }
+          });
+        } else {
+          if (typeof instance.addEventListener === 'function') {
+            instance.addEventListener('gmp-placeselect', handlePlaceChanged);
+            instance.addEventListener('gmp-placechange', handlePlaceChanged);
+          }
+          if (typeof instance.addListener === 'function') {
+            instance.addListener('place_changed', () => handlePlaceChanged({}));
+          }
+          el.addEventListener('focus', () => {
+            if (!el.value && typeof airportBounds === 'function') {
+              const bias = latLngBoundsToBias(airportBounds());
+              if (bias) {
+                if (typeof instance.setLocationBias === 'function') {
+                  instance.setLocationBias(bias);
+                } else {
+                  instance.locationBias = bias;
+                }
+              }
         }
       });
+        }
 
-      const obs=new MutationObserver(()=>{ normalizeSafely(el, obs); });
+        const obs = new MutationObserver(() => { normalizeSafely(el, obs); });
       normalizeSafely(el, obs);
+
+        el.dataset.placesWired = '1';
+        delete el.dataset.placesWirePending;
+      });
+    };
+
+    if (!window.google?.maps?.places) {
+      onPlacesLibraryReady(doWire);
+      return;
     }  
   
+    doWire();
   }
 
   /* ===== Section 7: Icon Injection / Visual Enhancement
@@ -1148,6 +1623,8 @@ const CONFIG = {
       'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
       'pickup_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
       'pickup_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
+      'return_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
+      'return_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
       'number_of_passengers':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`,
       'full_name':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/></svg>`,
       'email':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z'/><polyline points='22,6 12,13 2,6'/></svg>`,
@@ -1294,37 +1771,72 @@ function setInputValue(el, val){
 // Plain-text prefill: runs even before Maps is loaded
 function applyPrefillBasic(rootDoc){
   const cfg = window.CFG?.PREFILL;
-  if(!cfg) return;
+  const pageDefaults = window.CFG?.PAGE_DEFAULTS || {};
   const pairs = [
     ['pickup_location', 'input[data-q="pickup_location"]'],
     // ['drop_off_location','input[data-q="drop-off_location"]'], // optional: enable if you want
   ];
   for(const [key, sel] of pairs){
-    const pre = cfg[key];
-    if(!pre || typeof pre === 'object') continue;         // only handle strings here
+    const pre = cfg?.[key];
+    const defaultKey = key === 'pickup_location' ? 'defaultPickup' :
+      key === 'drop-off_location' ? 'defaultDropoff' : null;
+    const fallbackText = defaultKey ? pageDefaults[defaultKey] : null;
+    const text = (typeof pre === 'string' && pre) || fallbackText;
+    if(!text) continue;
     const el = rootDoc.querySelector(sel);
     if(!el || el.dataset.prefilled === '1') continue;
     el.dataset.prefilled = '1';
-    setInputValue(el, String(pre));
+    setInputValue(el, String(text));
+    if (defaultKey === 'defaultPickup' && pageDefaults.defaultPickupPlaceId) {
+      el.dataset.prefillPlaceId = pageDefaults.defaultPickupPlaceId;
+    }
+    if (defaultKey === 'defaultDropoff' && pageDefaults.defaultDropoffPlaceId) {
+      el.dataset.prefillPlaceId = pageDefaults.defaultDropoffPlaceId;
+    }
   }
 }
 
 // Maps-based prefill: Place ID or lat/lng (requires Google Maps JS loaded)
 function applyPrefillMaps(rootDoc){
   if(!window.google?.maps) return;
-  const cfg = window.CFG?.PREFILL;
-  if(!cfg) return;
+  const cfg = window.CFG?.PREFILL || {};
+  const pageDefaults = window.CFG?.PAGE_DEFAULTS || {};
+
+  const resolveLabel = (place, fallback) => {
+    if (fallback) return fallback;
+    if (!place) return '';
+    let label = place.name || place.formatted_address || '';
+    const types = place.types || [];
+    const isAirport = types.includes('airport');
+    if (isAirport && AIRPORT_CODES && AIRPORT_CODES[label]) {
+      const code = AIRPORT_CODES[label];
+      if (code && !label.toUpperCase().includes(`(${code.toUpperCase()})`)) {
+        label = `${label} (${code})`;
+      }
+    }
+    return label;
+  };
 
   const doOne = (key, sel) => {
-    const pre = cfg[key];
+    let pre = cfg[key];
+    if(!pre) {
+      const defaultKey = key === 'pickup_location' ? 'defaultPickupPlaceId' :
+        key === 'drop-off_location' ? 'defaultDropoffPlaceId' : null;
+      if (defaultKey && pageDefaults[defaultKey]) {
+        pre = { placeId: pageDefaults[defaultKey], text: pageDefaults.defaultPickup || pageDefaults.defaultDropoff || '' };
+      }
+    }
     if(!pre || typeof pre !== 'object') return;
     const el = rootDoc.querySelector(sel);
     if(!el || el.dataset.prefilled === '1') return;
 
-    const finish = (text) => {
+    const finish = (text, meta) => {
       if(!text) return;
       el.dataset.prefilled = '1';
       setInputValue(el, text);
+      if (meta?.placeId) {
+        el.dataset.prefillPlaceId = meta.placeId;
+      }
     };
 
     // Case A: Place ID
@@ -1332,8 +1844,8 @@ function applyPrefillMaps(rootDoc){
       const svc = new google.maps.places.PlacesService(document.createElement('div'));
       svc.getDetails({ placeId: pre.placeId, fields: ['name','formatted_address','types'] }, (place, status) => {
         if(status === google.maps.places.PlacesServiceStatus.OK && place){
-          // Prefer name; fall back to formatted address
-          finish(place.name || place.formatted_address || '');
+          const label = resolveLabel(place, pre.text);
+          finish(label, { placeId: pre.placeId });
         }
       });
       return;
@@ -1355,24 +1867,83 @@ function applyPrefillMaps(rootDoc){
 }
 
 // ---------- Autofill hidden drop-off from page title ----------
-function getBestTitle() {
+// Cache for failed tour lookups to prevent repeated 404s
+const tourLookupCache = new Map();
+
+async function getBestTitle() {
+  // 1) Check if tourism-hero already has data
+  try {
+    const hero = document.querySelector('tourism-hero');
+    if (hero?.tourData?.name) {
+      return hero.tourData.name;
+    }
+  } catch (_) {}
+
+  // 2) Try window.__tourData broadcast (set by components.js once loaded)
+  if (window.__tourData?.name) {
+    return window.__tourData.name;
+  }
+
+  // 3) Attempt to fetch the tour directly using the slug + client query params
+  try {
+    const url = new URL(window.location.href);
+    const slug = url.pathname.split('/').filter(Boolean).pop();
+    const clientFromUrl = url.searchParams.get('client');
+    const client = clientFromUrl || window.CFG?.client || window.CFG?.CLIENT;
+    const slugFromCfg = window.CFG?.slug || window.CFG?.CLIENT || window.CFG?.client;
+    const effectiveClient = clientFromUrl || slugFromCfg || client;
+    const apiBase = resolveApiBase();
+
+    if (slug && effectiveClient) {
+      const cacheKey = `${slug}:${effectiveClient}`;
+      
+      // Check cache first
+      if (tourLookupCache.has(cacheKey)) {
+        const cached = tourLookupCache.get(cacheKey);
+        if (cached === null) {
+          // Cached as "not found", skip fetch
+          return null;
+        }
+        if (cached) {
+          // Cached result found
+          return cached;
+        }
+      }
+      
+      const endpoint = `${apiBase}/api/tours/${encodeURIComponent(slug)}?client=${encodeURIComponent(effectiveClient)}&status=all`;
+      const response = await fetch(endpoint, { cache: 'default' });
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data?.tours) && data.tours[0]?.name) {
+          const tourName = data.tours[0].name;
+          tourLookupCache.set(cacheKey, tourName);
+          return tourName;
+        }
+      } else if (response.status === 404) {
+        // Cache 404 to prevent repeated requests
+        tourLookupCache.set(cacheKey, null);
+      }
+    }
+  } catch (err) {
+    console.warn('[TourForm] Failed to resolve tour name from slug:', err);
+  }
+
+  // 4) Fallback to previous heuristic
   const raw =
     document.querySelector('meta[property="og:title"]')?.content ||
     document.title ||
     '';
-  // Trim off common site-title delimiters: "Hotel Foo | Brand", "Hotel Foo – Brand"
-  const parts = raw.split(/ [|\-–•>]+ /); // simple heuristic; keeps the left-most
+  const parts = raw.split(/ [|\-–•>]+ /);
   let t = (parts[0] || raw || '').trim();
   if (!t) {
     const h1 = document.querySelector('h1');
     t = h1 ? h1.textContent.trim() : '';
   }
-  // Collapse whitespace & remove trailing punctuation
   t = t.replace(/\s+/g, ' ').replace(/[|–\-•]+$/,'').trim();
   return t;
 }
 
-function autofillHiddenDropOff(rootDoc) {
+async function autofillHiddenDropOff(rootDoc) {
   const el = (rootDoc || document).querySelector('input[data-q="drop-off_location"]');
   if (!el) return;
   if (el.dataset.dropAutoFilled === '1') return;
@@ -1381,7 +1952,7 @@ function autofillHiddenDropOff(rootDoc) {
   const current = (el.value || '').trim();
   if (current) { el.dataset.dropAutoFilled = '1'; return; }
 
-  const title = getBestTitle();
+  const title = await getBestTitle();
   if (!title) return;
 
   // Auto-fill the drop-off field for both tour forms (hidden via CSS) and transfer forms (hidden via input type)
@@ -1424,7 +1995,7 @@ autofillHiddenDropOff(document);
   setInterval(() => {
     if (document.title !== last) {
       last = document.title;
-      // Allow re-fill if it was never filled (don’t override if already set)
+      // Allow re-fill if it was never filled (don't override if already set)
       const el = document.querySelector('input[data-q="drop-off_location"]');
       if (el && !(el.value || '').trim()) {
         el.dataset.dropAutoFilled = ''; // allow another try
@@ -1439,7 +2010,7 @@ autofillHiddenDropOff(document);
 
   /* ===== Section 8: Initial Enhancement Invocation
     Purpose: Kick off date guard, time picker wiring, and icon injection for elements already in DOM.
-    Adjust order only if dependencies change (icons don’t depend on others).
+    Adjust order only if dependencies change (icons don't depend on others).
   ===================================================== */
   
   // Hide drop-off field for tour forms
@@ -1495,11 +2066,98 @@ autofillHiddenDropOff(document);
    Purpose: Detects new/re-rendered inputs (GHL dynamic forms) and re-applies enhancements.
    Remove for static forms to reduce overhead.
 ===================================================== */
+  // Round Trip checkbox conditional logic
+  function setupRoundTripToggle(rootDoc){
+    if(window.__roundTripToggleSetup) return;
+    window.__roundTripToggleSetup = true;
+
+    // Common checkbox data-q patterns to check
+    const checkboxPatterns = [
+      'round_trip', 'roundtrip', 'is_round_trip', 'round_trip?', 
+      'round_trip_checkbox', 'return_trip', 'is_return_trip'
+    ];
+
+    function findRoundTripCheckbox(doc){
+      // First, try exact match for 'round_trip' (most common pattern)
+      const exactMatch = doc.querySelector('input[type="checkbox"][data-q="round_trip"]');
+      if(exactMatch) return exactMatch;
+      
+      // Try to find checkbox by other common data-q patterns
+      for(const pattern of checkboxPatterns){
+        if(pattern === 'round_trip') continue; // Already checked above
+        const checkbox = doc.querySelector(`input[type="checkbox"][data-q="${pattern}"]`) ||
+                         doc.querySelector(`input[type="checkbox"][data-q*="${pattern}"]`);
+        if(checkbox) return checkbox;
+      }
+      // Fallback: look for checkbox with "round" or "trip" in label or nearby text
+      const allCheckboxes = doc.querySelectorAll('input[type="checkbox"]');
+      for(const cb of allCheckboxes){
+        const label = cb.closest('label') || 
+                      (cb.id && doc.querySelector(`label[for="${cb.id}"]`)) ||
+                      cb.parentElement;
+        if(label && /round.*trip|trip.*round/i.test(label.textContent || '')){
+          return cb;
+        }
+      }
+      return null;
+    }
+
+    function toggleReturnFields(show){
+      const returnDateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="return_date"])');
+      const returnTimeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="return_time"])');
+      
+      if(returnDateWrapper){
+        if(show){
+          returnDateWrapper.classList.add('round-trip-active');
+          returnDateWrapper.style.display = '';
+        } else {
+          returnDateWrapper.classList.remove('round-trip-active');
+          returnDateWrapper.style.display = 'none';
+        }
+      }
+      if(returnTimeWrapper){
+        if(show){
+          returnTimeWrapper.classList.add('round-trip-active');
+          returnTimeWrapper.style.display = '';
+        } else {
+          returnTimeWrapper.classList.remove('round-trip-active');
+          returnTimeWrapper.style.display = 'none';
+        }
+      }
+    }
+
+    function handleCheckboxChange(checkbox){
+      toggleReturnFields(checkbox.checked);
+    }
+
+    // Initial setup
+    const checkbox = findRoundTripCheckbox(rootDoc);
+    if(checkbox){
+      checkbox.addEventListener('change', ()=> handleCheckboxChange(checkbox));
+      // Set initial state
+      toggleReturnFields(checkbox.checked);
+    } else {
+      // If checkbox not found, check periodically (for dynamically loaded forms)
+      let attempts = 0;
+      const checkInterval = setInterval(()=>{
+        const cb = findRoundTripCheckbox(rootDoc);
+        if(cb){
+          cb.addEventListener('change', ()=> handleCheckboxChange(cb));
+          toggleReturnFields(cb.checked);
+          clearInterval(checkInterval);
+        }
+        attempts++;
+        if(attempts > 20) clearInterval(checkInterval); // Stop after 10 seconds
+      }, 500);
+    }
+  }
+
 (function observeLateFields(){
   if(window.__iconFieldObserver) return;
 
   const targetAttrs = [
     'pickup_location','drop-off_location','pickup_date','pickup_time',
+    'return_date','return_time',
     'number_of_passengers','full_name','email','phone'
   ];
 
@@ -1521,6 +2179,11 @@ autofillHiddenDropOff(document);
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
+            
+            // Setup round trip toggle when return fields are detected
+            if(q === 'return_date' || q === 'return_time'){
+              try { setupRoundTripToggle(document); } catch(_) {}
+            }
 
             // Prefill attempts (idempotent; guarded internally)
             applyPrefillBasic(document);
@@ -1541,10 +2204,17 @@ autofillHiddenDropOff(document);
               try { attachPickupDateGuard(document); } catch(_) {}
               try { window.__pickupDatePicker?.attach(document); } catch(_) {}
             }
+            if(q === 'return_date'){
+              try { attachPickupDateGuard(document); } catch(_) {}
+              try { window.__pickupDatePicker?.attach(document); } catch(_) {}
+            }
 
             // Late time field: time picker attachment  
             if(q === 'pickup_time'){
               try { attachPickupTimePicker(document, el); } catch(_) {}
+            }
+            if(q === 'return_time'){
+              try { attachReturnTimePicker(document, el); } catch(_) {}
             }
 
             // Late passenger field: dropdown select
@@ -1583,7 +2253,8 @@ autofillHiddenDropOff(document);
           prioritize predictions (airports > hotels), and expose debug reposition helper.
     Remove airport arrays & prioritizer if you only need basic Places autocomplete.
   ===================================================== */
-  loadGoogleMaps(()=>{
+  loadGoogleMaps(async ()=>{
+    await ensurePlacesLibrary().catch(err => console.warn('[TourForm] Places library import error:', err));
     const wantsJM =
 	    (Array.isArray(CONFIG.countries) && CONFIG.countries.includes('jm')) ||
 	    (CONFIG.region?.toLowerCase?.() === 'jm');
@@ -1673,7 +2344,7 @@ autofillHiddenDropOff(document);
 
     items.forEach(el => {
       const txt = (el.textContent || '').trim();
-      if (!isSpecificEnough(txt)) el.remove(); // drop “Montego Bay”-type areas
+      if (!isSpecificEnough(txt)) el.remove(); // drop "Montego Bay"-type areas
     });
 
     const left = [...container.querySelectorAll('.pac-item')];
