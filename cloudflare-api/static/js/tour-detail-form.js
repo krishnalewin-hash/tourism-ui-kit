@@ -39,14 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Minimal baseline styles (keep date stable; no layout experiments)
   (function injectMinimalStyles(){
     if(document.getElementById('booking-form-minimal-styles')) return;
-  const css = `/* Core icon wrapper + input padding */\n.icon-field-wrapper{position:relative;display:block;width:100%;}\n.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}\n.icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n/* Hide passenger field icon initially to prevent flash during input->select conversion */\n.icon-field-wrapper .field-icon[data-for="number_of_passengers"]{opacity:0;transition:opacity 0.3s ease;}\n/* Show passenger icon when wrapper has 'select-ready' class */\n.icon-field-wrapper.select-ready .field-icon[data-for="number_of_passengers"]{opacity:1;}\n.icon-field-wrapper > input[data-iconized='1'][data-q],.icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.1rem !important;}\n/* Baseline field styling (added for pickup/drop-off/time) */\ninput[data-q],input[data-q='pickup_location'],input[data-q='drop-off_location'],input[data-q='pickup_time'],input[data-q='return_time']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\ninput[data-q='pickup_date'],input[data-q='return_date']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\n/* Hide return date/time fields by default, show when round trip is checked */\n.icon-field-wrapper:has(input[data-q='return_date']),\n.icon-field-wrapper:has(input[data-q='return_time']){display:none !important;}\n.icon-field-wrapper.round-trip-active:has(input[data-q='return_date']),\n.icon-field-wrapper.round-trip-active:has(input[data-q='return_time']){display:block !important;}\n/* Unified text color across all data-q inputs/selects */\ninput[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}\n/* Larger Google Places Autocomplete dropdown (single-line) */\n.pac-container{font-size:16px !important; line-height:1.35 !important;}\n.pac-item{padding:10px 14px !important; font-size:15px !important;}\n.pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}\n.pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}\n/* Date picker popover */\n#pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}\n#pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}\n#pickup-date-popover button.dp-nav{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}\n#pickup-date-popover button.dp-nav:hover{background:#f2f2f2;}\n#pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}\n#pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}\n#pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}\n#pickup-date-popover .dp-day:hover{background:#eee;}\n#pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}\n#pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}\n#pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}\n`;
+  const css = `/* Core icon wrapper + input padding */\n.icon-field-wrapper{position:relative;display:block;width:100%;}\n.icon-field-wrapper .field-icon{position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;pointer-events:none;color:#777;}\n.icon-field-wrapper .field-icon svg{width:20px;height:20px;stroke:#777;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}\n/* Hide passenger field icon initially to prevent flash during input->select conversion */\n.icon-field-wrapper .field-icon[data-for="number_of_passengers"]{opacity:0;transition:opacity 0.3s ease;}\n/* Show passenger icon when wrapper has 'select-ready' class */\n.icon-field-wrapper.select-ready .field-icon[data-for="number_of_passengers"]{opacity:1;}\n.icon-field-wrapper > input[data-iconized='1'][data-q],.icon-field-wrapper > select[data-iconized='1'][data-q]{padding-left:2.1rem !important;}\n/* Baseline field styling (added for pickup/drop-off/time) */\ninput[data-q],input[data-q='pickup_location'],input[data-q='drop-off_location'],input[data-q='pickup_time']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\ninput[data-q='pickup_date']{display:inline-block !important;width:100% !important;min-width:200px !important;padding:10px 18px 10px 2.25rem !important;border:1px solid #ccc !important;background:#fff !important;line-height:1.4 !important;box-sizing:border-box !important;min-height:40px !important;color:#222 !important;}\n/* Unified text color across all data-q inputs/selects */\ninput[data-q], select[data-q], .icon-field-wrapper input, .icon-field-wrapper select{color:#222 !important;}\n/* Larger Google Places Autocomplete dropdown (single-line) */\n.pac-container{font-size:16px !important; line-height:1.35 !important;}\n.pac-item{padding:10px 14px !important; font-size:15px !important;}\n.pac-item:hover, .pac-item.pac-item-selected{background:#266BBC !important; color:#fff !important;}\n.pac-item:hover .pac-item-query, .pac-item.pac-item-selected .pac-item-query{color:#fff !important;}\n/* Date picker popover */\n#pickup-date-popover{position:absolute;z-index:2147483646;background:#fff;border:1px solid #444;border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.18);padding:10px 12px;width:320px !important;display:none;font:20px/1.3 system-ui,Arial,sans-serif !important;}\n#pickup-date-popover .dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px !important;font-weight:600;}\n#pickup-date-popover button.dp-nav{all:unset;cursor:pointer;font-size:20px !important;line-height:1;padding:4px 8px;border-radius:6px;color:#222;}\n#pickup-date-popover button.dp-nav:hover{background:#f2f2f2;}\n#pickup-date-popover .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}\n#pickup-date-popover .dp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px !important;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:#666;text-align:center;}\n#pickup-date-popover .dp-day{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:18px !important;cursor:pointer;border-radius:6px;user-select:none;}\n#pickup-date-popover .dp-day:hover{background:#eee;}\n#pickup-date-popover .dp-day.dp-disabled{opacity:.35;cursor:not-allowed;}\n#pickup-date-popover .dp-day.dp-today{outline:2px solid #188BF6;outline-offset:2px;}\n#pickup-date-popover .dp-day.dp-selected{background:#188BF6;color:#FFF;font-weight:600;}\n`;
     const s=document.createElement('style'); s.id='booking-form-minimal-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
   // Inject validation styles (error state + shake + inline message)
   (function injectValidationStyles(){
     if(document.getElementById('booking-form-validation-styles')) return;
-  const css = `/* Validation visuals */\n.input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important;}\n/* Wrapper may shake but shouldn't show red border */\n.icon-field-wrapper.input-error{border-radius:6px;}\n.field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}\n@keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}\n.shake{animation:bf-shake 400ms ease-in-out;}\n\n/* Equalize border radius for step-1 inputs (normal + error states) */\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='return_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='return_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],\ninput[data-q='pickup_location'],\ninput[data-q='drop-off_location'],\ninput[data-q='pickup_date'],\ninput[data-q='pickup_time'],\ninput[data-q='return_date'],\ninput[data-q='return_time'],\ninput[data-q='number_of_passengers'],\ninput[data-q='pickup_location'][aria-invalid='true'],\ninput[data-q='drop-off_location'][aria-invalid='true'],\ninput[data-q='pickup_date'][aria-invalid='true'],\ninput[data-q='pickup_time'][aria-invalid='true'],\ninput[data-q='return_date'][aria-invalid='true'],\ninput[data-q='return_time'][aria-invalid='true'],\ninput[data-q='number_of_passengers'][aria-invalid='true'],\ninput[data-q='pickup_location'].input-error,\ninput[data-q='drop-off_location'].input-error,\ninput[data-q='pickup_date'].input-error,\ninput[data-q='pickup_time'].input-error,\ninput[data-q='return_date'].input-error,\ninput[data-q='return_time'].input-error,\ninput[data-q='number_of_passengers'].input-error {\n  border-radius: 4px !important;\n}\n`;
+  const css = `/* Validation visuals */\n.input-error{border-color:#e53935 !important;box-shadow:0 0 0 2px rgba(229,57,53,0.15) !important;}\n/* Wrapper may shake but shouldn't show red border */\n.icon-field-wrapper.input-error{border-radius:6px;}\n.field-error{display:block;margin-top:6px;color:#e53935;font-size:12px;line-height:1.2;border:0 !important;box-shadow:none !important;}\n@keyframes bf-shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}\n.shake{animation:bf-shake 400ms ease-in-out;}\n\n/* Equalize border radius for step-1 inputs (normal + error states) */\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='drop-off_location'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_date'],\n.icon-field-wrapper .icon-input-row > input[data-q='pickup_time'],\n.icon-field-wrapper .icon-input-row > input[data-q='number_of_passengers'],\ninput[data-q='pickup_location'],\ninput[data-q='drop-off_location'],\ninput[data-q='pickup_date'],\ninput[data-q='pickup_time'],\ninput[data-q='number_of_passengers'],\ninput[data-q='pickup_location'][aria-invalid='true'],\ninput[data-q='drop-off_location'][aria-invalid='true'],\ninput[data-q='pickup_date'][aria-invalid='true'],\ninput[data-q='pickup_time'][aria-invalid='true'],\ninput[data-q='number_of_passengers'][aria-invalid='true'],\ninput[data-q='pickup_location'].input-error,\ninput[data-q='drop-off_location'].input-error,\ninput[data-q='pickup_date'].input-error,\ninput[data-q='pickup_time'].input-error,\ninput[data-q='number_of_passengers'].input-error {\n  border-radius: 4px !important;\n}\n`;
     const s=document.createElement('style'); s.id='booking-form-validation-styles'; s.textContent=css; document.head.appendChild(s);
   })();
 
@@ -605,7 +605,8 @@ function createAutocompleteInstance(inputEl, options){
     Remove if native date input validation or backend checks are sufficient.
     Caveat: Formats value (could differ from backend ISO expectations).
   ===================================================== */
-  function attachDateGuardForInput(input){
+  function attachPickupDateGuard(rootDoc){
+    const input = rootDoc.querySelector('input[data-q="pickup_date"]');
     if (!input || input.dataset.dateGuard === '1') return;
     input.dataset.dateGuard = '1';
     
@@ -614,29 +615,30 @@ function createAutocompleteInstance(inputEl, options){
       input.style.setProperty('color', '#000', 'important');
       input.style.setProperty('background', '#fff', 'important');
       input.style.setProperty('opacity', '1', 'important');
+      // Width and padding are now handled by CSS to prevent layout shift
     } catch(_) {}
     
     const todayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
-    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     function parseLocalDate(str){
       if (!str) return null;
       let s = str.trim();
       // Remove commas & ordinal suffixes (1st/2nd/3rd/4th...)
       s = s.replace(/,/g,'').replace(/\b(\d{1,2})(st|nd|rd|th)\b/i,'$1');
-      // Remove leading weekday (full or 3‑letter) if present
-      s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
+  // Remove leading weekday (full or 3‑letter) if present
+  s = s.replace(/^(Sun(day)?|Mon(day)?|Tue(sday)?|Wed(nesday)?|Thu(rsday)?|Fri(day)?|Sat(urday)?)\s+/i,'');
       // YYYY-MM-DD
       let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return new Date(+m[1],+m[2]-1,+m[3]);
       // MM/DD/YYYY or M-D-YYYY
       m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
       if (m){ const a=+m[1], b=+m[2], y=+m[3]; const day=a>12?a:b, mon=a>12?b:a; return new Date(y,mon-1,day);} 
-      // Full MonthName Day Year
-      m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
+  // Full MonthName Day Year
+  m = s.match(/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{1,2}) (\d{4})$/i);
       if (m){ return new Date(+m[3], MONTHS.findIndex(M=>M.toLowerCase()===m[1].toLowerCase()), +m[2]); }
-      // Abbrev MonthName Day Year
-      m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
-      if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
+  // Abbrev MonthName Day Year
+  m = s.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}) (\d{4})$/i);
+  if (m){ const fullIndex=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[1].substr(0,3)); return new Date(+m[3], fullIndex, +m[2]); }
       const d=new Date(s); return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
     }
     function formatDisplay(d){
@@ -644,7 +646,7 @@ function createAutocompleteInstance(inputEl, options){
       const day = d.getDate();
       const yr = d.getFullYear();
       const weekday = WEEKDAYS[d.getDay()].slice(0,3); // Abbrev weekday
-      return `${weekday}, ${month} ${day}, ${yr}`;
+  return `${weekday}, ${month} ${day}, ${yr}`;
     }
     function enforce(){
       const d=parseLocalDate(input.value);
@@ -677,14 +679,10 @@ function createAutocompleteInstance(inputEl, options){
         enforce();
       }
     }, 500);
-  }
-
-  function attachPickupDateGuard(rootDoc){
-    const pickupInput = rootDoc.querySelector('input[data-q="pickup_date"]');
-    const returnInput = rootDoc.querySelector('input[data-q="return_date"]');
     
-    if (pickupInput) attachDateGuardForInput(pickupInput);
-    if (returnInput) attachDateGuardForInput(returnInput);
+    // Remove the wrapper-based event handling that's causing issues
+    // const wrapper=input.closest('.vdpWithInput, .vdpComponent, .date-picker-field-survey');
+    // if(wrapper) wrapper.addEventListener('click',()=>{ startWatch(); setTimeout(enforce,50); });
   }
 
   // (Time input logic removed at user request)
@@ -774,26 +772,6 @@ function createAutocompleteInstance(inputEl, options){
   // Wire one or more pickup time inputs to the singleton picker
   function attachPickupTimePicker(rootDoc, specificEl){
     const input = specificEl || rootDoc.querySelector('input[data-q="pickup_time"]');
-    if(!input) return;
-    if(input.dataset.timeSpinnerWired) return;
-    input.dataset.timeSpinnerWired='1';
-    input.type='text';
-    input.readOnly=true; // prevent mobile keyboard
-    input.style.cursor='pointer';
-    input.autocomplete='off';
-    input.addEventListener('click', ()=> window.__singletonTimePicker.openFor(input));
-    input.addEventListener('focus', ()=> {
-      if(window.__singletonTimePicker.suppressNextFocusOpen){
-        window.__singletonTimePicker.suppressNextFocusOpen = false; // consume flag
-        return;
-      }
-      window.__singletonTimePicker.openFor(input);
-    });
-  }
-
-  // Wire return time input to the singleton picker
-  function attachReturnTimePicker(rootDoc, specificEl){
-    const input = specificEl || rootDoc.querySelector('input[data-q="return_time"]');
     if(!input) return;
     if(input.dataset.timeSpinnerWired) return;
     input.dataset.timeSpinnerWired='1';
@@ -1304,22 +1282,7 @@ function createAutocompleteInstance(inputEl, options){
     function keyNav(e){ if(e.key==='Escape'){ close(); state.input?.focus(); } }
     pop.addEventListener('click',e=>{ const nav=e.target.getAttribute('data-nav'); if(nav){ state.month+= +nav; if(state.month<0){ state.month=11; state.year--; } else if(state.month>11){ state.month=0; state.year++; } build(); return; } const day=e.target.getAttribute('data-day'); if(day){ const sel=new Date(state.year,state.month,+day); if(sel<todayStart()) return; const formatted=formatVerbose(sel); state.input.value=formatted; state.input.setAttribute('value',formatted); state.input.dispatchEvent(new Event('input',{bubbles:true})); state.input.dispatchEvent(new Event('change',{bubbles:true})); close(); }});
     window.addEventListener('resize',()=> position()); window.addEventListener('scroll',()=> position(), true);
-    function attach(rootDoc){ 
-      const pickupInput=rootDoc.querySelector('input[data-q="pickup_date"]'); 
-      if(pickupInput && pickupInput.dataset.datePickerWired!=='1'){ 
-        pickupInput.dataset.datePickerWired='1'; 
-        pickupInput.readOnly=true; 
-        pickupInput.addEventListener('focus',()=> openFor(pickupInput)); 
-        pickupInput.addEventListener('click',()=> openFor(pickupInput)); 
-      }
-      const returnInput=rootDoc.querySelector('input[data-q="return_date"]'); 
-      if(returnInput && returnInput.dataset.datePickerWired!=='1'){ 
-        returnInput.dataset.datePickerWired='1'; 
-        returnInput.readOnly=true; 
-        returnInput.addEventListener('focus',()=> openFor(returnInput)); 
-        returnInput.addEventListener('click',()=> openFor(returnInput)); 
-      }
-    }
+    function attach(rootDoc){ const input=rootDoc.querySelector('input[data-q="pickup_date"]'); if(!input || input.dataset.datePickerWired==='1') return; input.dataset.datePickerWired='1'; input.readOnly=true; input.addEventListener('focus',()=> openFor(input)); input.addEventListener('click',()=> openFor(input)); }
     window.__pickupDatePicker={ openFor, close, attach };
     // initial attach
     attach(document);
@@ -1623,8 +1586,6 @@ function createAutocompleteInstance(inputEl, options){
       'drop-off_location':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
       'pickup_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
       'pickup_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
-      'return_date':`<svg viewBox='0 0 24 24' aria-hidden='true'><rect x='3' y='5' width='18' height='16' rx='2' ry='2'/><line x1='16' y1='3' x2='16' y2='7'/><line x1='8' y1='3' x2='8' y2='7'/><line x1='3' y1='11' x2='21' y2='11'/></svg>`,
-      'return_time':`<svg viewBox='0 0 24 24' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>`,
       'number_of_passengers':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>`,
       'full_name':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/></svg>`,
       'email':`<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z'/><polyline points='22,6 12,13 2,6'/></svg>`,
@@ -1867,9 +1828,6 @@ function applyPrefillMaps(rootDoc){
 }
 
 // ---------- Autofill hidden drop-off from page title ----------
-// Cache for failed tour lookups to prevent repeated 404s
-const tourLookupCache = new Map();
-
 async function getBestTitle() {
   // 1) Check if tourism-hero already has data
   try {
@@ -1895,33 +1853,13 @@ async function getBestTitle() {
     const apiBase = resolveApiBase();
 
     if (slug && effectiveClient) {
-      const cacheKey = `${slug}:${effectiveClient}`;
-      
-      // Check cache first
-      if (tourLookupCache.has(cacheKey)) {
-        const cached = tourLookupCache.get(cacheKey);
-        if (cached === null) {
-          // Cached as "not found", skip fetch
-          return null;
-        }
-        if (cached) {
-          // Cached result found
-          return cached;
-        }
-      }
-      
       const endpoint = `${apiBase}/api/tours/${encodeURIComponent(slug)}?client=${encodeURIComponent(effectiveClient)}&status=all`;
       const response = await fetch(endpoint, { cache: 'default' });
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data?.tours) && data.tours[0]?.name) {
-          const tourName = data.tours[0].name;
-          tourLookupCache.set(cacheKey, tourName);
-          return tourName;
+          return data.tours[0].name;
         }
-      } else if (response.status === 404) {
-        // Cache 404 to prevent repeated requests
-        tourLookupCache.set(cacheKey, null);
       }
     }
   } catch (err) {
@@ -2066,98 +2004,11 @@ autofillHiddenDropOff(document);
    Purpose: Detects new/re-rendered inputs (GHL dynamic forms) and re-applies enhancements.
    Remove for static forms to reduce overhead.
 ===================================================== */
-  // Round Trip checkbox conditional logic
-  function setupRoundTripToggle(rootDoc){
-    if(window.__roundTripToggleSetup) return;
-    window.__roundTripToggleSetup = true;
-
-    // Common checkbox data-q patterns to check
-    const checkboxPatterns = [
-      'round_trip', 'roundtrip', 'is_round_trip', 'round_trip?', 
-      'round_trip_checkbox', 'return_trip', 'is_return_trip'
-    ];
-
-    function findRoundTripCheckbox(doc){
-      // First, try exact match for 'round_trip' (most common pattern)
-      const exactMatch = doc.querySelector('input[type="checkbox"][data-q="round_trip"]');
-      if(exactMatch) return exactMatch;
-      
-      // Try to find checkbox by other common data-q patterns
-      for(const pattern of checkboxPatterns){
-        if(pattern === 'round_trip') continue; // Already checked above
-        const checkbox = doc.querySelector(`input[type="checkbox"][data-q="${pattern}"]`) ||
-                         doc.querySelector(`input[type="checkbox"][data-q*="${pattern}"]`);
-        if(checkbox) return checkbox;
-      }
-      // Fallback: look for checkbox with "round" or "trip" in label or nearby text
-      const allCheckboxes = doc.querySelectorAll('input[type="checkbox"]');
-      for(const cb of allCheckboxes){
-        const label = cb.closest('label') || 
-                      (cb.id && doc.querySelector(`label[for="${cb.id}"]`)) ||
-                      cb.parentElement;
-        if(label && /round.*trip|trip.*round/i.test(label.textContent || '')){
-          return cb;
-        }
-      }
-      return null;
-    }
-
-    function toggleReturnFields(show){
-      const returnDateWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="return_date"])');
-      const returnTimeWrapper = rootDoc.querySelector('.icon-field-wrapper:has(input[data-q="return_time"])');
-      
-      if(returnDateWrapper){
-        if(show){
-          returnDateWrapper.classList.add('round-trip-active');
-          returnDateWrapper.style.display = '';
-        } else {
-          returnDateWrapper.classList.remove('round-trip-active');
-          returnDateWrapper.style.display = 'none';
-        }
-      }
-      if(returnTimeWrapper){
-        if(show){
-          returnTimeWrapper.classList.add('round-trip-active');
-          returnTimeWrapper.style.display = '';
-        } else {
-          returnTimeWrapper.classList.remove('round-trip-active');
-          returnTimeWrapper.style.display = 'none';
-        }
-      }
-    }
-
-    function handleCheckboxChange(checkbox){
-      toggleReturnFields(checkbox.checked);
-    }
-
-    // Initial setup
-    const checkbox = findRoundTripCheckbox(rootDoc);
-    if(checkbox){
-      checkbox.addEventListener('change', ()=> handleCheckboxChange(checkbox));
-      // Set initial state
-      toggleReturnFields(checkbox.checked);
-    } else {
-      // If checkbox not found, check periodically (for dynamically loaded forms)
-      let attempts = 0;
-      const checkInterval = setInterval(()=>{
-        const cb = findRoundTripCheckbox(rootDoc);
-        if(cb){
-          cb.addEventListener('change', ()=> handleCheckboxChange(cb));
-          toggleReturnFields(cb.checked);
-          clearInterval(checkInterval);
-        }
-        attempts++;
-        if(attempts > 20) clearInterval(checkInterval); // Stop after 10 seconds
-      }, 500);
-    }
-  }
-
 (function observeLateFields(){
   if(window.__iconFieldObserver) return;
 
   const targetAttrs = [
     'pickup_location','drop-off_location','pickup_date','pickup_time',
-    'return_date','return_time',
     'number_of_passengers','full_name','email','phone'
   ];
 
@@ -2179,11 +2030,6 @@ autofillHiddenDropOff(document);
             enhanceVisual(document);
             enhanceNextButtonMobile(document);
             enhanceSubmitButton(document);
-            
-            // Setup round trip toggle when return fields are detected
-            if(q === 'return_date' || q === 'return_time'){
-              try { setupRoundTripToggle(document); } catch(_) {}
-            }
 
             // Prefill attempts (idempotent; guarded internally)
             applyPrefillBasic(document);
@@ -2204,17 +2050,10 @@ autofillHiddenDropOff(document);
               try { attachPickupDateGuard(document); } catch(_) {}
               try { window.__pickupDatePicker?.attach(document); } catch(_) {}
             }
-            if(q === 'return_date'){
-              try { attachPickupDateGuard(document); } catch(_) {}
-              try { window.__pickupDatePicker?.attach(document); } catch(_) {}
-            }
 
             // Late time field: time picker attachment  
             if(q === 'pickup_time'){
               try { attachPickupTimePicker(document, el); } catch(_) {}
-            }
-            if(q === 'return_time'){
-              try { attachReturnTimePicker(document, el); } catch(_) {}
             }
 
             // Late passenger field: dropdown select
