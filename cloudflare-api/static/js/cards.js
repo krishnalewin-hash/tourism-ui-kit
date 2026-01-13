@@ -140,9 +140,19 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
   /* ---------- Client-side filter (safety net) ---------- */
   const match = (t) => {
     if (!FILTER || FILTER.mode === 'all') return true;
-    if (FILTER.mode === 'tag')     return (t.tags||[]).map(norm).includes(norm(FILTER.value));
-    if (FILTER.mode === 'type')    return norm(t.type) === norm(FILTER.value);
-    if (FILTER.mode === 'keyword') return [t.name,t.excerpt,(t.tags||[]).join(' ')].map(norm).join(' ').includes(norm(FILTER.value));
+    const valueNorm = norm(FILTER.value);
+    if (FILTER.mode === 'tag')     return (t.tags||[]).map(norm).includes(valueNorm);
+    if (FILTER.mode === 'type') {
+      const typeNorm = norm(t.type);
+      const categoryNorm = norm(t.category);
+      return typeNorm === valueNorm || categoryNorm === valueNorm;
+    }
+    if (FILTER.mode === 'category') {
+      const typeNorm = norm(t.type);
+      const categoryNorm = norm(t.category);
+      return typeNorm === valueNorm || categoryNorm === valueNorm;
+    }
+    if (FILTER.mode === 'keyword') return [t.name,t.excerpt,(t.tags||[]).join(' ')].map(norm).join(' ').includes(valueNorm);
     return true;
   };
 
@@ -152,6 +162,8 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
     const duration = t.duration ? esc(t.duration) : '';
     const location = t.location ? esc(t.location) : '';
     const type = t.type ? esc(t.type) : '';
+    const category = t.category ? esc(t.category) : '';
+    const primaryType = type || category;
     const group = t.group ? esc(t.group) : '';
     const excerpt = t.excerpt ? esc(t.excerpt) : '';
     const slug = esc(t.slug || '');
@@ -177,8 +189,8 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
         <div class="tour-meta" aria-label="Tour details">
           ${duration ? `<span><span aria-hidden="true">⏱ </span><span class="sr-only">Duration: </span>${duration}</span>` : ''}
           ${location ? `<span><span aria-hidden="true">📍 </span><span class="sr-only">Location: </span>${location}</span>` : ''}
-          ${type ? `<span><span aria-hidden="true">🏷 </span><span class="sr-only">Type: </span>${type}</span>` : ''}
-          ${group ? `<span><span aria-hidden="true">👥 </span><span class="sr-only">Group: </span>${group}</span>` : ''}
+          ${primaryType ? `<span><span aria-hidden="true">🏷 </span><span class="sr-only">Type: </span>${primaryType}</span>` : ''}
+          ${group ? `<span><span aria-hidden="true">👥 </span><span class="sr-only">Group Size: </span>${group}</span>` : ''}
         </div>
         ${excerpt ? `<p class="tour-desc">${excerpt}</p>` : ''}
       </div>
@@ -303,8 +315,8 @@ async function __waitForConfig__(selectorFallback='#tour-list') {
 
   // Apply client-side filter only if server didn't already filter
   const rows = (FILTER?.mode && FILTER?.value && FILTER.mode !== 'all') 
-    ? fetchedTours  // Server already filtered, don't filter again
-    : fetchedTours.filter(match); // Server didn't filter, apply client filter
+    ? fetchedTours.filter(match) // Always enforce client-side match in case server doesn't recognize mode
+    : fetchedTours;
   
   console.log('[Tours] Final filtered count:', rows.length);
   const cacheVersion = cached?.version || null;

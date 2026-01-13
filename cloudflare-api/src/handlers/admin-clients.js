@@ -2,13 +2,46 @@
  * Admin API handlers for client management
  */
 
+function serializeJsonField(fieldName, value) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '') return null;
+    try {
+      JSON.parse(trimmed);
+      return trimmed;
+    } catch (err) {
+      throw new Error(`Invalid JSON for ${fieldName}`);
+    }
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch (err) {
+    throw new Error(`Invalid JSON for ${fieldName}`);
+  }
+}
+
+function parseJsonField(value) {
+  if (!value || typeof value !== 'string') return null;
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    console.warn('Failed to parse JSON field:', err);
+    return null;
+  }
+}
+
 /**
  * GET /admin/clients - List all clients
  */
 export async function listClients(request, env) {
   try {
     const { results } = await env.DB.prepare(
-      'SELECT id, name, display_name, status, google_maps_api_key, created_at, updated_at FROM clients ORDER BY name ASC'
+      'SELECT id, name, display_name, status, google_maps_api_key, country, allowed_origin, created_at, updated_at FROM clients ORDER BY name ASC'
     ).all();
 
     return new Response(
@@ -53,13 +86,25 @@ export async function getClient(request, env, params) {
       'SELECT COUNT(*) as count FROM tours WHERE client_id = ?'
     ).bind(id).first();
 
+    const quoteResultsConfig = parseJsonField(client.quote_results_config);
+    const coreConfig = parseJsonField(client.core_config);
+    const contactConfig = parseJsonField(client.contact_config);
+
+    const responseClient = {
+      ...client,
+      quote_results_config: quoteResultsConfig,
+      core_config: coreConfig,
+      contact_config: contactConfig,
+      FORM_CONFIG: coreConfig?.FORM_CONFIG,
+      QUOTE_RESULTS_CONFIG: quoteResultsConfig || coreConfig?.QUOTE_RESULTS_CONFIG,
+      CONTACT_CONFIG: contactConfig || coreConfig?.CONTACT_CONFIG,
+      tour_count: tourCount?.count || 0,
+    };
+
     return new Response(
       JSON.stringify({
         success: true,
-        client: {
-          ...client,
-          tour_count: tourCount?.count || 0,
-        },
+        client: responseClient,
       }),
       {
         status: 200,
@@ -81,11 +126,39 @@ export async function getClient(request, env, params) {
 export async function createClient(request, env) {
   try {
     const body = await request.json();
-    const { name, display_name, status = 'active', google_maps_api_key } = body;
+    const {
+      name,
+      display_name,
+      status = 'active',
+      google_maps_api_key,
+      country,
+      allowed_origin,
+      quote_results_config,
+      core_config,
+      contact_config,
+      client_email,
+      client_phone,
+      preferred_contact_method,
+    } = body;
 
     if (!name) {
       return new Response(
         JSON.stringify({ error: 'Client name is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    let quoteResultsValue = null;
+    let coreConfigValue = null;
+    let contactConfigValue = null;
+
+    try {
+      quoteResultsValue = serializeJsonField('quote_results_config', quote_results_config);
+      coreConfigValue = serializeJsonField('core_config', core_config);
+      contactConfigValue = serializeJsonField('contact_config', contact_config);
+    } catch (err) {
+      return new Response(
+        JSON.stringify({ error: err.message || 'Invalid client configuration' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -104,18 +177,38 @@ export async function createClient(request, env) {
 
     // Create client
     const result = await env.DB.prepare(
-      'INSERT INTO clients (name, display_name, status, google_maps_api_key) VALUES (?, ?, ?, ?)'
-    ).bind(name, display_name || name, status, google_maps_api_key || null).run();
+      'INSERT INTO clients (name, display_name, status, google_maps_api_key, country, allowed_origin, quote_results_config, core_config, contact_config, client_email, client_phone, preferred_contact_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(
+      name,
+      display_name || name,
+      status,
+      google_maps_api_key || null,
+      country ? String(country).trim() || null : null,
+      allowed_origin ? String(allowed_origin).trim() || null : null,
+      quoteResultsValue,
+      coreConfigValue,
+      contactConfigValue,
+      client_email || null,
+      client_phone || null,
+      preferred_contact_method || null
+    ).run();
 
     // Get the created client
     const client = await env.DB.prepare(
       'SELECT * FROM clients WHERE id = ?'
     ).bind(result.meta.last_row_id).first();
 
+    const responseClient = {
+      ...client,
+      quote_results_config: parseJsonField(client.quote_results_config),
+      core_config: parseJsonField(client.core_config),
+      contact_config: parseJsonField(client.contact_config),
+    };
+
     return new Response(
       JSON.stringify({
         success: true,
-        client: client,
+        client: responseClient,
       }),
       {
         status: 201,
@@ -139,7 +232,20 @@ export async function updateClient(request, env, params) {
 
   try {
     const body = await request.json();
-    const { name, display_name, status, google_maps_api_key } = body;
+    const {
+      name,
+      display_name,
+      status,
+      google_maps_api_key,
+      country,
+      allowed_origin,
+      quote_results_config,
+      core_config,
+      contact_config,
+      client_email,
+      client_phone,
+      preferred_contact_method,
+    } = body;
 
     // Check if client exists
     const existing = await env.DB.prepare(
@@ -171,7 +277,74 @@ export async function updateClient(request, env, params) {
     }
     if (google_maps_api_key !== undefined) {
       updates.push('google_maps_api_key = ?');
-      values.push(google_maps_api_key);
+      values.push(google_maps_api_key || null);
+    }
+
+    if (body.hasOwnProperty('country')) {
+      updates.push('country = ?');
+      const normalizedCountry = country ? String(country).trim() : '';
+      values.push(normalizedCountry || null);
+    }
+
+    if (body.hasOwnProperty('allowed_origin')) {
+      updates.push('allowed_origin = ?');
+      const normalizedOrigin = allowed_origin ? String(allowed_origin).trim() : '';
+      values.push(normalizedOrigin || null);
+      console.log('[updateClient] Updating allowed_origin:', normalizedOrigin || null, 'from body:', allowed_origin);
+    } else {
+      console.log('[updateClient] allowed_origin not in body, skipping update');
+    }
+
+    if (body.hasOwnProperty('quote_results_config')) {
+      try {
+        updates.push('quote_results_config = ?');
+        values.push(serializeJsonField('quote_results_config', quote_results_config));
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ error: err.message || 'Invalid quote_results_config' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    if (body.hasOwnProperty('core_config')) {
+      try {
+        updates.push('core_config = ?');
+        values.push(serializeJsonField('core_config', core_config));
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ error: err.message || 'Invalid core_config' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    if (body.hasOwnProperty('contact_config')) {
+      try {
+        updates.push('contact_config = ?');
+        values.push(serializeJsonField('contact_config', contact_config));
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ error: err.message || 'Invalid contact_config' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Handle contact preference fields
+    if (body.hasOwnProperty('client_email')) {
+      updates.push('client_email = ?');
+      values.push(client_email || null);
+    }
+
+    if (body.hasOwnProperty('client_phone')) {
+      updates.push('client_phone = ?');
+      values.push(client_phone || null);
+    }
+
+    if (body.hasOwnProperty('preferred_contact_method')) {
+      updates.push('preferred_contact_method = ?');
+      values.push(preferred_contact_method || null);
     }
 
     updates.push('updated_at = CURRENT_TIMESTAMP');
@@ -193,10 +366,17 @@ export async function updateClient(request, env, params) {
       'SELECT * FROM clients WHERE id = ?'
     ).bind(id).first();
 
+    const responseClient = {
+      ...client,
+      quote_results_config: parseJsonField(client.quote_results_config),
+      core_config: parseJsonField(client.core_config),
+      contact_config: parseJsonField(client.contact_config),
+    };
+
     return new Response(
       JSON.stringify({
         success: true,
-        client: client,
+        client: responseClient,
       }),
       {
         status: 200,

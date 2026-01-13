@@ -129,6 +129,31 @@
 
     if (titleEl) titleEl.textContent = tour.name || '';
     
+    // Set page title to prevent reversion to default
+    if (tour.name) {
+      document.title = tour.name;
+      // Also set meta title for better SEO
+      const metaTitle = document.querySelector('meta[property="og:title"]');
+      if (metaTitle) {
+        metaTitle.setAttribute('content', tour.name);
+      }
+      
+      // Store the tour title globally to prevent other scripts from overriding it
+      window.__TOUR_TITLE__ = tour.name;
+      
+      // Set up a title watcher to maintain the correct title
+      if (!window.__TITLE_WATCHER__) {
+        window.__TITLE_WATCHER__ = true;
+        let lastTitle = document.title;
+        setInterval(() => {
+          if (window.__TOUR_TITLE__ && document.title !== window.__TOUR_TITLE__) {
+            document.title = window.__TOUR_TITLE__;
+            console.log('[TourDetail] Title corrected to:', window.__TOUR_TITLE__);
+          }
+        }, 1000);
+      }
+    }
+    
     if (metaEl) {
       const bits = [];
       if (tour.duration) bits.push(`⏱ ${tour.duration}`);
@@ -315,6 +340,13 @@
     if (window.__TOUR_DATA__ && window.__TOUR_DATA__[SLUG]) {
       const t = window.__TOUR_DATA__[SLUG];
       const imgs = imagesFromTour(t);
+      
+      // Set title immediately if tour data is already available
+      if (t && t.name) {
+        document.title = t.name;
+        window.__TOUR_TITLE__ = t.name;
+      }
+      
       renderTop(t, imgs);
       announceReady(t, window.__TOUR_VERSION__ || '');
       return;
@@ -331,6 +363,12 @@
     window.__TOUR_DATA__ = window.__TOUR_DATA__ || {};
     window.__TOUR_DATA__[SLUG] = fresh.tour;
     window.__TOUR_VERSION__ = fresh.version || '';
+
+    // Set title immediately when tour data is available
+    if (fresh.tour && fresh.tour.name) {
+      document.title = fresh.tour.name;
+      window.__TOUR_TITLE__ = fresh.tour.name;
+    }
 
     renderTop(fresh.tour, imagesFromTour(fresh.tour));
     announceReady(fresh.tour, window.__TOUR_VERSION__);

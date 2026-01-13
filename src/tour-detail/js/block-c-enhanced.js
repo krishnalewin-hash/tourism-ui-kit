@@ -28,6 +28,31 @@
   const DATA_URL = CFG.DATA_URL;
   const CLIENT = CFG.CLIENT || 'tour-driver';
   
+  // Extract excerpt from HTML description (first paragraph, plain text)
+  function extractExcerpt(htmlDescription) {
+    if (!htmlDescription) return '';
+    
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlDescription;
+    
+    // Get the first paragraph or first text content
+    const firstParagraph = tempDiv.querySelector('p');
+    if (firstParagraph) {
+      return firstParagraph.textContent.trim();
+    }
+    
+    // If no paragraph tags, get first text content
+    const textContent = tempDiv.textContent.trim();
+    
+    // Limit to first 200 characters and add ellipsis if needed
+    if (textContent.length > 200) {
+      return textContent.substring(0, 200).trim() + '...';
+    }
+    
+    return textContent;
+  }
+  
   if (!DATA_URL) {
     console.error('[Tours] Missing CFG.DATA_URL');
     return;
@@ -237,7 +262,7 @@
   function createTourCard(tour) {
     const image = tour.image || 'https://via.placeholder.com/400x200?text=No+Image';
     const title = tour.name || 'Untitled Tour';
-    const description = tour.excerpt || 'No description available.';
+    const description = extractExcerpt(tour.description_html) || 'No description available.';
     const price = tour.fromPrice ? `From $${tour.fromPrice}` : 'Price on request';
     const location = tour.location || '';
     const duration = tour.duration || '';

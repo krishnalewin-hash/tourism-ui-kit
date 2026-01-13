@@ -1,3 +1,35 @@
+function capturePageDefaults() {
+  try {
+    const selectors = 'script[data-default-pickup], script[data-default-pickup-place-id], script[data-default-dropoff], script[data-default-dropoff-place-id]';
+    const nodes = document.querySelectorAll(selectors);
+    const current = document.currentScript || (nodes.length ? nodes[nodes.length - 1] : null);
+    if (!current || !current.dataset) return;
+
+    window.CFG = window.CFG || {};
+    window.CFG.PAGE_DEFAULTS = window.CFG.PAGE_DEFAULTS || {};
+
+    const store = window.CFG.PAGE_DEFAULTS;
+    const ds = current.dataset;
+
+    if (ds.defaultPickup && !store.defaultPickup) {
+      store.defaultPickup = ds.defaultPickup;
+    }
+    if (ds.defaultDropoff && !store.defaultDropoff) {
+      store.defaultDropoff = ds.defaultDropoff;
+    }
+    if (ds.defaultPickupPlaceId && !store.defaultPickupPlaceId) {
+      store.defaultPickupPlaceId = ds.defaultPickupPlaceId;
+    }
+    if (ds.defaultDropoffPlaceId && !store.defaultDropoffPlaceId) {
+      store.defaultDropoffPlaceId = ds.defaultDropoffPlaceId;
+    }
+  } catch (err) {
+    console.warn('[TourForm] Failed to capture page defaults', err);
+  }
+}
+
+capturePageDefaults();
+
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Section 1: Minimal Inline Styles (baseline field & icon styling)
@@ -1294,37 +1326,72 @@ function setInputValue(el, val){
 // Plain-text prefill: runs even before Maps is loaded
 function applyPrefillBasic(rootDoc){
   const cfg = window.CFG?.PREFILL;
-  if(!cfg) return;
+  const pageDefaults = window.CFG?.PAGE_DEFAULTS || {};
   const pairs = [
     ['pickup_location', 'input[data-q="pickup_location"]'],
     // ['drop_off_location','input[data-q="drop-off_location"]'], // optional: enable if you want
   ];
   for(const [key, sel] of pairs){
-    const pre = cfg[key];
-    if(!pre || typeof pre === 'object') continue;         // only handle strings here
+    const pre = cfg?.[key];
+    const defaultKey = key === 'pickup_location' ? 'defaultPickup' :
+      key === 'drop-off_location' ? 'defaultDropoff' : null;
+    const fallbackText = defaultKey ? pageDefaults[defaultKey] : null;
+    const text = (typeof pre === 'string' && pre) || fallbackText;
+    if(!text) continue;
     const el = rootDoc.querySelector(sel);
     if(!el || el.dataset.prefilled === '1') continue;
     el.dataset.prefilled = '1';
-    setInputValue(el, String(pre));
+    setInputValue(el, String(text));
+    if (defaultKey === 'defaultPickup' && pageDefaults.defaultPickupPlaceId) {
+      el.dataset.prefillPlaceId = pageDefaults.defaultPickupPlaceId;
+    }
+    if (defaultKey === 'defaultDropoff' && pageDefaults.defaultDropoffPlaceId) {
+      el.dataset.prefillPlaceId = pageDefaults.defaultDropoffPlaceId;
+    }
   }
 }
 
 // Maps-based prefill: Place ID or lat/lng (requires Google Maps JS loaded)
 function applyPrefillMaps(rootDoc){
   if(!window.google?.maps) return;
-  const cfg = window.CFG?.PREFILL;
-  if(!cfg) return;
+  const cfg = window.CFG?.PREFILL || {};
+  const pageDefaults = window.CFG?.PAGE_DEFAULTS || {};
+
+  const resolveLabel = (place, fallback) => {
+    if (fallback) return fallback;
+    if (!place) return '';
+    let label = place.name || place.formatted_address || '';
+    const types = place.types || [];
+    const isAirport = types.includes('airport');
+    if (isAirport && AIRPORT_CODES && AIRPORT_CODES[label]) {
+      const code = AIRPORT_CODES[label];
+      if (code && !label.toUpperCase().includes(`(${code.toUpperCase()})`)) {
+        label = `${label} (${code})`;
+      }
+    }
+    return label;
+  };
 
   const doOne = (key, sel) => {
-    const pre = cfg[key];
+    let pre = cfg[key];
+    if(!pre) {
+      const defaultKey = key === 'pickup_location' ? 'defaultPickupPlaceId' :
+        key === 'drop-off_location' ? 'defaultDropoffPlaceId' : null;
+      if (defaultKey && pageDefaults[defaultKey]) {
+        pre = { placeId: pageDefaults[defaultKey], text: pageDefaults.defaultPickup || pageDefaults.defaultDropoff || '' };
+      }
+    }
     if(!pre || typeof pre !== 'object') return;
     const el = rootDoc.querySelector(sel);
     if(!el || el.dataset.prefilled === '1') return;
 
-    const finish = (text) => {
+    const finish = (text, meta) => {
       if(!text) return;
       el.dataset.prefilled = '1';
       setInputValue(el, text);
+      if (meta?.placeId) {
+        el.dataset.prefillPlaceId = meta.placeId;
+      }
     };
 
     // Case A: Place ID
@@ -1332,8 +1399,8 @@ function applyPrefillMaps(rootDoc){
       const svc = new google.maps.places.PlacesService(document.createElement('div'));
       svc.getDetails({ placeId: pre.placeId, fields: ['name','formatted_address','types'] }, (place, status) => {
         if(status === google.maps.places.PlacesServiceStatus.OK && place){
-          // Prefer name; fall back to formatted address
-          finish(place.name || place.formatted_address || '');
+          const label = resolveLabel(place, pre.text);
+          finish(label, { placeId: pre.placeId });
         }
       });
       return;

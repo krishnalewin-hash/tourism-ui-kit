@@ -14,17 +14,20 @@ Use this **improved version** that waits for the data to be ready:
   console.log('[SEO] Script loaded, waiting for tour data...');
   
   let tourDataProcessed = false;
+  let currentTour = null;
+  let titleWatcher = null;
   
   function updateSEOTags(tour) {
-    if (!tour || tourDataProcessed) return;
-    tourDataProcessed = true;
+    if (!tour) return;
     
+    currentTour = tour;
     const siteName = 'FunTrip Tours Jamaica';
+    const correctTitle = `${tour.name} | ${siteName}`;
     
     console.log('[SEO] Updating meta tags for:', tour.name);
     
     // Update page title
-    document.title = `${tour.name} | ${siteName}`;
+    document.title = correctTitle;
     console.log('[SEO] Title updated to:', document.title);
     
     // Update or create meta description
@@ -47,6 +50,9 @@ Use this **improved version** that waits for the data to be ready:
     updateMetaTag('name', 'twitter:image', tour.image);
     
     console.log('[SEO] All meta tags updated successfully');
+    
+    // Start title watcher to prevent overrides
+    startTitleWatcher(correctTitle);
   }
   
   function updateMetaTag(attrName, attrValue, content) {
@@ -59,6 +65,20 @@ Use this **improved version** that waits for the data to be ready:
       document.head.appendChild(tag);
     }
     tag.content = content;
+  }
+  
+  // Title watcher to prevent GHL from overriding
+  function startTitleWatcher(correctTitle) {
+    if (titleWatcher) return; // Already running
+    
+    console.log('[SEO] Starting title watcher to prevent overrides');
+    
+    titleWatcher = setInterval(function() {
+      if (document.title !== correctTitle) {
+        console.log('[SEO] Title was overridden, restoring:', correctTitle);
+        document.title = correctTitle;
+      }
+    }, 1000); // Check every second
   }
   
   // Method 1: Listen for the tour-data-loaded event
@@ -96,6 +116,7 @@ Use this **improved version** that waits for the data to be ready:
     }
     
     if (checkGlobalData()) {
+      tourDataProcessed = true;
       clearInterval(pollInterval);
       return;
     }
@@ -118,6 +139,11 @@ Use this **improved version** that waits for the data to be ready:
 
 ## Why This Version is Better
 
+### 🛡️ **Title Override Protection:**
+- **Title Watcher** - Continuously monitors and restores the correct title every second
+- **Prevents GHL Override** - Stops GoHighLevel from changing the title back
+- **Persistent** - Keeps working even if other scripts try to override
+
 ### Multiple Detection Methods:
 1. **Event Listener** - Waits for `tour-data-loaded` event
 2. **Global Variable Check** - Checks `window.__TOUR_DATA__`
@@ -132,6 +158,8 @@ You'll see in console:
 [SEO] Updating meta tags for: Blue Hole Adventure
 [SEO] Title updated to: Blue Hole Adventure | FunTrip Tours Jamaica
 [SEO] All meta tags updated successfully
+[SEO] Starting title watcher to prevent overrides
+[SEO] Title was overridden, restoring: Blue Hole Adventure | FunTrip Tours Jamaica
 ```
 
 ## Installation
@@ -159,6 +187,8 @@ After updating:
 [SEO] Updating meta tags for: Bamboo Rafting & Beach Day
 [SEO] Title updated to: Bamboo Rafting & Beach Day | FunTrip Tours Jamaica
 [SEO] All meta tags updated successfully
+[SEO] Starting title watcher to prevent overrides
+[SEO] Title was overridden, restoring: Bamboo Rafting & Beach Day | FunTrip Tours Jamaica
 ```
 
 ## If Still Not Working
@@ -197,10 +227,12 @@ Would you like me to do that instead?
 ## Troubleshooting
 
 ### Title Updates But Then Reverts?
-This means something else is overwriting it. Check for:
-- Other scripts updating `document.title`
-- GHL's own title management
-- Browser extensions interfering
+**✅ FIXED!** The new script includes a **Title Watcher** that:
+- Monitors the title every second
+- Automatically restores the correct title if overridden
+- Prevents GHL and other scripts from changing it back
+
+You should see in console: `[SEO] Title was overridden, restoring: [Tour Name]`
 
 ### Title Never Updates?
 Check console for errors. Most likely:

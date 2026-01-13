@@ -3,6 +3,37 @@
 
 window.BookingForm = window.BookingForm || {};
 
+function capturePageDefaults() {
+  try {
+    const scripts = document.querySelectorAll('script[data-default-pickup], script[data-default-pickup-place-id], script[data-default-dropoff], script[data-default-dropoff-place-id]');
+    const current = document.currentScript || (scripts.length ? scripts[scripts.length - 1] : null);
+    if (!current || !current.dataset) return;
+
+    window.CFG = window.CFG || {};
+    window.CFG.PAGE_DEFAULTS = window.CFG.PAGE_DEFAULTS || {};
+
+    const store = window.CFG.PAGE_DEFAULTS;
+    const ds = current.dataset;
+
+    if (ds.defaultPickup && !store.defaultPickup) {
+      store.defaultPickup = ds.defaultPickup;
+    }
+    if (ds.defaultPickupPlaceId && !store.defaultPickupPlaceId) {
+      store.defaultPickupPlaceId = ds.defaultPickupPlaceId;
+    }
+    if (ds.defaultDropoff && !store.defaultDropoff) {
+      store.defaultDropoff = ds.defaultDropoff;
+    }
+    if (ds.defaultDropoffPlaceId && !store.defaultDropoffPlaceId) {
+      store.defaultDropoffPlaceId = ds.defaultDropoffPlaceId;
+    }
+  } catch (err) {
+    console.warn('[ConfigLoader] Failed to capture page defaults', err);
+  }
+}
+
+capturePageDefaults();
+
 // Configuration loader with built-in fallbacks
 async function loadClientConfiguration() {
   console.log('[ConfigLoader] Starting configuration loading...');
@@ -13,20 +44,95 @@ async function loadClientConfiguration() {
     return window.CFG;
   }
 
-  // Determine client from various sources
-    const client = window.CFG?.CLIENT || 
+  // Determine client from various sources (support both CLIENT and client)
+  const client = window.CFG?.CLIENT || 
+    window.CFG?.client ||
     new URLSearchParams(location.search).get('client') || 
     sessionStorage.getItem('client') || 
     'demo';
 
-  // Determine base URL for configs
-  const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
+  // Determine API base URL
+  const DEFAULT_API_BASE = 'https://tourism-api-production.krishna-0a3.workers.dev';
+  
+  function resolveApiBase() {
+    const cfg = window.CFG || {};
+    const candidates = [
+      cfg.API_BASE,
+      cfg.apiBase,
+      cfg.API_ORIGIN,
+      cfg.apiOrigin,
+      cfg.API_URL,
+      cfg.apiUrl,
+      cfg.BASE_URL,
+      cfg.baseUrl,
+      cfg.BASE,
+      cfg.base,
+    ];
+    
+    for (const value of candidates) {
+      if (value && typeof value === 'string' && value.trim()) {
+        try {
+          const url = new URL(value.trim());
+          return url.origin;
+        } catch (_) {
+          // Invalid URL, try next
+        }
+      }
+    }
 
+    try {
+      const currentScript = document.currentScript || Array.from(document.getElementsByTagName('script')).pop();
+      if (currentScript?.src) {
+        const url = new URL(currentScript.src, window.location.href);
+        return url.origin;
+      }
+    } catch (_) {
+      // Ignore
+    }
+
+    return DEFAULT_API_BASE;
+  }
+
+  const apiBase = resolveApiBase();
   console.log(`[ConfigLoader] Loading configuration for client: ${client}`);
+  console.log(`[ConfigLoader] API Base: ${apiBase}`);
+
+  // Try API endpoint first (gets live config from database)
+  try {
+    const apiUrl = `${apiBase.replace(/\/$/, '')}/api/client-config/${encodeURIComponent(client)}`;
+    console.log(`[ConfigLoader] Fetching via API: ${apiUrl}`);
+    
+    const apiResponse = await fetch(apiUrl, { cache: 'no-store' });
+    if (apiResponse.ok) {
+      const clientConfig = await apiResponse.json();
+      const formConfig = clientConfig.FORM_CONFIG || {};
+      
+      window.CFG = {
+        ...window.CFG,
+        ...formConfig,
+        GMAPS_KEY: formConfig.GMAPS_KEY || formConfig.PLACES_API_KEY,
+        COUNTRIES: formConfig.COUNTRIES || formConfig.COUNTRY ? [formConfig.COUNTRY] : null,
+        CURRENCY: formConfig.CURRENCY,
+        PLACES: formConfig.PLACES,
+        FIELD_MAPPING: formConfig.FIELD_MAPPING,
+        configLoaded: true,
+        loadedFrom: 'api'
+      };
+
+      console.log(`[ConfigLoader] Successfully loaded ${client} configuration from API`);
+      return window.CFG;
+    } else {
+      console.log(`[ConfigLoader] API returned ${apiResponse.status}: ${apiResponse.statusText}`);
+    }
+  } catch (error) {
+    console.log(`[ConfigLoader] API fetch failed: ${error.message}`);
+  }
+
+  // Fallback: Try CDN core config
+  const base = window.CFG?.BASE || 'krishnalewin-hash/tourism-ui-kit@main';
   console.log(`[ConfigLoader] Base URL: ${base}`);
 
   try {
-    // Try to load core configuration first
     let configUrl;
     if (base.startsWith('../') || base.startsWith('./') || base.startsWith('/')) {
       configUrl = `${base}/clients/${client}/core/config.json`;
@@ -136,7 +242,14 @@ async function initializeBookingFormWithConfig() {
       // Fallback: directly update CONFIG if initializeConfig not available yet
       if (window.BookingForm.CONFIG) {
         window.BookingForm.CONFIG.googleApiKey = window.CFG.GMAPS_KEY;
-        window.BookingForm.CONFIG.countries = window.CFG.COUNTRIES;
+        // Normalize countries to array format
+        const countries = window.CFG.COUNTRIES || window.CFG.COUNTRY;
+        if (countries) {
+          const arr = Array.isArray(countries) ? countries : [countries];
+          window.BookingForm.CONFIG.countries = arr.map(x => String(x).toUpperCase());
+        } else {
+          window.BookingForm.CONFIG.countries = null;
+        }
         
         if (window.CFG.PLACES) {
           window.BookingForm.CONFIG.places = {
@@ -165,9 +278,25 @@ async function initializeBookingFormWithConfig() {
       window.BookingForm.onConfigReady = [];
     }
     
+    // Inject baseline styles first (critical for form appearance)
+    if (window.BookingForm.initNow) {
+      window.BookingForm.initNow();
+    } else if (window.BookingForm.injectBaselineStyles) {
+      window.BookingForm.injectBaselineStyles();
+    }
+    
     // Trigger form enhancement
     if (window.BookingForm.enhance) {
       window.BookingForm.enhance();
+    } else {
+      // Fallback: manually trigger enhancement if enhance function not available
+      console.warn('[BookingForm] enhance() not available, trying manual initialization');
+      if (window.BookingForm.attachPickupDateGuard) window.BookingForm.attachPickupDateGuard(document);
+      if (window.BookingForm.attachPickupTimePicker) window.BookingForm.attachPickupTimePicker(document);
+      if (window.BookingForm.enhanceVisual) window.BookingForm.enhanceVisual(document);
+      if (window.BookingForm.initMapsAndFilters) window.BookingForm.initMapsAndFilters();
+      if (window.BookingForm.wireAutocomplete) window.BookingForm.wireAutocomplete(document);
+      if (window.BookingForm.observeLateFields) window.BookingForm.observeLateFields();
     }
     
   } catch (error) {
@@ -175,8 +304,25 @@ async function initializeBookingFormWithConfig() {
     
     // Even if config fails, try to initialize with defaults
     window.BookingForm.configReady = true;
+    
+    // Inject baseline styles even on failure
+    if (window.BookingForm.initNow) {
+      window.BookingForm.initNow();
+    } else if (window.BookingForm.injectBaselineStyles) {
+      window.BookingForm.injectBaselineStyles();
+    }
+    
     if (window.BookingForm.enhance) {
       window.BookingForm.enhance();
+    } else {
+      // Fallback: manually trigger enhancement if enhance function not available
+      console.warn('[BookingForm] enhance() not available, trying manual initialization');
+      if (window.BookingForm.attachPickupDateGuard) window.BookingForm.attachPickupDateGuard(document);
+      if (window.BookingForm.attachPickupTimePicker) window.BookingForm.attachPickupTimePicker(document);
+      if (window.BookingForm.enhanceVisual) window.BookingForm.enhanceVisual(document);
+      if (window.BookingForm.initMapsAndFilters) window.BookingForm.initMapsAndFilters();
+      if (window.BookingForm.wireAutocomplete) window.BookingForm.wireAutocomplete(document);
+      if (window.BookingForm.observeLateFields) window.BookingForm.observeLateFields();
     }
   }
 }

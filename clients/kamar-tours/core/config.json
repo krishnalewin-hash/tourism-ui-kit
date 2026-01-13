@@ -31,16 +31,16 @@
   "QUOTE_RESULTS_CONFIG": {
     "bands": [
       {
-        "maxMi": 10,
+        "maxMi": 50,
         "pricePP": 30
       },
       {
-        "maxMi": 20,
-        "pricePP": 45
+        "maxMi": 60,
+        "pricePP": 40
       },
       {
-        "maxMi": 40,
-        "pricePP": 60
+        "maxMi": 70,
+        "pricePP": 50
       },
       {
         "maxMi": 999,

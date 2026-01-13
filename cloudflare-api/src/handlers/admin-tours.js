@@ -28,7 +28,7 @@ export async function listTours(request, env) {
   try {
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
-    const status = searchParams.get('status') || 'active';
+    const status = searchParams.get('status') || 'published';
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -60,6 +60,10 @@ export async function listTours(request, env) {
       exclusions: JSON.parse(t.exclusions || '[]'),
       faqs: JSON.parse(t.faqs || '[]'),
       tags: JSON.parse(t.tags || '[]'),
+      operating_days: JSON.parse(t.operating_days || '[]'),
+      time_slots: JSON.parse(t.time_slots || '[]'),
+      blackout_dates: JSON.parse(t.blackout_dates || '[]'),
+      addons: JSON.parse(t.addons || '[]'),
     }));
 
     return new Response(
@@ -114,6 +118,10 @@ export async function getTour(request, env, params) {
       exclusions: JSON.parse(tour.exclusions || '[]'),
       faqs: JSON.parse(tour.faqs || '[]'),
       tags: JSON.parse(tour.tags || '[]'),
+      operating_days: JSON.parse(tour.operating_days || '[]'),
+      time_slots: JSON.parse(tour.time_slots || '[]'),
+      blackout_dates: JSON.parse(tour.blackout_dates || '[]'),
+      addons: JSON.parse(tour.addons || '[]'),
     };
 
     return new Response(
@@ -150,18 +158,28 @@ export async function createTour(request, env) {
       image,
       gallery,
       location,
-      type,
+      category,
       duration,
-      duration_minutes,
-      pricing_type,
       from_price,
+      what_to_bring,
+      restrictions,
+      currency,
+      adult_price,
+      child_price,
+      senior_price,
+      video_url,
+      video_type,
+      operating_days,
+      time_slots,
+      blackout_dates,
+      addons,
       highlights,
       itinerary,
       inclusions,
       exclusions,
       faqs,
       tags,
-      status = 'active',
+      status = 'draft',
     } = body;
 
     // Validate required fields
@@ -204,26 +222,65 @@ export async function createTour(request, env) {
     const exclusionsArray = parseArrayField(exclusions, 'exclusions');
     const faqsArray = parseArrayField(faqs, 'faqs');
     const tagsArray = parseArrayField(tags, 'tags');
+    const operatingDaysArray = parseArrayField(operating_days, 'operating_days');
+    const timeSlotsArray = parseArrayField(time_slots, 'time_slots');
+    const blackoutDatesArray = parseArrayField(blackout_dates, 'blackout_dates');
+    const addonsArray = parseArrayField(addons, 'addons');
+
+    // Helper to convert undefined to null for D1 compatibility
+    const toNull = (v) => v === undefined ? null : v;
+
+    // Prepare bind values - ensure all are properly converted
+    const bindValues = [
+      client_id,
+      slug,
+      name,
+      toNull(excerpt),
+      toNull(description_html),
+      toNull(image),
+      galleryArray ? JSON.stringify(galleryArray) : '[]',
+      toNull(location),
+      toNull(category),
+      toNull(duration),
+      toNull(from_price),
+      toNull(what_to_bring),
+      toNull(restrictions),
+      toNull(currency),
+      toNull(adult_price),
+      toNull(child_price),
+      toNull(senior_price),
+      toNull(video_url),
+      toNull(video_type),
+      operatingDaysArray ? JSON.stringify(operatingDaysArray) : '[]',
+      timeSlotsArray ? JSON.stringify(timeSlotsArray) : '[]',
+      blackoutDatesArray ? JSON.stringify(blackoutDatesArray) : '[]',
+      addonsArray ? JSON.stringify(addonsArray) : '[]',
+      highlightsArray ? JSON.stringify(highlightsArray) : '[]',
+      itineraryArray ? JSON.stringify(itineraryArray) : '[]',
+      inclusionsArray ? JSON.stringify(inclusionsArray) : '[]',
+      exclusionsArray ? JSON.stringify(exclusionsArray) : '[]',
+      faqsArray ? JSON.stringify(faqsArray) : '[]',
+      tagsArray ? JSON.stringify(tagsArray) : '[]',
+      status
+    ];
+
+    // Debug: log bind values count and ensure exactly 30
+    console.log(`Bind values count: ${bindValues.length}, expected: 30`);
+    if (bindValues.length !== 30) {
+      console.error('ERROR: Bind values count mismatch!', bindValues);
+      throw new Error(`Expected 30 bind values but got ${bindValues.length}`);
+    }
 
     // Create tour
     const result = await env.DB.prepare(`
       INSERT INTO tours (
         client_id, slug, name, excerpt, description_html, image, gallery,
-        location, type, duration, duration_minutes, pricing_type, from_price,
+        location, category, duration, from_price, what_to_bring, restrictions,
+        currency, adult_price, child_price, senior_price, video_url, video_type,
+        operating_days, time_slots, blackout_dates, addons,
         highlights, itinerary, inclusions, exclusions, faqs, tags, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      client_id, slug, name, excerpt, description_html, image,
-      JSON.stringify(galleryArray),
-      location, type, duration, duration_minutes, pricing_type, from_price,
-      JSON.stringify(highlightsArray),
-      JSON.stringify(itineraryArray),
-      JSON.stringify(inclusionsArray),
-      JSON.stringify(exclusionsArray),
-      JSON.stringify(faqsArray),
-      JSON.stringify(tagsArray),
-      status
-    ).run();
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(...bindValues).run();
 
     // Get the created tour
     const tour = await env.DB.prepare(
@@ -240,6 +297,10 @@ export async function createTour(request, env) {
       exclusions: JSON.parse(tour.exclusions || '[]'),
       faqs: JSON.parse(tour.faqs || '[]'),
       tags: JSON.parse(tour.tags || '[]'),
+      operating_days: JSON.parse(tour.operating_days || '[]'),
+      time_slots: JSON.parse(tour.time_slots || '[]'),
+      blackout_dates: JSON.parse(tour.blackout_dates || '[]'),
+      addons: JSON.parse(tour.addons || '[]'),
     };
 
     return new Response(
@@ -289,7 +350,8 @@ export async function updateTour(request, env, params) {
     // Simple fields
     const simpleFields = [
       'slug', 'name', 'excerpt', 'description_html', 'image', 'location',
-      'type', 'duration', 'duration_minutes', 'pricing_type', 'from_price', 'status'
+      'category', 'duration', 'from_price', 'what_to_bring', 'restrictions',
+      'currency', 'adult_price', 'child_price', 'senior_price', 'video_url', 'video_type', 'status'
     ];
 
     for (const field of simpleFields) {
@@ -300,7 +362,7 @@ export async function updateTour(request, env, params) {
     }
 
     // Array fields (need JSON stringification)
-    const arrayFields = ['gallery', 'highlights', 'itinerary', 'inclusions', 'exclusions', 'faqs', 'tags'];
+    const arrayFields = ['gallery', 'highlights', 'itinerary', 'inclusions', 'exclusions', 'faqs', 'tags', 'operating_days', 'time_slots', 'blackout_dates', 'addons'];
     
     for (const field of arrayFields) {
       if (body[field] !== undefined) {
@@ -339,6 +401,10 @@ export async function updateTour(request, env, params) {
       exclusions: JSON.parse(tour.exclusions || '[]'),
       faqs: JSON.parse(tour.faqs || '[]'),
       tags: JSON.parse(tour.tags || '[]'),
+      operating_days: JSON.parse(tour.operating_days || '[]'),
+      time_slots: JSON.parse(tour.time_slots || '[]'),
+      blackout_dates: JSON.parse(tour.blackout_dates || '[]'),
+      addons: JSON.parse(tour.addons || '[]'),
     };
 
     return new Response(

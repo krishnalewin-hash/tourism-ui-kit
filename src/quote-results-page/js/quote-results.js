@@ -14,8 +14,40 @@
 
 const MOUNT_ID = "quote-calc";
 
+function capturePageDefaults() {
+  try {
+    const selectors = 'script[data-default-pickup], script[data-default-dropoff], script[data-default-pickup-place-id], script[data-default-dropoff-place-id]';
+    const scripts = document.querySelectorAll(selectors);
+    const current = document.currentScript || (scripts.length ? scripts[scripts.length - 1] : null);
+    if (!current || !current.dataset) return;
+
+    window.CFG = window.CFG || {};
+    window.CFG.PAGE_DEFAULTS = window.CFG.PAGE_DEFAULTS || {};
+
+    const store = window.CFG.PAGE_DEFAULTS;
+    const ds = current.dataset;
+
+    if (ds.defaultPickup && !store.defaultPickup) {
+      store.defaultPickup = ds.defaultPickup;
+    }
+    if (ds.defaultDropoff && !store.defaultDropoff) {
+      store.defaultDropoff = ds.defaultDropoff;
+    }
+    if (ds.defaultPickupPlaceId && !store.defaultPickupPlaceId) {
+      store.defaultPickupPlaceId = ds.defaultPickupPlaceId;
+    }
+    if (ds.defaultDropoffPlaceId && !store.defaultDropoffPlaceId) {
+      store.defaultDropoffPlaceId = ds.defaultDropoffPlaceId;
+    }
+  } catch (err) {
+    console.warn('[quote-calc] Failed to capture page defaults', err);
+  }
+}
+
+capturePageDefaults();
+
 // Inline CSS styles for the component
-const QUOTE_RESULTS_CSS = `:root{--card-bg:#fff;--card-border:#ececec;--muted:#6b7280;--accent:#D65130;--accent-600:#b54224;--shadow:0 8px 24px rgba(0,0,0,.06);--radius:12px;--font:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}html,body{margin:0;padding:0}body{font-family:var(--font);color:#111827;background:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:5px;font-weight:700;text-decoration:none}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover,.btn-primary:focus{background:var(--accent-600)}.btn:focus{outline:2px solid #000;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}#quote-calc{box-sizing:border-box;max-width:1100px;margin:24px auto;padding:24px;border:1px solid #ececec;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.qc-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media (max-width:900px){.qc-row{grid-template-columns:1fr;gap:24px}#quote-calc{padding:16px}}.qc-map{width:100%;height:400px;border-radius:12px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb}.qc-details{display:flex;flex-direction:column;gap:0px}.qc-detail-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6}.qc-detail-item:last-of-type{border-bottom:none}.qc-detail-label{font-weight:800;color:#374151;font-size:18px}.qc-detail-value{font-weight:400;color:#111827;font-size:18px}.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}.qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}.qc-btn-primary{background:#059669;color:white;border:2px solid #059669}.qc-btn-primary:hover{background:#047857;border-color:#047857}.qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}.qc-btn-secondary:hover{background:#f9fafb;border-color:#9ca3af}.qc-error{padding:16px;border:1px solid #f3d2d2;background:#fff6f6;color:#9b1c1c;border-radius:10px;text-align:center}.qc-shimmer{position:relative;border-radius:10px;background:#eef0f3;overflow:hidden}.qc-shimmer:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 100%);animation:qc-shimmer 1.4s infinite}@keyframes qc-shimmer{100%{transform:translateX(100%)}}`;
+const QUOTE_RESULTS_CSS = `:root{--card-bg:#fff;--card-border:#ececec;--muted:#6b7280;--accent:#D65130;--accent-600:#b54224;--shadow:0 8px 24px rgba(0,0,0,.06);--radius:12px;--font:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}html,body{margin:0;padding:0}body{font-family:var(--font);color:#111827;background:#fff}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:5px;font-weight:700;text-decoration:none}.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover,.btn-primary:focus{background:var(--accent-600)}.btn:focus{outline:2px solid #000;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}#quote-calc{box-sizing:border-box;max-width:1100px;margin:24px auto;padding:24px;border:1px solid #ececec;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.06);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.qc-row{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media (max-width:900px){.qc-row{grid-template-columns:1fr;gap:24px}#quote-calc{padding:16px}}.qc-map{width:100%;height:400px;border-radius:12px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb}.qc-details{display:flex;flex-direction:column;gap:0px}.qc-detail-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f3f4f6}.qc-detail-item:last-of-type{border-bottom:none}.qc-detail-label{font-weight:800;color:#374151;font-size:18px}.qc-detail-value{font-weight:400;color:#111827;font-size:18px}.qc-detail-value.highlight{font-size:18px;font-weight:800;color:#059669}.qc-buttons{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.qc-btn{flex:1;min-width:140px;padding:14px 20px;border-radius:8px;font-weight:600;font-size:18px;text-align:center;text-decoration:none;cursor:pointer;border:none;transition:all 0.2s ease}.qc-btn-primary{background:#059669;color:white;border:2px solid #059669}.qc-btn-primary:hover{background:#047857;border-color:#047857}.qc-btn-secondary{background:white;color:#374151;border:2px solid #d1d5db}.qc-btn-secondary:hover{background:#f9fafb;border-color:#9ca3af}.qc-kingston-message{padding:16px;border:1px solid #fbbf24;background:#fffbeb;color:#92400e;border-radius:8px;text-align:center;font-size:16px;line-height:1.5;margin-bottom:12px;flex:1 1 100%;min-width:100%}.qc-error{padding:16px;border:1px solid #f3d2d2;background:#fff6f6;color:#9b1c1c;border-radius:10px;text-align:center}.qc-shimmer{position:relative;border-radius:10px;background:#eef0f3;overflow:hidden}.qc-shimmer:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,rgba(255,255,255,0) 0,rgba(255,255,255,.6) 50%,rgba(255,255,255,0) 100%);animation:qc-shimmer 1.4s infinite}@keyframes qc-shimmer{100%{transform:translateX(100%)}}`;
 
 // Function to inject CSS styles into the document
 function injectStyles() {
@@ -168,6 +200,20 @@ function injectStyles() {
     if (window.LEAD_DATA && window.LEAD_DATA[k]) return window.LEAD_DATA[k];
     return "";
   };
+  const PAGE_DEFAULTS = () => window.CFG?.PAGE_DEFAULTS || {};
+  const DEFAULT_KEYS = {
+    pickup_location: "defaultPickup",
+    dropoff_location: "defaultDropoff"
+  };
+  const getParamWithDefaults = (name) => {
+    const value = getParam(name);
+    if (value) return value;
+    const key = DEFAULT_KEYS[name];
+    if (key && PAGE_DEFAULTS()[key]) {
+      return PAGE_DEFAULTS()[key];
+    }
+    return value;
+  };
 
   const esc = s => String(s||"").replace(/[<>&"']/g, m => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[m]);
   const fmtMi = n => (n||0).toFixed(1) + " miles";
@@ -188,9 +234,95 @@ function injectStyles() {
     return 0;
   }
 
+  /* ===== 3.5) Kingston Route Detection ================================= */
+  /**
+   * Checks if coordinates fall within Kingston bounding box
+   * @param {number} lat - Latitude
+   * @param {number} lng - Longitude
+   * @returns {boolean} True if coordinates are within Kingston bounds
+   */
+  function isInKingston(lat, lng) {
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      console.log('[Kingston] Invalid coordinates:', { lat, lng });
+      return false;
+    }
+    // Kingston, Jamaica bounding box
+    // Latitude: ~17.95°N to ~18.10°N
+    // Longitude: ~-76.90°W to ~-76.65°W (more negative = more west)
+    const inBounds = lat >= 17.95 && lat <= 18.10 && lng >= -76.90 && lng <= -76.65;
+    console.log('[Kingston] Coordinate check:', { lat, lng, inBounds, bounds: '17.95-18.10°N, -76.90 to -76.65°W' });
+    return inBounds;
+  }
+
+  /**
+   * Checks if either pickup or dropoff location contains "Kingston" (case-insensitive)
+   * Optionally checks coordinates if geocoded data is available
+   * @param {string} pickup - Pickup location string
+   * @param {string} dropoff - Dropoff location string
+   * @param {Object} [coordinates] - Optional object with pickup/dropoff coordinates
+   * @param {Object} [coordinates.pickup] - {lat, lng} for pickup
+   * @param {Object} [coordinates.dropoff] - {lat, lng} for dropoff
+   * @returns {boolean} True if route includes Kingston
+   */
+  function isKingstonRoute(pickup, dropoff, coordinates = null) {
+    if (!pickup || !dropoff) {
+      console.log('[Kingston] Missing pickup or dropoff');
+      return false;
+    }
+
+    // Check location strings for "kingston" (case-insensitive)
+    const pickupLower = String(pickup).toLowerCase();
+    const dropoffLower = String(dropoff).toLowerCase();
+    
+    console.log('[Kingston] Checking locations:', { pickup: pickupLower, dropoff: dropoffLower });
+    
+    if (pickupLower.includes('kingston') || dropoffLower.includes('kingston')) {
+      console.log('[Kingston] ✓ Found "kingston" in location strings');
+      return true;
+    }
+
+    // Check for common Kingston landmarks/neighborhoods (fallback for string detection)
+    const kingstonKeywords = ['mona', 'papine', 'half way tree', 'new kingston', 'uptown', 'downtown kingston', 'cross roads'];
+    const combinedText = pickupLower + ' ' + dropoffLower;
+    for (const keyword of kingstonKeywords) {
+      if (combinedText.includes(keyword)) {
+        console.log('[Kingston] ✓ Found Kingston keyword:', keyword);
+        // For certain keywords like "mona", we're more confident it's Kingston
+        if (keyword === 'mona' || keyword === 'papine') {
+          return true;
+        }
+      }
+    }
+
+    // Optionally check coordinates if available
+    if (coordinates) {
+      console.log('[Kingston] Checking coordinates:', coordinates);
+      if (coordinates.pickup && isInKingston(coordinates.pickup.lat, coordinates.pickup.lng)) {
+        console.log('[Kingston] ✓ Pickup coordinates are in Kingston:', coordinates.pickup);
+        return true;
+      }
+      if (coordinates.dropoff && isInKingston(coordinates.dropoff.lat, coordinates.dropoff.lng)) {
+        console.log('[Kingston] ✓ Dropoff coordinates are in Kingston:', coordinates.dropoff);
+        return true;
+      }
+      console.log('[Kingston] ✗ Coordinates are not in Kingston bounds');
+      if (coordinates.dropoff) {
+        console.log('[Kingston] Dropoff coords:', coordinates.dropoff, 'Bounds:', '17.95-18.10°N, -76.90 to -76.65°W');
+      }
+    } else {
+      console.log('[Kingston] No coordinates provided for checking');
+    }
+
+    return false;
+  }
+
   /* ===== 4) UI builders ================================================== */
   function buildCardHTML(state){
-    const { pickup, dropoff, miles, seconds, pp, total, pax, showMap = true } = state;
+    const { pickup, dropoff, miles, seconds, pp, total, pax, showMap = true, coordinates = null } = state;
+    
+    // Check if this is a Kingston route
+    const isKingston = isKingstonRoute(pickup, dropoff, coordinates);
+    console.log('[buildCardHTML] isKingston:', isKingston, 'coordinates:', coordinates);
 
     return `
       <div class="qc-row">
@@ -231,8 +363,15 @@ function injectStyles() {
           </div>
           
           <div class="qc-buttons">
+            ${isKingston ? `
+            <div class="qc-kingston-message">
+              💬 Online payment is unavailable for Kingston routes. Please call or text us to confirm your booking.
+            </div>
+            <button class="qc-btn qc-btn-secondary" onclick="handleContactUs()">Contact Us</button>
+            ` : `
             <button class="qc-btn qc-btn-primary" onclick="handlePayNow()">Pay Now</button>
             <button class="qc-btn qc-btn-secondary" onclick="handleContactUs()">Contact Us</button>
+            `}
           </div>
         </div>
       </div>
@@ -304,8 +443,8 @@ function injectStyles() {
     const mount = document.getElementById(MOUNT_ID);
     if (!mount) { console.warn(`[quote-calc] No element #${MOUNT_ID} found`); return; }
 
-    const pickup = getParam("pickup_location");
-    const dropoff = getParam("dropoff_location");
+    const pickup = getParamWithDefaults("pickup_location");
+    const dropoff = getParamWithDefaults("dropoff_location");
     
     console.log(`[quote-calc] Starting calculation with pickup: ${pickup}, dropoff: ${dropoff}`);
     console.log(`[quote-calc] Initial CONFIG.googleApiKey: ${CONFIG.googleApiKey?.substring(0, 15)}...`);
@@ -371,7 +510,7 @@ function injectStyles() {
 
         console.log(`[quote-calc] Distance Matrix calculation successful: ${miles.toFixed(1)} miles, $${total} total`);
 
-        // Render initial UI with calculated quote (show map placeholder)
+        // Render UI immediately (don't wait for geocoding)
         const outer = document.createElement("div");
         outer.id = MOUNT_ID;
         outer.innerHTML = buildCardHTML({
@@ -379,11 +518,89 @@ function injectStyles() {
           miles: Math.round(miles*10)/10,
           seconds, pax,
           pp, total,
-          showMap: true
+          showMap: true,
+          coordinates: null // Start with null, update after geocoding
         });
-
+        
         // Replace mount contents
         mount.replaceWith(outer);
+
+        // Geocode addresses to get coordinates for Kingston detection (async, doesn't block UI)
+        const geocoder = new google.maps.Geocoder();
+        
+        // Geocode both pickup and dropoff
+        Promise.all([
+          new Promise((resolve) => {
+            geocoder.geocode({ address: pickup }, (results, status) => {
+              if (status === 'OK' && results && results[0] && results[0].geometry && results[0].geometry.location) {
+                resolve({
+                  lat: results[0].geometry.location.lat(),
+                  lng: results[0].geometry.location.lng()
+                });
+              } else {
+                console.warn('[quote-calc] Geocoding failed for pickup:', pickup, status);
+                resolve(null);
+              }
+            });
+          }),
+          new Promise((resolve) => {
+            geocoder.geocode({ address: dropoff }, (results, status) => {
+              if (status === 'OK' && results && results[0] && results[0].geometry && results[0].geometry.location) {
+                resolve({
+                  lat: results[0].geometry.location.lat(),
+                  lng: results[0].geometry.location.lng()
+                });
+              } else {
+                console.warn('[quote-calc] Geocoding failed for dropoff:', dropoff, status);
+                resolve(null);
+              }
+            });
+          })
+        ]).then(([pickupCoords, dropoffCoords]) => {
+          const coordinates = {
+            pickup: pickupCoords,
+            dropoff: dropoffCoords
+          };
+          
+          console.log('[quote-calc] Geocoded coordinates:', coordinates);
+          console.log('[quote-calc] Pickup coords:', pickupCoords);
+          console.log('[quote-calc] Dropoff coords:', dropoffCoords);
+          
+          // Check Kingston route
+          const isKingston = isKingstonRoute(pickup, dropoff, coordinates);
+          console.log('[quote-calc] Is Kingston route?', isKingston);
+          
+          // Update UI with Kingston detection (re-render buttons section)
+          const buttonContainer = document.querySelector('.qc-buttons');
+          if (buttonContainer) {
+            const isKingstonNow = isKingstonRoute(pickup, dropoff, coordinates);
+            console.log('[quote-calc] Updating button container. isKingstonNow:', isKingstonNow, 'buttonContainer:', buttonContainer);
+            if (isKingstonNow) {
+              const payNowButton = buttonContainer.querySelector('.qc-btn-primary');
+              if (payNowButton) {
+                console.log('[quote-calc] Hiding Pay Now button and showing Kingston message');
+                payNowButton.style.display = 'none';
+                const kingstonMessage = document.createElement('div');
+                kingstonMessage.className = 'qc-kingston-message';
+                kingstonMessage.innerHTML = '💬 Online payment is unavailable for Kingston routes. Please call or text us to confirm your booking.';
+                buttonContainer.insertBefore(kingstonMessage, payNowButton);
+              } else {
+                // If button structure is different, replace entire container
+                buttonContainer.innerHTML = `
+                  <div class="qc-kingston-message">
+                    💬 Online payment is unavailable for Kingston routes. Please call or text us to confirm your booking.
+                  </div>
+                  <button class="qc-btn qc-btn-secondary" onclick="handleContactUs()">Contact Us</button>
+                `;
+              }
+            }
+          } else {
+            console.warn('[quote-calc] Button container not found!');
+          }
+        }).catch((error) => {
+          console.error('[quote-calc] Geocoding error:', error);
+          // Continue with UI even if geocoding fails
+        });
 
         // Try to enhance with interactive route map (optional)
         const mapNode = document.getElementById("qc-map");
@@ -466,8 +683,8 @@ function injectStyles() {
   /* ===== 8) Button Handlers =========================================== */
   window.handlePayNow = function() {
     // Get current trip details
-    const pickup = getParam("pickup_location");
-    const dropoff = getParam("dropoff_location");
+    const pickup = getParamWithDefaults("pickup_location");
+    const dropoff = getParamWithDefaults("dropoff_location");
     const pickupDate = getParam("pickup_date");
     const pickupTime = getParam("pickup_time");
     const passengers = getParam("passengers") || getParam("number_of_passengers") || CONFIG.defaultPassengers;
@@ -495,8 +712,8 @@ function injectStyles() {
 
   window.handleContactUs = function() {
     // Get trip details for contact form
-    const pickup = getParam("pickup_location");
-    const dropoff = getParam("dropoff_location");
+    const pickup = getParamWithDefaults("pickup_location");
+    const dropoff = getParamWithDefaults("dropoff_location");
     const passengers = getParam("passengers") || getParam("number_of_passengers") || CONFIG.defaultPassengers;
     
     // Use client-specific contact configuration or fallback to defaults

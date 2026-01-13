@@ -4,7 +4,11 @@ import { getEmbedTourScript, getEmbedAllToursScript } from './handlers/embed';
 import { listClients, getClient, createClient, updateClient, deleteClient } from './handlers/admin-clients';
 import { listTours, getTour, createTour, updateTour, deleteTour } from './handlers/admin-tours';
 import { syncFromSheets, getSyncStatus } from './handlers/admin-sync';
+import { uploadImage, deleteImage, serveImage } from './handlers/upload';
 import { withAdminAuth } from './middleware/auth';
+import { getClientConfigBySlug } from './handlers/client-config';
+import { getAllowedOrigin, getAllAllowedOrigins } from './handlers/allowed-origins';
+import { getPaymentProcessorConfig } from './handlers/payment-processor-config';
 
 class Router {
   constructor() {
@@ -78,6 +82,17 @@ router.get('/health', handleHealth);
 router.get('/api/tours', getAllTours);
 router.get('/api/tours/:slug', getTourBySlug);
 
+// Public client configuration
+router.get('/api/client-config/:slug', getClientConfigBySlug);
+router.get('/api/client-config/:slug/payment-processors/:processor', getPaymentProcessorConfig);
+
+// Public allowed origins API (for payment servers)
+router.get('/api/allowed-origins', getAllAllowedOrigins);
+router.get('/api/allowed-origins/:name', getAllowedOrigin);
+
+// Public image serving
+router.get('/api/images/:filename', serveImage);
+
 // Embed endpoints (return JavaScript)
 router.get('/embed/tour/:slug', getEmbedTourScript);
 router.get('/embed/tours', getEmbedAllToursScript);
@@ -99,6 +114,10 @@ router.delete('/admin/tours/:id', withAdminAuth(deleteTour));
 // Admin Sync Tools (protected)
 router.get('/admin/sync/status', withAdminAuth(getSyncStatus));
 router.post('/admin/sync/from-sheets', withAdminAuth(syncFromSheets));
+
+// Image Upload (protected)
+router.post('/admin/upload', withAdminAuth(uploadImage));
+router.delete('/admin/upload', withAdminAuth(deleteImage));
 
 export { router };
 

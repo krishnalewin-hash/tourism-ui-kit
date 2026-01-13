@@ -194,6 +194,30 @@ window.BookingForm.enhance = function() {
           }
         }
       });
+
+      const pageDefaults = window.CFG?.PAGE_DEFAULTS || {};
+
+      function applyDefaultIfNeeded(paramName, valueKey, placeIdKey) {
+        if (!pageDefaults[valueKey]) return;
+        const existing = window.BookingForm.getParam(qs, paramName);
+        if (existing) return;
+        const field = document.querySelector(`input[data-q="${paramName}"], input[name="${paramName}"]`);
+        if (!field || (field.value && field.value.trim())) return;
+
+        const defaultValue = pageDefaults[valueKey];
+        field.value = defaultValue;
+        field.setAttribute('value', defaultValue);
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+
+        if (pageDefaults[placeIdKey]) {
+          field.dataset.prefillPlaceId = pageDefaults[placeIdKey];
+        }
+      }
+
+      applyDefaultIfNeeded('pickup_location', 'defaultPickup', 'defaultPickupPlaceId');
+      applyDefaultIfNeeded('dropoff_location', 'defaultDropoff', 'defaultDropoffPlaceId');
+
     } catch (e) {
       console.warn('URL parameter population failed:', e);
     }
