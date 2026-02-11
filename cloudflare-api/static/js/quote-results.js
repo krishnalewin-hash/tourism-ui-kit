@@ -1760,7 +1760,14 @@ function resolveApiBase() {
 
     // If a payment API is configured, create attempt then processor-specific session
     if (CONFIG.paymentApiUrl) {
-      const PAYMENT_API_BASE = CONFIG.paymentApiUrl.replace(/\/$/,'');
+      // PAYMENT_API_BASE = domain only (no paths)
+      let PAYMENT_API_BASE;
+      try {
+        const u = new URL(CONFIG.paymentApiUrl);
+        PAYMENT_API_BASE = u.origin;
+      } catch (e) {
+        PAYMENT_API_BASE = String(CONFIG.paymentApiUrl).replace(/\/+$/, '').replace(/\/.*$/, '');
+      }
       const endpoints = {
         createAttempt: `${PAYMENT_API_BASE}/api/payment/create`,
         stripeCreate: `${PAYMENT_API_BASE}/api/payment/stripe/create`,
@@ -1768,6 +1775,7 @@ function resolveApiBase() {
         squareCreate: `${PAYMENT_API_BASE}/api/payment/square/create`
       };
 
+      const proc = String(paymentGateway || '').toLowerCase();
       const q = window.__qcQuote || {};
       const feeStructure = CONFIG.paymentGatewayConfig?.fee_structure ||
                           CONFIG.paymentGatewayConfig?.transactionFeePayer ||
@@ -1802,7 +1810,7 @@ function resolveApiBase() {
           duration: q.seconds,
           quoteTimestamp: q.quoteTimestamp
         },
-        paymentProcessor: paymentGateway,
+        paymentProcessor: proc,
         fee_structure: mappedFeeStructure
       };
 
@@ -1814,20 +1822,19 @@ function resolveApiBase() {
 
       (async () => {
         try {
-          // Step 1: Create payment attempt
-          const createRes = await post(endpoints.createAttempt, payload);
-          if (!createRes.ok) {
-            const errData = await createRes.json().catch(() => ({}));
-            throw new Error(errData.error || 'Failed to create payment attempt');
-          }
-          const createResult = await createRes.json();
-          const paymentAttemptId = createResult.paymentAttemptId;
-          if (!paymentAttemptId) throw new Error('Server did not return paymentAttemptId');
+          // Stripe: ONLY createAttempt -> stripeCreate. NO wipay, NO /payments/*
+          if (proc === 'stripe') {
+            console.log('[PAY] calling createAttempt', endpoints.createAttempt);
+            const createRes = await post(endpoints.createAttempt, payload);
+            if (!createRes.ok) {
+              const errData = await createRes.json().catch(() => ({}));
+              throw new Error(errData.error || 'Failed to create payment attempt');
+            }
+            const createResult = await createRes.json();
+            const paymentAttemptId = createResult.paymentAttemptId;
+            if (!paymentAttemptId) throw new Error('Server did not return paymentAttemptId');
 
-          const client = payload.client;
-
-          // Step 2: Call processor-specific create endpoint
-          if (paymentGateway === 'stripe') {
+            const client = payload.client;
             const origin = typeof window !== 'undefined' && window.location ? window.location.origin : '';
             const stripePayload = {
               client,
@@ -1835,6 +1842,8 @@ function resolveApiBase() {
               successUrl: origin ? `${origin}/payment-success` : undefined,
               cancelUrl: origin ? `${origin}/payment-cancelled` : undefined
             };
+
+            console.log('[PAY] calling stripeCreate', endpoints.stripeCreate);
             const stripeRes = await post(endpoints.stripeCreate, stripePayload);
             if (!stripeRes.ok) {
               const errData = await stripeRes.json().catch(() => ({}));
@@ -1844,8 +1853,25 @@ function resolveApiBase() {
             const redirect = stripeResult.redirectUrl || stripeResult.url || stripeResult.paymentUrl;
             if (redirect) window.location.href = redirect;
             else throw new Error('Missing redirect URL');
-          } else if (paymentGateway === 'wipay' || paymentGateway === 'tilopay') {
+            return;
+          }
+
+          // WiPay/Tilopay: createAttempt -> wipayCreate only
+          if (proc === 'wipay' || proc === 'tilopay') {
+            console.log('[PAY] calling createAttempt', endpoints.createAttempt);
+            const createRes = await post(endpoints.createAttempt, payload);
+            if (!createRes.ok) {
+              const errData = await createRes.json().catch(() => ({}));
+              throw new Error(errData.error || 'Failed to create payment attempt');
+            }
+            const createResult = await createRes.json();
+            const paymentAttemptId = createResult.paymentAttemptId;
+            if (!paymentAttemptId) throw new Error('Server did not return paymentAttemptId');
+
+            const client = payload.client;
             const wipayPayload = { client, paymentAttemptId, fee_structure: mappedFeeStructure };
+
+            console.log('[PAY] calling wipayCreate', endpoints.wipayCreate);
             const wipayRes = await post(endpoints.wipayCreate, wipayPayload);
             if (!wipayRes.ok) {
               const errData = await wipayRes.json().catch(() => ({}));
@@ -1855,9 +1881,10 @@ function resolveApiBase() {
             const redirect = wipayResult.redirectUrl || wipayResult.url || wipayResult.paymentUrl;
             if (redirect) window.location.href = redirect;
             else throw new Error('Missing redirect URL');
-          } else {
-            throw new Error('Unsupported payment processor: ' + paymentGateway);
+            return;
           }
+
+          throw new Error('Unsupported payment processor: ' + proc);
         } catch (err) {
           console.error('[quote-calc] Payment error:', err);
           alert('Payment failed: ' + (err.message || 'Unknown error'));
